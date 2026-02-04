@@ -2,8 +2,8 @@
 
 ## URLs
 
-**Frontend (GitHub Pages):**
-https://mohitunecha.github.io/Mohit-Unecha-s-Portfolio-Website/
+**Frontend (Custom Domain):**
+https://mohitunecha.com/
 
 **Backend (Vercel):**
 https://mohit-unecha-s-portfolio-website.vercel.app/
@@ -17,11 +17,11 @@ You MUST update the `FRONTEND_ORIGIN` variable in your Vercel dashboard:
 3. Go to **Settings** → **Environment Variables**
 4. Update `FRONTEND_ORIGIN` to:
    ```
-   https://mohitunecha.github.io
+   https://mohitunecha.com
    ```
 5. **Redeploy** your backend for changes to take effect
 
-This allows the backend to accept requests from your GitHub Pages frontend (CORS).
+This allows the backend to accept requests from your custom domain (CORS).
 
 ## Current Configuration
 
