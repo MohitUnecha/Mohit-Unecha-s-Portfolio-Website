@@ -22,14 +22,12 @@ export type EducationItem = {
   gpa?: string;
 };
 
-const basePath = process.env.NODE_ENV === 'production' ? '/Mohit-Unecha-s-Portfolio-Website' : '';
-
 export const profile = {
   name: "Mohit Unecha",
   headline: "Aspiring Software Engineer & Product Manager",
   location: "Based in [City, State]",
-  heroBackgroundImage: `${basePath}/hero-bg.jpg`,
-  photoUrl: `${basePath}/mohit.jpg`,
+  heroBackgroundImage: "/hero-bg.jpg",
+  photoUrl: "/mohit.jpg",
   agentName: "Jarvis",
   email: "mohitkunecha@gmail.com",
   phone: "(848) 248 6750",

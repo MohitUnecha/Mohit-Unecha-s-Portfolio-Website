@@ -4,8 +4,6 @@ import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
 import { useState, useEffect } from "react";
 
-const basePath = process.env.NODE_ENV === 'production' ? '/Mohit-Unecha-s-Portfolio-Website' : '';
-
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -84,7 +82,7 @@ export default function Home() {
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-4">
           <a href="#home" className={`transition ${accentHoverTextClass}`}>
-            <img src={`${basePath}/Logo.png`} alt="Logo" className="h-10 w-auto" />
+            <img src="/Logo.png" alt="Logo" className="h-10 w-auto" />
           </a>
           <nav className={`flex items-center gap-8 text-sm font-medium ${navTextClass}`}>
             <a className={`transition ${accentHoverTextClass}`} href="#about">
@@ -141,7 +139,7 @@ export default function Home() {
                 className={`flex items-center justify-center rounded-full border p-2 transition hover:opacity-70 ${isDarkMode ? "border-white/40" : "border-black/40"}`}
                 aria-label="LinkedIn"
               >
-                <img src={`${basePath}/LinkedinLogo.png`} alt="LinkedIn" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2)' }} />
+                <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2)' }} />
               </a>
               <a
                 href={`https://${profile.github}`}
@@ -150,7 +148,7 @@ export default function Home() {
                 className={`flex items-center justify-center rounded-full border p-2 transition hover:opacity-70 ${isDarkMode ? "border-white/40" : "border-black/40"}`}
                 aria-label="GitHub"
               >
-                <img src={`${basePath}/Githublogo.png`} alt="GitHub" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2.8)' }} />
+                <img src="/Githublogo.png" alt="GitHub" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2.8)' }} />
               </a>
             </div>
             <a
