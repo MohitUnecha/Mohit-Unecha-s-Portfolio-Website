@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/Mohit-Unecha-s-Portfolio-Website' : '',
 };
 
 export default nextConfig;
