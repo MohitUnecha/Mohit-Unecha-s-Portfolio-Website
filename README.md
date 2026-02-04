@@ -1,4 +1,4 @@
-# Mohit Unecha Portfolio mohitunecha@gmail.com
+# Mohit Unecha Portfolio mohitunecha.com
 
 
 This repository contains a full-stack personal portfolio with an AI chatbot placeholder.
