@@ -28,10 +28,13 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm ci --legacy-peer-deps || npm ci
 
       - name: Build
         run: cd frontend && npm run build
+
+      - name: List output
+        run: ls -la frontend/out/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
