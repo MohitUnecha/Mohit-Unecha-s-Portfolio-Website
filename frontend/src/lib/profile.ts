@@ -198,7 +198,7 @@ export const profile = {
       gpa: "3.89",
       details: [
         "Dean's List Scholar for academic excellence",
-        "Active in tech communities: Data Hackathon winner, Busi,ness Information Technology Society",
+        "Active in tech communities: Data Hackathon winner, Business Information Technology Society",
         "Interdisciplinary focus positioning for roles at intersection of tech and business strategy",
       ],
     },
