@@ -19,23 +19,36 @@ const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 let geminiModelName = null;
 
 const pickGeminiModel = async () => {
-  if (geminiModelName || !GEMINI_API_KEY) return geminiModelName;
-
-  const response = await axios.get("https://generativelanguage.googleapis.com/v1beta/models", {
-    params: { key: GEMINI_API_KEY },
-  });
-
-  const models = response?.data?.models || [];
-  const model = models.find((candidate) =>
-    (candidate.supportedGenerationMethods || []).includes("generateContent")
-  );
-
-  if (!model?.name) {
-    throw new Error("No Gemini model supports generateContent for this API key.");
+  if (geminiModelName) return geminiModelName;
+  if (!GEMINI_API_KEY) {
+    console.error("GEMINI_API_KEY is not set");
+    throw new Error("GEMINI_API_KEY environment variable is missing");
   }
 
-  geminiModelName = model.name.replace(/^models\//, "");
-  return geminiModelName;
+  try {
+    const response = await axios.get("https://generativelanguage.googleapis.com/v1beta/models", {
+      params: { key: GEMINI_API_KEY },
+    });
+
+    const models = response?.data?.models || [];
+    const model = models.find((candidate) =>
+      (candidate.supportedGenerationMethods || []).includes("generateContent")
+    );
+
+    if (!model?.name) {
+      throw new Error("No Gemini model supports generateContent for this API key.");
+    }
+
+    geminiModelName = model.name.replace(/^models\//, "");
+    console.log("Selected Gemini model:", geminiModelName);
+    return geminiModelName;
+  } catch (error) {
+    console.error("Error picking Gemini model:", error.message);
+    // Fallback to a known model
+    geminiModelName = "gemini-1.5-flash";
+    console.log("Using fallback model:", geminiModelName);
+    return geminiModelName;
+  }
 };
 
 app.use(cors({ origin: FRONTEND_ORIGIN }));
@@ -68,6 +81,8 @@ app.post("/api/chat", async (req, res) => {
   const { message } = req.body || {};
   const safeMessage = typeof message === "string" ? message.trim() : "";
 
+  console.log("Chat request received:", { safeMessage: safeMessage.substring(0, 50) });
+
   if (!safeMessage) {
     return res.status(400).json({
       reply: "Please provide a message so I can respond.",
@@ -75,6 +90,12 @@ app.post("/api/chat", async (req, res) => {
   }
 
   // If Gemini is not configured, return placeholder
+  if (!GEMINI_API_KEY) {
+    console.error("GEMINI_API_KEY is not configured");
+    return res.status(500).json({
+      reply: "AI service not configured. Please contact the site owner.",
+    });
+  }
   if (!genAI) {
     return res.json({
       reply: "Thanks for your message! Please configure GEMINI_API_KEY in .env to enable AI-powered responses.",
