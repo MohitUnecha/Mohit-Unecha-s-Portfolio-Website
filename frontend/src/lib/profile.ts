@@ -189,6 +189,35 @@ export const profile = {
         "Active creative outlet blending technical skills with artistic expression",
       ],
     },
+    {
+      name: "Personal Portfolio Website",
+      summary:
+        "Full-stack portfolio website showcasing projects, experience, and AI-powered chatbot assistant. Built with Next.js frontend deployed on GitHub Pages and Express backend on Vercel.",
+      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Express.js", "Node.js", "Gemini API", "Nodemailer", "reCAPTCHA"],
+      link: "https://github.com/MohitUnecha/Mohit-Unecha-s-Portfolio-Website",
+      impact: [
+        "Deployed full-stack application with GitHub Pages (frontend) and Vercel (backend)",
+        "Integrated Jarvis AI chatbot powered by Google Gemini API for interactive career guidance",
+        "Implemented contact form with email notifications, rate limiting, and reCAPTCHA v3 verification",
+        "Responsive design with dark mode support and smooth animations using Tailwind CSS",
+        "Auto-scrolling chat with clickable email and social media links",
+      ],
+    },
+    {
+      name: "Everything F1",
+      summary:
+        "Full-stack Formula 1 analytics platform combining machine learning predictions with interactive race visualization. Predicts race outcomes using telemetry data and replays races on an interactive track map with lap-by-lap analysis.",
+      stack: ["Python", "FastF1", "LightGBM", "XGBoost", "PostgreSQL", "FastAPI", "Next.js", "React", "WebGL", "Pandas", "NumPy", "Scikit-learn"],
+      link: "https://github.com/MohitUnecha/Everything-F1",
+      impact: [
+        "Developed ML models predicting F1 race outcomes including win, podium, and top-10 probabilities using historical telemetry and weekend data",
+        "Built interactive race replay system allowing users to scrub through races, visualize car positions, tyre strategies, pit stops, and safety cars on track map",
+        "Integrated FastF1 library to ingest official F1 timing data, telemetry (speed, throttle, brake, gears), and race control messages",
+        "Created explainable predictions showing pace comparisons, tyre degradation analysis, strategy impacts, and overtaking difficulty metrics",
+        "Designed scalable architecture with PostgreSQL for structured data and Parquet columnar storage for large telemetry time series",
+        "Built REST APIs with FastAPI serving race data, predictions, and replay frames to Next.js/React frontend",
+      ],
+    },
   ] as ProjectItem[],
   education: [
     {
