@@ -26,7 +26,7 @@ const pickGeminiModel = async () => {
   }
 
   // Use fallback model directly - don't make API call which might timeout
-  geminiModelName = "gemini-1.5-flash";
+  geminiModelName = "gemini-2.0-flash";
   console.log("Using Gemini model:", geminiModelName);
   return geminiModelName;
 };
