@@ -106,6 +106,7 @@ app.post("/api/chat", async (req, res) => {
       throw new Error("Failed to select a Gemini model");
     }
     
+    console.log("Creating model with:", modelName);
     const model = genAI.getGenerativeModel({ model: modelName });
 
     // System prompt with comprehensive information about Mohit
@@ -165,6 +166,12 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
 
     return res.json({ reply });
   } catch (error) {
+    console.error("=== CHAT ENDPOINT ERROR ===");
+    console.error("Error message:", error?.message);
+    console.error("Error name:", error?.name);
+    console.error("Full error:", JSON.stringify(error, null, 2));
+    console.error("=========================");
+    
     console.error("Gemini API error:", {
       message: error?.message,
       status: error?.status,
