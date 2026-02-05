@@ -4,7 +4,6 @@ const dotenv = require("dotenv");
 const nodemailer = require("nodemailer");
 const rateLimit = require("express-rate-limit");
 const axios = require("axios");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 dotenv.config();
 
@@ -12,24 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-// Initialize Gemini AI
-const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
-let geminiModelName = null;
-
-const pickGeminiModel = async () => {
-  if (geminiModelName) return geminiModelName;
-  if (!GEMINI_API_KEY) {
-    console.error("GEMINI_API_KEY is not set");
-    throw new Error("GEMINI_API_KEY environment variable is missing");
-  }
-
-  // Use fallback model directly - don't make API call which might timeout
-  geminiModelName = "gemini-2.0-flash";
-  console.log("Using Gemini model:", geminiModelName);
-  return geminiModelName;
-};
+// OpenAI API configuration
+const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_MODEL = "gpt-3.5-turbo";
 
 app.use(cors({ 
   origin: FRONTEND_ORIGIN,
@@ -74,7 +60,7 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Jarvis AI Chat Endpoint with Gemini
+// Jarvis AI Chat Endpoint with OpenAI
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body || {};
   const safeMessage = typeof message === "string" ? message.trim() : "";
@@ -87,29 +73,15 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
-  // If Gemini is not configured, return placeholder
-  if (!GEMINI_API_KEY) {
-    console.error("GEMINI_API_KEY is not configured");
+  // If OpenAI key is not configured, return placeholder
+  if (!OPENAI_API_KEY) {
+    console.error("OPENAI_API_KEY is not configured");
     return res.status(500).json({
       reply: "AI service not configured. Please contact the site owner.",
     });
   }
-  if (!genAI) {
-    return res.json({
-      reply: "Thanks for your message! Please configure GEMINI_API_KEY in .env to enable AI-powered responses.",
-    });
-  }
 
   try {
-    const modelName = await pickGeminiModel();
-    if (!modelName) {
-      throw new Error("Failed to select a Gemini model");
-    }
-    
-    console.log("Creating model with:", modelName);
-    const model = genAI.getGenerativeModel({ model: modelName });
-
-    // System prompt with comprehensive information about Mohit
     const systemPrompt = `You are Jarvis, Mohit Unecha's AI assistant on his portfolio website. You are friendly, professional, and knowledgeable about Mohit. 
 
 **WHO MOHIT IS (BIG PICTURE):**
@@ -136,7 +108,7 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 
 **SKILLS:**
 - Languages: Python, Node.js, TypeScript, React, JavaScript
-- Tools: Gemini API, Pinecone, Canvas LMS, Google Drive API, Git
+- Tools: OpenAI API, Canvas LMS, Google Drive API, Git
 
 **PERSONAL INTERESTS:**
 - Cars: Loves Bugatti, Ferrari, McLaren, Tesla
@@ -152,31 +124,51 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
 - Use first person when speaking as Jarvis
 - Direct users to the contact form for collaborations`;
 
-    const fullPrompt = `${systemPrompt}\n\nUser's question: ${safeMessage}`;
+    console.log("Calling OpenAI API with model:", OPENAI_MODEL);
     
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const reply = response.text();
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: OPENAI_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: safeMessage,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 150,
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
+    const reply = response.data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    console.log("OpenAI response received successfully");
+    
     return res.json({ reply });
   } catch (error) {
     console.error("=== CHAT ENDPOINT ERROR ===");
     console.error("Error message:", error?.message);
-    console.error("Error name:", error?.name);
-    console.error("Full error:", JSON.stringify(error, null, 2));
+    console.error("Error status:", error?.response?.status);
+    console.error("Error data:", error?.response?.data);
     console.error("=========================");
     
-    console.error("Gemini API error:", {
-      message: error?.message,
-      status: error?.status,
-      statusText: error?.statusText,
-      details: error?.errorDetails,
-      stack: error?.stack,
-    });
-    
-    // Log more details for debugging
-    if (error?.message?.includes("API")) {
-      console.error("API-related error detected:", error.message);
+    // Check for specific OpenAI errors
+    if (error?.response?.status === 401) {
+      console.error("Invalid OpenAI API key");
+    } else if (error?.response?.status === 429) {
+      console.error("OpenAI API rate limited");
+    } else if (error?.response?.status === 500) {
+      console.error("OpenAI API server error");
     }
     
     return res.status(500).json({
