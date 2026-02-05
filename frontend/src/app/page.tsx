@@ -62,7 +62,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Cursor tracker
+  // Cursor tracker and interactive detection
   useEffect(() => {
     let mouseTimeout: NodeJS.Timeout;
 
@@ -73,13 +73,12 @@ export default function Home() {
 
       // Check if cursor is over interactive elements
       const target = e.target as HTMLElement;
-      const isInteractive = target.tagName === 'BUTTON' || 
-                           target.tagName === 'A' || 
-                           target.classList.contains('interactive') ||
-                           target.closest('button') ||
-                           target.closest('a') ||
-                           target.closest('.interactive');
-      setIsOverInteractive(!!isInteractive);
+      const isClickable = target?.closest('button') || 
+                          target?.closest('a') || 
+                          target?.closest('input') ||
+                          target?.closest('textarea') ||
+                          target?.classList?.contains('interactive');
+      setIsOverInteractive(!!isClickable);
 
       clearTimeout(mouseTimeout);
       mouseTimeout = setTimeout(() => {
@@ -108,19 +107,29 @@ export default function Home() {
 
   // Section fade-in on scroll
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setVisibleSections((prev) => new Set([...prev, entry.target.id]));
-        }
-      });
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.id;
+            if (sectionId) {
+              setVisibleSections((prev) => new Set([...prev, sectionId]));
+            }
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
+    );
 
-    const sections = document.querySelectorAll('section[id], [data-fade-in]');
-    sections.forEach((section) => observer.observe(section));
+    // Observe all sections with IDs
+    const sections = document.querySelectorAll('section[id]');
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
 
     return () => {
       sections.forEach((section) => observer.unobserve(section));
+      observer.disconnect();
     };
   }, []);
 
@@ -154,9 +163,9 @@ export default function Home() {
         style={{
           left: `${cursorX}px`,
           top: `${cursorY}px`,
-          opacity: isMouseMoving ? (isOverInteractive ? 1 : 0.7) : 0,
+          opacity: isMouseMoving ? 1 : 0,
           transform: "translate(-50%, -50%)",
-          transition: "opacity 0.2s ease-out",
+          transition: "opacity 0.15s ease-out, width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
       >
         <div
@@ -164,13 +173,13 @@ export default function Home() {
             isDarkMode ? "bg-emerald-400" : "bg-blue-400"
           }`}
           style={{ 
-            width: isOverInteractive ? "32px" : "24px",
-            height: isOverInteractive ? "32px" : "24px",
+            width: isOverInteractive ? "60px" : "30px",
+            height: isOverInteractive ? "60px" : "30px",
             boxShadow: isDarkMode 
-              ? `0 0 ${isOverInteractive ? "60px" : "40px"} rgba(52, 211, 153, ${isOverInteractive ? 0.7 : 0.5})` 
-              : `0 0 ${isOverInteractive ? "60px" : "40px"} rgba(59, 130, 246, ${isOverInteractive ? 0.7 : 0.5})`,
-            transform: isClickingCursor ? "scale(1.3)" : "scale(1)",
-            transition: "all 0.2s ease-out",
+              ? `0 0 ${isOverInteractive ? "80px" : "50px"} rgba(52, 211, 153, ${isOverInteractive ? 0.8 : 0.6})` 
+              : `0 0 ${isOverInteractive ? "80px" : "50px"} rgba(59, 130, 246, ${isOverInteractive ? 0.8 : 0.6})`,
+            transform: isClickingCursor ? "scale(1.4)" : "scale(1)",
+            transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         />
       </div>
