@@ -5,10 +5,13 @@ html {
   cursor: none;
 }
 
-/* Show cursor in chatbot area */
-.chatbot-panel,
+/* Show cursor in chatbot area and all contents */
+.chatbot-panel {
+  cursor: auto !important;
+}
+
 .chatbot-panel * {
-  cursor: auto;
+  cursor: auto !important;
 }
 
 :root {
