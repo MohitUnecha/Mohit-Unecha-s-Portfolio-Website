@@ -152,15 +152,9 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
 - Use first person when speaking as Jarvis
 - Direct users to the contact form for collaborations`;
 
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: safeMessage }]
-        }
-      ],
-      systemInstruction: systemPrompt
-    });
+    const fullPrompt = `${systemPrompt}\n\nUser's question: ${safeMessage}`;
+    
+    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const reply = response.text();
 
