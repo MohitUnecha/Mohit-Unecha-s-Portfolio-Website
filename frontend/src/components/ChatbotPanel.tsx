@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { profile } from "@/lib/profile";
 
 type Message = {
@@ -14,12 +14,117 @@ const initialMessages: Message[] = [
     content: `Hi! I’m ${profile.agentName}, Mohit’s AI sidekick. Ask about his SWE/PM background, projects, or experience.`,
   },
 ];
+// Function to parse text and convert emails and links to clickable elements
+const parseMessageContent = (content: string) => {
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
 
+  // Combined regex to find emails, URLs, GitHub, and LinkedIn links
+  const combinedRegex = /(\b[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+\b|https?:\/\/github\.com\/[a-zA-Z0-9_-]+|https?:\/\/linkedin\.com\/in\/[a-zA-Z0-9_-]+|linkedin\.com\/in\/[a-zA-Z0-9_-]+|github\.com\/[a-zA-Z0-9_-]+|https?:\/\/[^\s]+)/g;
+
+  let match;
+  const regex = new RegExp(combinedRegex.source, "g");
+
+  while ((match = regex.exec(content)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(content.substring(lastIndex, match.index));
+    }
+
+    const matchedText = match[0];
+
+    // Determine the type and create appropriate link
+    if (matchedText.includes("@")) {
+      // Email
+      parts.push(
+        <a
+          key={`email-${match.index}`}
+          href={`mailto:${matchedText}`}
+          className="text-emerald-300 hover:text-emerald-200 underline cursor-pointer"
+        >
+          {matchedText}
+        </a>
+      );
+    } else if (
+      matchedText.includes("github.com") ||
+      matchedText.includes("github")
+    ) {
+      // GitHub link
+      const url = matchedText.startsWith("http")
+        ? matchedText
+        : `https://${matchedText}`;
+      parts.push(
+        <a
+          key={`github-${match.index}`}
+          href={url}
+          className="text-emerald-300 hover:text-emerald-200 underline cursor-pointer"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {matchedText}
+        </a>
+      );
+    } else if (
+      matchedText.includes("linkedin.com") ||
+      matchedText.includes("linkedin")
+    ) {
+      // LinkedIn link
+      const url = matchedText.startsWith("http")
+        ? matchedText
+        : `https://${matchedText}`;
+      parts.push(
+        <a
+          key={`linkedin-${match.index}`}
+          href={url}
+          className="text-emerald-300 hover:text-emerald-200 underline cursor-pointer"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {matchedText}
+        </a>
+      );
+    } else if (matchedText.startsWith("http")) {
+      // Generic URL
+      parts.push(
+        <a
+          key={`url-${match.index}`}
+          href={matchedText}
+          className="text-emerald-300 hover:text-emerald-200 underline cursor-pointer"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {matchedText}
+        </a>
+      );
+    } else {
+      parts.push(matchedText);
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < content.length) {
+    parts.push(content.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [content];
+};
 export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boolean }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to latest message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async () => {
     const trimmed = input.trim();
@@ -96,9 +201,10 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
                     : "bg-white/10"
                 }`}
               >
-                {message.content}
+                {parseMessageContent(message.content)}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="mt-4 flex gap-2">
