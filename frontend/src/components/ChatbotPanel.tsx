@@ -30,8 +30,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
     setIsLoading(true);
 
     try {
-      const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+      const apiBaseUrl = "https://mohit-unecha-s-portfolio-website.vercel.app";
 
       const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: "POST",

@@ -408,7 +408,7 @@ export default function Home() {
                     );
                   }
 
-                  const response = await fetch("/api/contact", {
+                  const response = await fetch("https://mohit-unecha-s-portfolio-website.vercel.app/api/contact", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ ...formData, recaptchaToken }),
