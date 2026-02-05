@@ -15,6 +15,7 @@ export default function Home() {
   const [cursorX, setCursorX] = useState(0);
   const [cursorY, setCursorY] = useState(0);
   const [isMouseMoving, setIsMouseMoving] = useState(false);
+  const [isClickingCursor, setIsClickingCursor] = useState(false);
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
 
@@ -71,12 +72,24 @@ export default function Home() {
       clearTimeout(mouseTimeout);
       mouseTimeout = setTimeout(() => {
         setIsMouseMoving(false);
-      }, 2000);
+      }, 3000);
+    };
+
+    const handleMouseDown = () => {
+      setIsClickingCursor(true);
+    };
+
+    const handleMouseUp = () => {
+      setIsClickingCursor(false);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
       clearTimeout(mouseTimeout);
     };
   }, []);
@@ -101,44 +114,53 @@ export default function Home() {
   const buttonClass = isDarkMode
     ? "border-white/20 bg-white/5 text-slate-100"
     : "border-slate-300 bg-white text-slate-700";
-  const overlayClass = isDarkMode
-    ? "from-black/95 via-black/90 to-black/95"
-    : "from-black/92 via-black/88 to-black/92";
+  const overlayClass = "bg-black/65";
 
   return (
-    <div className={`min-h-screen ${pageClass}`}>
+    <div className={`min-h-screen ${pageClass} cursor-none`}>
       {/* Cursor Tracker Glow */}
       <div
-        className="pointer-events-none fixed z-40 transition-opacity duration-300"
+        className="pointer-events-none fixed z-40"
         style={{
           left: `${cursorX}px`,
           top: `${cursorY}px`,
-          opacity: isMouseMoving ? 0.6 : 0,
+          opacity: isMouseMoving ? 0.7 : 0,
           transform: "translate(-50%, -50%)",
+          transition: "opacity 0.3s ease-out",
         }}
       >
         <div
           className={`h-20 w-20 rounded-full blur-2xl ${
             isDarkMode ? "bg-emerald-400" : "bg-blue-400"
           }`}
-          style={{ boxShadow: isDarkMode ? "0 0 40px rgba(52, 211, 153, 0.4)" : "0 0 40px rgba(59, 130, 246, 0.4)" }}
+          style={{ 
+            boxShadow: isDarkMode ? "0 0 40px rgba(52, 211, 153, 0.5)" : "0 0 40px rgba(59, 130, 246, 0.5)",
+            transform: isClickingCursor ? "scale(1.3)" : "scale(1)",
+            transition: "transform 0.2s ease-out",
+          }}
         />
       </div>
 
       {/* Cursor Inner Circle */}
       <div
-        className="pointer-events-none fixed z-40 transition-opacity duration-300"
+        className="pointer-events-none fixed z-40"
         style={{
           left: `${cursorX}px`,
           top: `${cursorY}px`,
           opacity: isMouseMoving ? 1 : 0,
           transform: "translate(-50%, -50%)",
+          transition: "opacity 0.3s ease-out",
         }}
       >
         <div
-          className={`h-4 w-4 rounded-full border-2 ${
+          className={`rounded-full border-2 ${
             isDarkMode ? "border-emerald-300" : "border-blue-500"
           }`}
+          style={{
+            width: isClickingCursor ? "20px" : "16px",
+            height: isClickingCursor ? "20px" : "16px",
+            transition: "width 0.2s ease-out, height 0.2s ease-out",
+          }}
         />
       </div>
 
@@ -178,12 +200,11 @@ export default function Home() {
           backgroundAttachment: "fixed",
         }}
       >
-        {/* Zoom in background overlay */}
+        {/* Solid black overlay - 35% translucent */}
         <div 
-          className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`}
+          className={`absolute inset-0 ${overlayClass}`}
           style={{
-            transform: `scale(${1 + zoomProgress * 0.5})`,
-            transition: "transform 0.1s ease-out",
+            transition: "opacity 0.5s ease-out",
           }}
         />
         
@@ -200,11 +221,12 @@ export default function Home() {
           }}
         />
         
-        <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress }}>
+        <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress, transition: "opacity 0.5s ease-out" }}>
             <div
               className={`mb-8 h-48 w-48 overflow-hidden rounded-full border-4 shadow-2xl ${
                 isDarkMode ? "border-emerald-400/40" : "border-blue-600/40"
               }`}
+              style={{ transition: "all 0.5s ease-out" }}
             >
 
               <img
@@ -213,19 +235,19 @@ export default function Home() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <h1 className="mb-4 text-6xl font-bold tracking-tight md:text-7xl">
+            <h1 className="mb-4 text-6xl font-bold tracking-tight md:text-7xl" style={{ transition: "all 0.5s ease-out" }}>
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
-            <p className={`mb-8 max-w-2xl text-2xl font-light ${bodyTextClass}`}>
+            <p className={`mb-8 max-w-2xl text-2xl font-light ${bodyTextClass}`} style={{ transition: "all 0.5s ease-out" }}>
               {profile.headline}
             </p>
-            <div className="mb-8 flex flex-wrap justify-center gap-4">
+            <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.5s ease-out" }}>
               <a
                 href={`https://${profile.linkedIn}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center rounded-full border p-2 transition hover:opacity-70 ${isDarkMode ? "border-white/40" : "border-black/40"}`}
+                className={`flex items-center justify-center rounded-full border p-2 transition-all duration-300 hover:opacity-70 ${isDarkMode ? "border-white/40" : "border-black/40"}`}
                 aria-label="LinkedIn"
               >
                 <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2)' }} />
@@ -242,7 +264,8 @@ export default function Home() {
             </div>
             <a
               href="#about"
-              className={`mt-12 animate-bounce transition ${accentHoverTextClass} ${sectionLabelClass}`}
+              className={`mt-12 animate-bounce transition-all duration-500 ${accentHoverTextClass} ${sectionLabelClass}`}
+              style={{ transition: "all 0.5s ease-out" }}
             >
               <svg
                 className="h-6 w-6"
