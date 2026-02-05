@@ -11,6 +11,7 @@ export default function Home() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
+  const [zoomProgress, setZoomProgress] = useState(0);
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
 
@@ -43,6 +44,12 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       setIsHeaderVisible(window.scrollY > window.innerHeight * 0.8);
+      
+      // Calculate zoom progress based on scroll within the hero section
+      const heroHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      const progress = Math.min(scrollY / heroHeight, 1);
+      setZoomProgress(progress);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -108,10 +115,32 @@ export default function Home() {
           backgroundImage: `url(${profile.heroBackgroundImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          backgroundAttachment: "fixed",
         }}
       >
-        <div className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`} />
-        <div className="relative z-10 flex flex-col items-center text-center">
+        {/* Zoom in background overlay */}
+        <div 
+          className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`}
+          style={{
+            transform: `scale(${1 + zoomProgress * 0.5})`,
+            transition: "transform 0.1s ease-out",
+          }}
+        />
+        
+        {/* Animated background zoom effect */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${profile.heroBackgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            transform: `scale(${1 + zoomProgress * 0.5})`,
+            opacity: 1 - zoomProgress * 0.3,
+            transition: "transform 0.1s ease-out, opacity 0.1s ease-out",
+          }}
+        />
+        
+        <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress }}>
             <div
               className={`mb-8 h-48 w-48 overflow-hidden rounded-full border-4 shadow-2xl ${
                 isDarkMode ? "border-emerald-400/40" : "border-blue-600/40"
