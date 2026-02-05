@@ -102,8 +102,8 @@ export default function Home() {
     ? "border-white/20 bg-white/5 text-slate-100"
     : "border-slate-300 bg-white text-slate-700";
   const overlayClass = isDarkMode
-    ? "from-black/85 via-black/75 to-black/85"
-    : "from-black/80 via-black/70 to-black/80";
+    ? "from-black/95 via-black/90 to-black/95"
+    : "from-black/92 via-black/88 to-black/92";
 
   return (
     <div className={`min-h-screen ${pageClass}`}>
