@@ -498,7 +498,7 @@ export default function Home() {
               Get In Touch
             </h2>
             <p className={`mx-auto mb-12 text-center text-lg ${bodyTextClass}`}>
-              Reach out for SWE or PM opportunities, collaborations, or mentorship.
+              Let's connect! I'd love to collaborate, chat about opportunities, or mentor together.
             </p>
 
             <form
