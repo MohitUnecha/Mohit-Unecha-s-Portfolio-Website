@@ -12,6 +12,9 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
   const [zoomProgress, setZoomProgress] = useState(0);
+  const [cursorX, setCursorX] = useState(0);
+  const [cursorY, setCursorY] = useState(0);
+  const [isMouseMoving, setIsMouseMoving] = useState(false);
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
 
@@ -56,6 +59,28 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Cursor tracker
+  useEffect(() => {
+    let mouseTimeout: NodeJS.Timeout;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setCursorX(e.clientX);
+      setCursorY(e.clientY);
+      setIsMouseMoving(true);
+
+      clearTimeout(mouseTimeout);
+      mouseTimeout = setTimeout(() => {
+        setIsMouseMoving(false);
+      }, 2000);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      clearTimeout(mouseTimeout);
+    };
+  }, []);
+
   const pageClass = isDarkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900";
   const headerClass = isDarkMode
     ? "border-white/5 bg-slate-950/80"
@@ -82,6 +107,41 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen ${pageClass}`}>
+      {/* Cursor Tracker Glow */}
+      <div
+        className="pointer-events-none fixed z-40 transition-opacity duration-300"
+        style={{
+          left: `${cursorX}px`,
+          top: `${cursorY}px`,
+          opacity: isMouseMoving ? 0.6 : 0,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <div
+          className={`h-20 w-20 rounded-full blur-2xl ${
+            isDarkMode ? "bg-emerald-400" : "bg-blue-400"
+          }`}
+          style={{ boxShadow: isDarkMode ? "0 0 40px rgba(52, 211, 153, 0.4)" : "0 0 40px rgba(59, 130, 246, 0.4)" }}
+        />
+      </div>
+
+      {/* Cursor Inner Circle */}
+      <div
+        className="pointer-events-none fixed z-40 transition-opacity duration-300"
+        style={{
+          left: `${cursorX}px`,
+          top: `${cursorY}px`,
+          opacity: isMouseMoving ? 1 : 0,
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <div
+          className={`h-4 w-4 rounded-full border-2 ${
+            isDarkMode ? "border-emerald-300" : "border-blue-500"
+          }`}
+        />
+      </div>
+
       <header
         className={`fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
           isHeaderVisible ? "opacity-100 shadow-lg" : "opacity-0 pointer-events-none"
