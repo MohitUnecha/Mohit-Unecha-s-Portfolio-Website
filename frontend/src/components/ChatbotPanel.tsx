@@ -14,12 +14,7 @@ const initialMessages: Message[] = [
     content: `Hi! I’m ${profile.agentName}, Mohit’s AI sidekick. Ask about his SWE/PM background, projects, or experience.`,
   },
 ];
-// Function to parse text and convert emails and links to clickable elements
-const parseMessageContent = (content: string): (string | React.ReactElement)[] => {
-  // For now, just return the content as-is to fix the chatbot
-  // We'll add fancy link parsing back later
-  return [content];
-};
+
 export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boolean }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -111,7 +106,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
                     : "bg-white/10"
                 }`}
               >
-                {parseMessageContent(message.content)}
+                {message.content}
               </div>
             ))}
             <div ref={messagesEndRef} />
