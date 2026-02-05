@@ -25,30 +25,10 @@ const pickGeminiModel = async () => {
     throw new Error("GEMINI_API_KEY environment variable is missing");
   }
 
-  try {
-    const response = await axios.get("https://generativelanguage.googleapis.com/v1beta/models", {
-      params: { key: GEMINI_API_KEY },
-    });
-
-    const models = response?.data?.models || [];
-    const model = models.find((candidate) =>
-      (candidate.supportedGenerationMethods || []).includes("generateContent")
-    );
-
-    if (!model?.name) {
-      throw new Error("No Gemini model supports generateContent for this API key.");
-    }
-
-    geminiModelName = model.name.replace(/^models\//, "");
-    console.log("Selected Gemini model:", geminiModelName);
-    return geminiModelName;
-  } catch (error) {
-    console.error("Error picking Gemini model:", error.message);
-    // Fallback to a known model
-    geminiModelName = "gemini-1.5-flash";
-    console.log("Using fallback model:", geminiModelName);
-    return geminiModelName;
-  }
+  // Use fallback model directly - don't make API call which might timeout
+  geminiModelName = "gemini-1.5-flash";
+  console.log("Using Gemini model:", geminiModelName);
+  return geminiModelName;
 };
 
 app.use(cors({ 
@@ -122,6 +102,10 @@ app.post("/api/chat", async (req, res) => {
 
   try {
     const modelName = await pickGeminiModel();
+    if (!modelName) {
+      throw new Error("Failed to select a Gemini model");
+    }
+    
     const model = genAI.getGenerativeModel({ model: modelName });
 
     // System prompt with comprehensive information about Mohit
