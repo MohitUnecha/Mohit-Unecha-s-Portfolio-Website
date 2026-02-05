@@ -51,8 +51,26 @@ const pickGeminiModel = async () => {
   }
 };
 
-app.use(cors({ origin: FRONTEND_ORIGIN }));
+app.use(cors({ 
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Add explicit CORS headers for all routes
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', FRONTEND_ORIGIN);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Rate limiting: max 5 contact form submissions per IP per 15 minutes
 const contactLimiter = rateLimit({
@@ -168,7 +186,14 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
       status: error?.status,
       statusText: error?.statusText,
       details: error?.errorDetails,
+      stack: error?.stack,
     });
+    
+    // Log more details for debugging
+    if (error?.message?.includes("API")) {
+      console.error("API-related error detected:", error.message);
+    }
+    
     return res.status(500).json({
       reply: "I'm having trouble connecting right now. Please try again in a moment or use the contact form below!",
     });
