@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { profile } from "@/lib/profile";
 
 type Message = {
@@ -15,8 +15,8 @@ const initialMessages: Message[] = [
   },
 ];
 // Function to parse text and convert emails and links to clickable elements
-const parseMessageContent = (content: string) => {
-  const parts: (string | JSX.Element)[] = [];
+const parseMessageContent = (content: string): (string | React.ReactElement)[] => {
+  const parts: (string | React.ReactElement)[] = [];
   let lastIndex = 0;
 
   // Combined regex to find emails, URLs, GitHub, and LinkedIn links
