@@ -16,6 +16,8 @@ export default function Home() {
   const [cursorY, setCursorY] = useState(0);
   const [isMouseMoving, setIsMouseMoving] = useState(false);
   const [isClickingCursor, setIsClickingCursor] = useState(false);
+  const [isOverInteractive, setIsOverInteractive] = useState(false);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
 
@@ -69,6 +71,16 @@ export default function Home() {
       setCursorY(e.clientY);
       setIsMouseMoving(true);
 
+      // Check if cursor is over interactive elements
+      const target = e.target as HTMLElement;
+      const isInteractive = target.tagName === 'BUTTON' || 
+                           target.tagName === 'A' || 
+                           target.classList.contains('interactive') ||
+                           target.closest('button') ||
+                           target.closest('a') ||
+                           target.closest('.interactive');
+      setIsOverInteractive(!!isInteractive);
+
       clearTimeout(mouseTimeout);
       mouseTimeout = setTimeout(() => {
         setIsMouseMoving(false);
@@ -91,6 +103,24 @@ export default function Home() {
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
       clearTimeout(mouseTimeout);
+    };
+  }, []);
+
+  // Section fade-in on scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setVisibleSections((prev) => new Set([...prev, entry.target.id]));
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const sections = document.querySelectorAll('section[id], [data-fade-in]');
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
     };
   }, []);
 
@@ -124,19 +154,23 @@ export default function Home() {
         style={{
           left: `${cursorX}px`,
           top: `${cursorY}px`,
-          opacity: isMouseMoving ? 0.7 : 0,
+          opacity: isMouseMoving ? (isOverInteractive ? 1 : 0.7) : 0,
           transform: "translate(-50%, -50%)",
-          transition: "opacity 0.3s ease-out",
+          transition: "opacity 0.2s ease-out",
         }}
       >
         <div
-          className={`h-20 w-20 rounded-full blur-2xl ${
+          className={`rounded-full blur-2xl ${
             isDarkMode ? "bg-emerald-400" : "bg-blue-400"
           }`}
           style={{ 
-            boxShadow: isDarkMode ? "0 0 40px rgba(52, 211, 153, 0.5)" : "0 0 40px rgba(59, 130, 246, 0.5)",
+            width: isOverInteractive ? "32px" : "24px",
+            height: isOverInteractive ? "32px" : "24px",
+            boxShadow: isDarkMode 
+              ? `0 0 ${isOverInteractive ? "60px" : "40px"} rgba(52, 211, 153, ${isOverInteractive ? 0.7 : 0.5})` 
+              : `0 0 ${isOverInteractive ? "60px" : "40px"} rgba(59, 130, 246, ${isOverInteractive ? 0.7 : 0.5})`,
             transform: isClickingCursor ? "scale(1.3)" : "scale(1)",
-            transition: "transform 0.2s ease-out",
+            transition: "all 0.2s ease-out",
           }}
         />
       </div>
@@ -283,7 +317,11 @@ export default function Home() {
         </section>
 
         <main className="mx-auto w-full max-w-5xl px-8 pb-32">
-          <section id="about" className="py-24">
+          <section id="about" className="py-24" style={{
+            opacity: visibleSections.has('about') ? 1 : 0,
+            transform: visibleSections.has('about') ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
           <h2 className={`mb-12 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
             About Me
           </h2>
@@ -315,7 +353,11 @@ export default function Home() {
           )}
         </section>
 
-        <section id="experience" className="py-24">
+        <section id="experience" className="py-24" style={{
+          opacity: visibleSections.has('experience') ? 1 : 0,
+          transform: visibleSections.has('experience') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
           <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
             Experience
           </h2>
@@ -346,7 +388,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="projects" className="py-24">
+        <section id="projects" className="py-24" style={{
+          opacity: visibleSections.has('projects') ? 1 : 0,
+          transform: visibleSections.has('projects') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
           <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
             Projects
           </h2>
@@ -354,7 +400,11 @@ export default function Home() {
             {profile.projects.map((project) => (
               <article
                 key={project.name}
-                className={`group rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
+                className={`group interactive rounded-2xl border p-6 transition duration-300 ${cardClass} ${cardHoverClass}`}
+                style={{
+                  boxShadow: 'none',
+                  cursor: 'pointer'
+                }}
               >
                 <h3
                   className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"} ${projectHoverClass}`}
@@ -492,7 +542,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="contact" className="py-24">
+        <section id="contact" className="py-24" style={{
+          opacity: visibleSections.has('contact') ? 1 : 0,
+          transform: visibleSections.has('contact') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
           <div className="mx-auto max-w-2xl px-8">
             <h2 className={`mb-8 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
               Get In Touch
@@ -552,11 +606,23 @@ export default function Home() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                   disabled={formStatus === "loading"}
-                  className={`rounded-lg border px-4 py-3 text-sm transition ${
+                  className={`interactive rounded-lg border px-4 py-3 text-sm transition ${
                     isDarkMode
                       ? "border-white/10 bg-white/5 placeholder-slate-500 focus:border-emerald-400/50 focus:ring-emerald-400/20"
                       : "border-slate-200 bg-slate-50 placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20"
                   } focus:outline-none focus:ring-2`}
+                  style={{
+                    boxShadow: 'none',
+                    transition: 'all 0.3s ease-out'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = isDarkMode
+                      ? '0 0 20px rgba(52, 211, 153, 0.3)'
+                      : '0 0 20px rgba(59, 130, 246, 0.3)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 />
                 <input
                   type="email"
@@ -565,11 +631,23 @@ export default function Home() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                   disabled={formStatus === "loading"}
-                  className={`rounded-lg border px-4 py-3 text-sm transition ${
+                  className={`interactive rounded-lg border px-4 py-3 text-sm transition ${
                     isDarkMode
                       ? "border-white/10 bg-white/5 placeholder-slate-500 focus:border-emerald-400/50 focus:ring-emerald-400/20"
                       : "border-slate-200 bg-slate-50 placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20"
                   } focus:outline-none focus:ring-2`}
+                  style={{
+                    boxShadow: 'none',
+                    transition: 'all 0.3s ease-out'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = isDarkMode
+                      ? '0 0 20px rgba(52, 211, 153, 0.3)'
+                      : '0 0 20px rgba(59, 130, 246, 0.3)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 />
               </div>
 
@@ -580,11 +658,23 @@ export default function Home() {
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 required
                 disabled={formStatus === "loading"}
-                className={`w-full rounded-lg border px-4 py-3 text-sm transition ${
+                className={`interactive w-full rounded-lg border px-4 py-3 text-sm transition ${
                   isDarkMode
                     ? "border-white/10 bg-white/5 placeholder-slate-500 focus:border-emerald-400/50 focus:ring-emerald-400/20"
                     : "border-slate-200 bg-slate-50 placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20"
                 } focus:outline-none focus:ring-2`}
+                style={{
+                  boxShadow: 'none',
+                  transition: 'all 0.3s ease-out'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.boxShadow = isDarkMode
+                    ? '0 0 20px rgba(52, 211, 153, 0.3)'
+                    : '0 0 20px rgba(59, 130, 246, 0.3)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               />
 
               <textarea
@@ -594,11 +684,23 @@ export default function Home() {
                 required
                 disabled={formStatus === "loading"}
                 rows={5}
-                className={`w-full rounded-lg border px-4 py-3 text-sm transition ${
+                className={`interactive w-full rounded-lg border px-4 py-3 text-sm transition ${
                   isDarkMode
                     ? "border-white/10 bg-white/5 placeholder-slate-500 focus:border-emerald-400/50 focus:ring-emerald-400/20"
                     : "border-slate-200 bg-slate-50 placeholder-slate-400 focus:border-blue-500/50 focus:ring-blue-500/20"
                 } focus:outline-none focus:ring-2`}
+                style={{
+                  boxShadow: 'none',
+                  transition: 'all 0.3s ease-out'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.boxShadow = isDarkMode
+                    ? '0 0 20px rgba(52, 211, 153, 0.3)'
+                    : '0 0 20px rgba(59, 130, 246, 0.3)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               />
 
               <button
