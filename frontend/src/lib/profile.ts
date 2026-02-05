@@ -194,11 +194,11 @@ export const profile = {
       name: "Personal Portfolio Website",
       summary:
         "Full-stack portfolio website showcasing projects, experience, and AI-powered chatbot assistant. Built with Next.js frontend deployed on GitHub Pages and Express backend on Vercel.",
-      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Express.js", "Node.js", "Gemini API", "Nodemailer", "reCAPTCHA"],
+      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Express.js", "Node.js", "Groq API", "Nodemailer", "reCAPTCHA"],
       link: "https://github.com/MohitUnecha/Mohit-Unecha-s-Portfolio-Website",
       impact: [
         "Deployed full-stack application with GitHub Pages (frontend) and Vercel (backend)",
-        "Integrated Jarvis AI chatbot powered by Google Gemini API for interactive career guidance",
+        "Integrated Jarvis AI chatbot powered by Groq API with Llama 3.3 model for interactive career guidance",
         "Implemented contact form with email notifications, rate limiting, and reCAPTCHA v3 verification",
         "Responsive design with dark mode support and smooth animations using Tailwind CSS",
         "Auto-scrolling chat with clickable email and social media links",
