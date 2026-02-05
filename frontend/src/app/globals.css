@@ -2,6 +2,13 @@
 
 html {
   scroll-behavior: smooth;
+  cursor: none;
+}
+
+/* Show cursor in chatbot area */
+.chatbot-panel,
+.chatbot-panel * {
+  cursor: auto;
 }
 
 :root {

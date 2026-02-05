@@ -73,7 +73,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="chatbot-panel fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {isOpen && (
         <div className="relative w-[320px] overflow-hidden rounded-3xl border border-white/15 bg-slate-950/95 p-5 shadow-2xl backdrop-blur">
           <div className="flex items-center justify-between">

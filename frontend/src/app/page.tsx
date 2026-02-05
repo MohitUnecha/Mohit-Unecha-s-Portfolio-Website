@@ -156,7 +156,7 @@ export default function Home() {
   const overlayClass = "bg-black/65";
 
   return (
-    <div className={`min-h-screen ${pageClass} cursor-none`}>
+    <div className={`min-h-screen ${pageClass}`}>
       {/* Cursor Tracker Glow */}
       <div
         className="pointer-events-none fixed z-40"
