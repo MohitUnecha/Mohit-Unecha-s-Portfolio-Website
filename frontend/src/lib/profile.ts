@@ -12,6 +12,7 @@ export type ProjectItem = {
   stack: string[];
   impact: string[];
   link?: string;
+  linkLabel?: string;
 };
 
 export type EducationItem = {
@@ -209,6 +210,7 @@ export const profile = {
         "Full-stack Formula 1 analytics platform combining machine learning predictions with interactive race visualization. Predicts race outcomes using telemetry data and replays races on an interactive track map with lap-by-lap analysis.",
       stack: ["Python", "FastF1", "LightGBM", "XGBoost", "PostgreSQL", "FastAPI", "Next.js", "React", "WebGL", "Pandas", "NumPy", "Scikit-learn"],
       link: "https://github.com/MohitUnecha/Everything-F1",
+      linkLabel: "Incoming",
       impact: [
         "Developed ML models predicting F1 race outcomes including win, podium, and top-10 probabilities using historical telemetry and weekend data",
         "Built interactive race replay system allowing users to scrub through races, visualize car positions, tyre strategies, pit stops, and safety cars on track map",
