@@ -11,11 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "";
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// OpenAI API configuration
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const OPENAI_MODEL = "gpt-3.5-turbo";
+// Groq API configuration (fast and free!)
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 app.use(cors({ 
   origin: FRONTEND_ORIGIN,
@@ -60,7 +60,7 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Jarvis AI Chat Endpoint with OpenAI
+// Jarvis AI Chat Endpoint with Groq API
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body || {};
   const safeMessage = typeof message === "string" ? message.trim() : "";
@@ -73,9 +73,9 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
-  // If OpenAI key is not configured, return placeholder
-  if (!OPENAI_API_KEY) {
-    console.error("OPENAI_API_KEY is not configured");
+  // If Groq key is not configured, return placeholder
+  if (!GROQ_API_KEY) {
+    console.error("GROQ_API_KEY is not configured");
     return res.status(500).json({
       reply: "AI service not configured. Please contact the site owner.",
     });
@@ -108,7 +108,7 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 
 **SKILLS:**
 - Languages: Python, Node.js, TypeScript, React, JavaScript
-- Tools: OpenAI API, Canvas LMS, Google Drive API, Git
+- Tools: Groq API, Canvas LMS, Google Drive API, Git
 
 **PERSONAL INTERESTS:**
 - Cars: Loves Bugatti, Ferrari, McLaren, Tesla
@@ -124,12 +124,12 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
 - Use first person when speaking as Jarvis
 - Direct users to the contact form for collaborations`;
 
-    console.log("Calling OpenAI API with model:", OPENAI_MODEL);
+    console.log("Calling Groq API with model:", GROQ_MODEL);
     
     const response = await axios.post(
-      OPENAI_API_URL,
+      GROQ_API_URL,
       {
-        model: OPENAI_MODEL,
+        model: GROQ_MODEL,
         messages: [
           {
             role: "system",
@@ -145,14 +145,14 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
       },
       {
         headers: {
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Authorization": `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
     );
 
     const reply = response.data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
-    console.log("OpenAI response received successfully");
+    console.log("Groq response received successfully");
     
     return res.json({ reply });
   } catch (error) {
@@ -162,13 +162,13 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
     console.error("Error data:", error?.response?.data);
     console.error("=========================");
     
-    // Check for specific OpenAI errors
+    // Check for specific errors
     if (error?.response?.status === 401) {
-      console.error("Invalid OpenAI API key");
+      console.error("Invalid Groq API key");
     } else if (error?.response?.status === 429) {
-      console.error("OpenAI API rate limited");
+      console.error("Groq API rate limited");
     } else if (error?.response?.status === 500) {
-      console.error("OpenAI API server error");
+      console.error("Groq API server error");
     }
     
     return res.status(500).json({
