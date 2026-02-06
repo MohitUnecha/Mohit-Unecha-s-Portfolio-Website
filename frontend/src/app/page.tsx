@@ -153,7 +153,7 @@ export default function Home() {
   const buttonClass = isDarkMode
     ? "border-emerald-400/80 bg-emerald-500/40 text-emerald-50 font-semibold shadow-xl shadow-emerald-500/40"
     : "border-blue-400 bg-blue-400/70 text-white font-semibold shadow-xl shadow-blue-500/40";
-  const overlayClass = "bg-black/80";
+  const overlayClass = "bg-black/85";
 
   return (
     <div className={`min-h-screen ${pageClass}`}>
@@ -239,7 +239,7 @@ export default function Home() {
         style={{
           backgroundImage: `url(${profile.heroBackgroundImage})`,
           backgroundSize: "cover",
-          backgroundPosition: "center center",
+          backgroundPosition: "43% center",
           backgroundAttachment: "fixed",
         }}
       >
@@ -247,7 +247,7 @@ export default function Home() {
         <div 
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)",
+            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%)",
             transition: "opacity 0.5s ease-out",
           }}
         />
@@ -266,7 +266,7 @@ export default function Home() {
           style={{
             backgroundImage: `url(${profile.heroBackgroundImage})`,
             backgroundSize: "cover",
-            backgroundPosition: "center center",
+            backgroundPosition: "43% center",
             transform: `scale(${1 + zoomProgress * 0.5})`,
             opacity: 1 - zoomProgress * 0.3,
             transition: "transform 0.1s ease-out, opacity 0.1s ease-out",
