@@ -239,11 +239,20 @@ export default function Home() {
         style={{
           backgroundImage: `url(${profile.heroBackgroundImage})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "center center",
           backgroundAttachment: "fixed",
         }}
       >
-        {/* Solid black overlay - 35% translucent */}
+        {/* Color tint overlay */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)",
+            transition: "opacity 0.5s ease-out",
+          }}
+        />
+        
+        {/* Solid black overlay - 80% translucent */}
         <div 
           className={`absolute inset-0 ${overlayClass}`}
           style={{
@@ -257,7 +266,7 @@ export default function Home() {
           style={{
             backgroundImage: `url(${profile.heroBackgroundImage})`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center center",
             transform: `scale(${1 + zoomProgress * 0.5})`,
             opacity: 1 - zoomProgress * 0.3,
             transition: "transform 0.1s ease-out, opacity 0.1s ease-out",
