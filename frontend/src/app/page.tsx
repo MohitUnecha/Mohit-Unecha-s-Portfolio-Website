@@ -153,7 +153,7 @@ export default function Home() {
   const buttonClass = isDarkMode
     ? "border-white/20 bg-white/5 text-slate-100"
     : "border-slate-300 bg-white text-slate-700";
-  const overlayClass = "bg-black/65";
+  const overlayClass = "bg-black/80";
 
   return (
     <div className={`min-h-screen ${pageClass}`}>
