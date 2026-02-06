@@ -1245,10 +1245,11 @@ export function WordleGame({ isDarkMode }: { isDarkMode: boolean }) {
 // Zip Game (LinkedIn-style path connection puzzle)
 export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
   const [grid, setGrid] = React.useState<(number | null)[][]>([]);
-  const [path, setPath] = React.useState<number[]>([]);
+  const [path, setPath] = React.useState<{ row: number; col: number }[]>([]);
   const [checkpoints, setCheckpoints] = React.useState<{ num: number; row: number; col: number }[]>([]);
   const [solved, setSolved] = React.useState(false);
   const [dragging, setDragging] = React.useState(false);
+  const [currentSequence, setCurrentSequence] = React.useState(1);
 
   const initPuzzle = () => {
     // Create 6x6 grid
@@ -1277,82 +1278,140 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
     setGrid(newGrid);
     setCheckpoints(newCheckpoints);
     setPath([]);
+    setCurrentSequence(1);
     setSolved(false);
+    setDragging(false);
   };
 
   React.useEffect(() => {
     initPuzzle();
   }, []);
 
-  const handleCellClick = (row: number, col: number) => {
-    const cellValue = grid[row][col];
-    if (cellValue === null) return;
+  const isAdjacent = (cell1: { row: number; col: number }, cell2: { row: number; col: number }) => {
+    const rowDiff = Math.abs(cell1.row - cell2.row);
+    const colDiff = Math.abs(cell1.col - cell2.col);
+    return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+  };
 
-    if (path.length === 0 && cellValue === 1) {
-      setPath([1]);
-    } else if (path.length > 0 && cellValue === path.length + 1) {
-      const newPath = [...path, cellValue];
+  const isInPath = (row: number, col: number) => {
+    return path.some(p => p.row === row && p.col === col);
+  };
+
+  const handleCellInteraction = (row: number, col: number) => {
+    if (solved) return;
+
+    const cellValue = grid[row][col];
+    const isStart = cellValue === 1;
+    const alreadyInPath = isInPath(row, col);
+
+    // Starting new path
+    if (path.length === 0 && isStart) {
+      setPath([{ row, col }]);
+      setCurrentSequence(2);
+      setDragging(true);
+      return;
+    }
+
+    // Continuing path
+    if (dragging && path.length > 0) {
+      const lastCell = path[path.length - 1];
+      
+      // Can't go back on ourselves
+      if (alreadyInPath) return;
+      
+      // Must be adjacent
+      if (!isAdjacent(lastCell, { row, col })) return;
+
+      const newPath = [...path, { row, col }];
       setPath(newPath);
-      if (newPath.length === checkpoints.length) {
+
+      // Check if we hit the next checkpoint
+      if (cellValue === currentSequence) {
+        setCurrentSequence(currentSequence + 1);
+      }
+
+      // Check if solved: path length equals grid size and all checkpoints visited
+      if (newPath.length === 36 && currentSequence > checkpoints.length) {
         setSolved(true);
+        setDragging(false);
       }
     }
   };
 
-  const handleUndo = () => {
-    if (path.length > 0) {
-      setPath(path.slice(0, -1));
-      setSolved(false);
+  const handleMouseDown = (row: number, col: number) => {
+    handleCellInteraction(row, col);
+  };
+
+  const handleMouseEnter = (row: number, col: number) => {
+    if (dragging) {
+      handleCellInteraction(row, col);
     }
   };
 
-  const isInPath = (row: number, col: number) => {
-    const cellValue = grid[row][col];
-    return cellValue !== null && path.includes(cellValue);
+  const handleMouseUp = () => {
+    setDragging(false);
   };
 
-  const isNextInSequence = (row: number, col: number) => {
-    const cellValue = grid[row][col];
-    return cellValue === path.length + 1;
+  const handleUndo = () => {
+    if (path.length > 0) {
+      const newPath = path.slice(0, -1);
+      setPath(newPath);
+      setSolved(false);
+      
+      // Recalculate current sequence
+      let seq = 1;
+      checkpoints.forEach(cp => {
+        if (newPath.some(p => p.row === cp.row && p.col === cp.col)) {
+          seq = Math.max(seq, cp.num + 1);
+        }
+      });
+      setCurrentSequence(seq);
+    }
   };
 
-  const getGradientColor = (num: number) => {
-    const progress = (num - 1) / (checkpoints.length - 1);
+  const getGradientColor = (index: number, total: number) => {
+    const progress = index / total;
     if (isDarkMode) {
       // Purple to blue gradient
-      const r = Math.round(168 - progress * 68); // 168 -> 100
-      const g = Math.round(85 - progress * 26);  // 85 -> 59
-      const b = Math.round(247 - progress * 71); // 247 -> 176
+      const r = Math.round(168 - progress * 68);
+      const g = Math.round(85 - progress * 26);
+      const b = Math.round(247 - progress * 71);
       return `rgb(${r}, ${g}, ${b})`;
     } else {
-      // Blue gradient
-      const r = Math.round(147 - progress * 88); // 147 -> 59
-      const g = Math.round(51 + progress * 79);  // 51 -> 130
-      const b = Math.round(234 - progress * 28); // 234 -> 246
+      // Orange to blue gradient
+      const r = Math.round(255 - progress * 196);
+      const g = Math.round(140 - progress * 11);
+      const b = Math.round(0 + progress * 246);
       return `rgb(${r}, ${g}, ${b})`;
     }
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Zip</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
-        Connect: {path.length}/{checkpoints.length}
+        Path: {path.length}/36 • Next: {currentSequence <= checkpoints.length ? currentSequence : "✓"}
       </div>
-      <div className="grid grid-cols-6 gap-1 p-4 rounded-2xl" style={{ background: isDarkMode ? "#1e293b" : "#e2e8f0" }}>
+      <div 
+        className="grid grid-cols-6 gap-1 p-4 rounded-2xl select-none" 
+        style={{ background: isDarkMode ? "#1e293b" : "#e2e8f0" }}
+      >
         {grid.map((row, i) => row.map((cell, j) => {
           const isCheckpoint = cell !== null;
           const inPath = isInPath(i, j);
-          const isNext = isNextInSequence(i, j);
-          const bgColor = inPath ? getGradientColor(cell!) : (isDarkMode ? "#334155" : "#cbd5e1");
+          const pathIndex = path.findIndex(p => p.row === i && p.col === j);
+          const bgColor = inPath 
+            ? getGradientColor(pathIndex, path.length - 1) 
+            : (isDarkMode ? "#334155" : "#cbd5e1");
           
           return (
-            <button
+            <div
               key={`${i}-${j}`}
-              onClick={() => handleCellClick(i, j)}
-              className={`w-14 h-14 rounded-lg font-bold text-lg transition-all relative ${
-                isNext ? "ring-4 ring-yellow-400 animate-pulse" : ""
-              } ${inPath ? "scale-105 shadow-lg" : ""}`}
+              onMouseDown={() => handleMouseDown(i, j)}
+              onMouseEnter={() => handleMouseEnter(i, j)}
+              className={`w-14 h-14 rounded-lg font-bold text-lg transition-all relative cursor-pointer ${
+                inPath ? "shadow-lg" : ""
+              }`}
               style={{ 
                 background: bgColor,
                 color: inPath || isCheckpoint ? "#fff" : isDarkMode ? "#64748b" : "#94a3b8"
@@ -1360,14 +1419,14 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
             >
               {isCheckpoint && (
                 <div className={`absolute inset-0 rounded-lg flex items-center justify-center ${
-                  inPath ? "bg-black/40" : ""
+                  inPath ? "bg-black/30" : "bg-black/60"
                 }`}>
-                  <span className="relative z-10">{cell}</span>
+                  <span className="relative z-10 font-bold text-xl">{cell}</span>
                 </div>
               )}
-            </button>
+            </div>
           );
-        }))}
+        })))}
       </div>
       <div className="flex gap-3">
         <button 
@@ -1385,16 +1444,16 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
           onClick={initPuzzle} 
           className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
         >
-          New Puzzle
+          Reset
         </button>
       </div>
       {solved && (
-        <p className={`font-bold text-xl ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
-          Perfect! All connected! 🎉
+        <p className={`font-bold text-xl animate-bounce ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+          🎉 Perfect! All 36 cells connected!
         </p>
       )}
       <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-        Connect dots 1 → 16 in order<br/>Fill every cell!
+        Click & drag to draw a path<br/>Connect 1→16 in order & fill every cell
       </p>
     </div>
   );

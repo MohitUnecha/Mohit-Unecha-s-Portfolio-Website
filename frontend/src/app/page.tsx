@@ -155,8 +155,8 @@ export default function Home() {
   const accentBgHoverClass = isDarkMode ? "hover:bg-emerald-400/10" : "hover:bg-blue-50";
   const projectHoverClass = isDarkMode ? "group-hover:text-emerald-300" : "group-hover:text-blue-700";
   const buttonClass = isDarkMode
-    ? "border-emerald-300 bg-emerald-500/50 text-white font-bold shadow-2xl shadow-emerald-500/70"
-    : "border-blue-500 bg-blue-600/50 text-white font-bold shadow-2xl shadow-blue-600/70";
+    ? "border-emerald-300 bg-emerald-500 text-white font-bold shadow-2xl shadow-emerald-500/70 hover:bg-emerald-400"
+    : "border-blue-500 bg-blue-600 text-white font-bold shadow-2xl shadow-blue-600/70 hover:bg-blue-700";
   const overlayClass = isDarkMode ? "bg-black/90" : "bg-white/75";
 
   return (
