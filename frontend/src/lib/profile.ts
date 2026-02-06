@@ -27,7 +27,7 @@ export const profile = {
   name: "Mohit Unecha",
   headline: "Aspiring Software Engineer & Product Manager",
   location: "Based in [City, State]",
-  heroBackgroundImage: "/hero-bg.jpg",
+  heroBackgroundImage: "/new_york_night_black_and_white_cityscape.jpg",
   photoUrl: "/mohit.jpg",
   agentName: "Jarvis",
   email: "mohitkunecha@gmail.com",
