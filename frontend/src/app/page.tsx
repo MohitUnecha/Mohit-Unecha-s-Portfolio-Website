@@ -4,7 +4,7 @@ import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
 import { useState, useEffect } from "react";
 import React from "react";
-import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame } from "@/components/Games";
+import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame } from "@/components/Games";
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
@@ -802,7 +802,7 @@ export default function Home() {
             <h2 className={`mb-6 text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
               Choose a Game
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {[
                 { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
                 { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
@@ -810,6 +810,10 @@ export default function Home() {
                 { id: 'flappy', name: '🐦 Flappy Bird', desc: 'Tap to fly' },
                 { id: '2048', name: '🔢 2048', desc: 'Merge tiles' },
                 { id: 'breakout', name: '🧱 Breakout', desc: 'Brick breaker' },
+                { id: 'memory', name: '🧠 Memory', desc: 'Match pairs' },
+                { id: 'invaders', name: '👾 Space Invaders', desc: 'Shoot aliens' },
+                { id: 'simon', name: '🎵 Simon Says', desc: 'Repeat sequence' },
+                { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
               ].map((game) => (
                 <button
                   key={game.id}
@@ -859,6 +863,10 @@ export default function Home() {
             {selectedGame === 'flappy' && <FlappyGame isDarkMode={isDarkMode} />}
             {selectedGame === '2048' && <Game2048 isDarkMode={isDarkMode} />}
             {selectedGame === 'breakout' && <BreakoutGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'memory' && <MemoryMatchGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'invaders' && <SpaceInvadersGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'simon' && <SimonSaysGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'tictactoe' && <TicTacToeGame isDarkMode={isDarkMode} />}
           </div>
         </div>
       )}

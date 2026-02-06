@@ -612,3 +612,319 @@ export function BreakoutGame({ isDarkMode }: { isDarkMode: boolean }) {
     </div>
   );
 }
+
+// Memory Match Game
+export function MemoryMatchGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const [cards, setCards] = React.useState<number[]>([]);
+  const [flipped, setFlipped] = React.useState<number[]>([]);
+  const [matched, setMatched] = React.useState<number[]>([]);
+  const [moves, setMoves] = React.useState(0);
+
+  React.useEffect(() => {
+    const numbers = Array.from({ length: 8 }, (_, i) => i);
+    setCards([...numbers, ...numbers].sort(() => Math.random() - 0.5));
+  }, []);
+
+  const handleCardClick = (index: number) => {
+    if (flipped.length === 2 || flipped.includes(index) || matched.includes(index)) return;
+    
+    const newFlipped = [...flipped, index];
+    setFlipped(newFlipped);
+
+    if (newFlipped.length === 2) {
+      setMoves(m => m + 1);
+      if (cards[newFlipped[0]] === cards[newFlipped[1]]) {
+        setMatched([...matched, ...newFlipped]);
+        setFlipped([]);
+      } else {
+        setTimeout(() => setFlipped([]), 800);
+      }
+    }
+  };
+
+  const resetGame = () => {
+    const numbers = Array.from({ length: 8 }, (_, i) => i);
+    setCards([...numbers, ...numbers].sort(() => Math.random() - 0.5));
+    setFlipped([]);
+    setMatched([]);
+    setMoves(0);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Memory Match</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Moves: {moves}</div>
+      <div className="grid grid-cols-4 gap-3">
+        {cards.map((card, i) => (
+          <button
+            key={i}
+            onClick={() => handleCardClick(i)}
+            className={`w-16 h-16 rounded-lg font-bold text-2xl transition-all ${
+              flipped.includes(i) || matched.includes(i)
+                ? isDarkMode ? "bg-emerald-500 text-white" : "bg-blue-500 text-white"
+                : isDarkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
+            {(flipped.includes(i) || matched.includes(i)) ? card : "?"}
+          </button>
+        ))}
+      </div>
+      {matched.length === 16 && (
+        <p className={`font-bold text-xl ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>You Won in {moves} moves!</p>
+      )}
+      <button onClick={resetGame} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
+        New Game
+      </button>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Tap cards to find matching pairs</p>
+    </div>
+  );
+}
+
+// Space Invaders Game
+export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [score, setScore] = React.useState(0);
+  const [gameOver, setGameOver] = React.useState(false);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 400;
+    canvas.height = 500;
+
+    let playerX = 180;
+    let bullets: { x: number; y: number }[] = [];
+    let aliens: { x: number; y: number; alive: boolean }[] = [];
+    let alienSpeed = 1;
+    let alienDirection = 1;
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 8; col++) {
+        aliens.push({ x: col * 45 + 20, y: row * 40 + 30, alive: true });
+      }
+    }
+
+    const shoot = () => {
+      bullets.push({ x: playerX + 18, y: 450 });
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") playerX = Math.max(0, playerX - 20);
+      if (e.key === "ArrowRight") playerX = Math.min(360, playerX + 20);
+      if (e.key === " ") shoot();
+    };
+
+    const handleTouch = (e: TouchEvent) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touchX = e.touches[0].clientX - rect.left;
+      if (touchX < canvas.width / 3) playerX = Math.max(0, playerX - 20);
+      else if (touchX > (canvas.width * 2) / 3) playerX = Math.min(360, playerX + 20);
+      else shoot();
+    };
+
+    const gameLoop = () => {
+      if (gameOver) return;
+
+      ctx.fillStyle = isDarkMode ? "#0f172a" : "#f1f5f9";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+      ctx.fillRect(playerX, 460, 40, 20);
+
+      bullets.forEach((b, i) => {
+        b.y -= 5;
+        if (b.y < 0) bullets.splice(i, 1);
+        ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+        ctx.fillRect(b.x, b.y, 4, 10);
+      });
+
+      aliens.forEach((alien) => {
+        if (!alien.alive) return;
+        alien.x += alienSpeed * alienDirection;
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(alien.x, alien.y, 30, 20);
+
+        bullets.forEach((b, i) => {
+          if (b.x > alien.x && b.x < alien.x + 30 && b.y > alien.y && b.y < alien.y + 20) {
+            alien.alive = false;
+            bullets.splice(i, 1);
+            setScore(s => s + 10);
+          }
+        });
+
+        if (alien.y > 440) setGameOver(true);
+      });
+
+      const rightMost = Math.max(...aliens.filter(a => a.alive).map(a => a.x));
+      const leftMost = Math.min(...aliens.filter(a => a.alive).map(a => a.x));
+      
+      if (rightMost > 370 || leftMost < 0) {
+        alienDirection *= -1;
+        aliens.forEach(a => { if (a.alive) a.y += 20; });
+      }
+
+      if (aliens.every(a => !a.alive)) setGameOver(true);
+
+      requestAnimationFrame(gameLoop);
+    };
+
+    window.addEventListener("keydown", handleKey);
+    canvas.addEventListener("touchstart", handleTouch);
+    gameLoop();
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      canvas.removeEventListener("touchstart", handleTouch);
+    };
+  }, [isDarkMode, gameOver]);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Space Invaders</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
+      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Game Over!</p>}
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right/middle to play</p>
+    </div>
+  );
+}
+
+// Simon Says Game
+export function SimonSaysGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const [sequence, setSequence] = React.useState<number[]>([]);
+  const [playerSeq, setPlayerSeq] = React.useState<number[]>([]);
+  const [active, setActive] = React.useState<number | null>(null);
+  const [score, setScore] = React.useState(0);
+  const [gameStarted, setGameStarted] = React.useState(false);
+
+  const colors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b"];
+  const colorNames = ["Red", "Green", "Blue", "Yellow"];
+
+  const playSequence = (seq: number[]) => {
+    seq.forEach((color, i) => {
+      setTimeout(() => {
+        setActive(color);
+        setTimeout(() => setActive(null), 400);
+      }, i * 600);
+    });
+  };
+
+  const startGame = () => {
+    const newSeq = [Math.floor(Math.random() * 4)];
+    setSequence(newSeq);
+    setPlayerSeq([]);
+    setScore(0);
+    setGameStarted(true);
+    setTimeout(() => playSequence(newSeq), 500);
+  };
+
+  const handleColor = (color: number) => {
+    if (!gameStarted || active !== null) return;
+
+    const newPlayerSeq = [...playerSeq, color];
+    setPlayerSeq(newPlayerSeq);
+
+    if (sequence[newPlayerSeq.length - 1] !== color) {
+      setGameStarted(false);
+      return;
+    }
+
+    if (newPlayerSeq.length === sequence.length) {
+      setScore(sequence.length);
+      const nextSeq = [...sequence, Math.floor(Math.random() * 4)];
+      setSequence(nextSeq);
+      setPlayerSeq([]);
+      setTimeout(() => playSequence(nextSeq), 1000);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Simon Says</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
+      <div className="grid grid-cols-2 gap-3">
+        {colors.map((color, i) => (
+          <button
+            key={i}
+            onClick={() => handleColor(i)}
+            className="w-24 h-24 rounded-lg transition-all"
+            style={{
+              backgroundColor: active === i ? color : `${color}80`,
+              boxShadow: active === i ? `0 0 20px ${color}` : "none",
+            }}
+          />
+        ))}
+      </div>
+      {!gameStarted && (
+        <button onClick={startGame} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
+          {score > 0 ? "Play Again" : "Start Game"}
+        </button>
+      )}
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        {gameStarted ? "Repeat the sequence!" : "Tap to start"}
+      </p>
+    </div>
+  );
+}
+
+// Tic Tac Toe Game
+export function TicTacToeGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const [board, setBoard] = React.useState<string[]>(Array(9).fill(""));
+  const [isX, setIsX] = React.useState(true);
+  const [winner, setWinner] = React.useState<string | null>(null);
+
+  const checkWinner = (squares: string[]) => {
+    const lines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+    for (const [a, b, c] of lines) {
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a];
+      }
+    }
+    return squares.every(s => s) ? "Draw" : null;
+  };
+
+  const handleClick = (i: number) => {
+    if (board[i] || winner) return;
+    const newBoard = [...board];
+    newBoard[i] = isX ? "X" : "O";
+    setBoard(newBoard);
+    setIsX(!isX);
+    setWinner(checkWinner(newBoard));
+  };
+
+  const resetGame = () => {
+    setBoard(Array(9).fill(""));
+    setIsX(true);
+    setWinner(null);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Tic Tac Toe</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+        {winner ? (winner === "Draw" ? "It's a Draw!" : `${winner} Wins!`) : `Player ${isX ? "X" : "O"}'s Turn`}
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {board.map((cell, i) => (
+          <button
+            key={i}
+            onClick={() => handleClick(i)}
+            className={`w-20 h-20 rounded-lg font-bold text-4xl ${
+              isDarkMode ? "bg-slate-700 text-emerald-400" : "bg-slate-200 text-blue-600"
+            }`}
+          >
+            {cell}
+          </button>
+        ))}
+      </div>
+      <button onClick={resetGame} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
+        New Game
+      </button>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Get 3 in a row to win</p>
+    </div>
+  );
+}
