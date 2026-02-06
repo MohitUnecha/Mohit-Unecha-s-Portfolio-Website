@@ -12,6 +12,7 @@ export default function Home() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
@@ -780,11 +781,11 @@ export default function Home() {
       {/* Game Selector Modal */}
       {showGameSelector && !selectedGame && (
         <div 
-          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md overflow-y-auto py-8"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md overflow-hidden"
           onClick={() => setShowGameSelector(false)}
         >
           <div 
-            className={`relative rounded-3xl border-2 p-8 shadow-2xl max-w-6xl w-full mx-4 ${
+            className={`relative rounded-3xl border-2 p-8 shadow-2xl max-w-5xl w-full mx-4 ${
               isDarkMode 
                 ? "border-emerald-400/40 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30" 
                 : "border-blue-400/40 bg-gradient-to-br from-white via-white to-blue-50"
@@ -793,7 +794,7 @@ export default function Home() {
           >
             <button
               onClick={() => setShowGameSelector(false)}
-              className={`absolute right-6 top-6 text-3xl font-bold transition-all hover:scale-110 hover:rotate-90 ${
+              className={`absolute right-6 top-6 text-3xl font-bold transition-all hover:scale-110 hover:rotate-90 z-10 ${
                 isDarkMode ? "text-emerald-400 hover:text-emerald-300" : "text-blue-600 hover:text-blue-700"
               }`}
             >
@@ -802,46 +803,112 @@ export default function Home() {
             <h2 className={`mb-8 text-3xl font-bold text-center ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
               🎮 Choose Your Game
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-5">
-              {[
-                { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
-                { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
-                { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
-                { id: 'flappy', name: '🐦 Flappy Bird', desc: 'Tap to fly' },
-                { id: '2048', name: '🔢 2048', desc: 'Merge tiles' },
-                { id: 'breakout', name: '🧱 Breakout', desc: 'Brick breaker' },
-                { id: 'memory', name: '🧠 Memory', desc: 'Match pairs' },
-                { id: 'invaders', name: '👾 Space Invaders', desc: 'Shoot aliens' },
-                { id: 'simon', name: '🎵 Simon Says', desc: 'Repeat sequence' },
-                { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
-                { id: 'race', name: '🏎️ Race', desc: 'Dodge obstacles' },
-                { id: 'whack', name: '🦫 Whack-a-Mole', desc: 'Hit the moles' },
-                { id: 'wordle', name: '📝 Wordle', desc: 'Guess the word' },
-                { id: 'zip', name: '🧩 Zip', desc: 'Connect the dots' },
-              ].map((game) => (
-                <button
-                  key={game.id}
-                  onClick={() => setSelectedGame(game.id)}
-                  className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
-                    isDarkMode
-                      ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
-                      : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
-                  }`}
+            
+            {/* Carousel */}
+            <div className="relative">
+              {/* Navigation Arrows */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCarouselIndex(Math.max(0, carouselIndex - 1));
+                }}
+                disabled={carouselIndex === 0}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  carouselIndex === 0
+                    ? "opacity-30 cursor-not-allowed"
+                    : isDarkMode
+                    ? "bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/50"
+                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/50"
+                } text-white text-2xl font-bold`}
+              >
+                ‹
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCarouselIndex(Math.min(11, carouselIndex + 1));
+                }}
+                disabled={carouselIndex === 11}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  carouselIndex === 11
+                    ? "opacity-30 cursor-not-allowed"
+                    : isDarkMode
+                    ? "bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/50"
+                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/50"
+                } text-white text-2xl font-bold`}
+              >
+                ›
+              </button>
+
+              {/* Games Container */}
+              <div className="overflow-hidden px-2">
+                <div 
+                  className="flex transition-transform duration-500 ease-out gap-4"
+                  style={{ transform: `translateX(-${carouselIndex * (100 / 3)}%)` }}
                 >
-                  <div className={`text-4xl mb-3 transition-transform duration-300 group-hover:scale-110`}>
-                    {game.name.split(' ')[0]}
-                  </div>
-                  <div className={`font-semibold text-sm mb-1 ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
-                    {game.name.substring(game.name.indexOf(' ') + 1)}
-                  </div>
-                  <div className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-                    {game.desc}
-                  </div>
-                  <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                    isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
-                  }`} />
-                </button>
-              ))}
+                  {[
+                    { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
+                    { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
+                    { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
+                    { id: 'flappy', name: '🐦 Flappy Bird', desc: 'Tap to fly' },
+                    { id: '2048', name: '🔢 2048', desc: 'Merge tiles' },
+                    { id: 'breakout', name: '🧱 Breakout', desc: 'Brick breaker' },
+                    { id: 'memory', name: '🧠 Memory', desc: 'Match pairs' },
+                    { id: 'invaders', name: '👾 Space Invaders', desc: 'Shoot aliens' },
+                    { id: 'simon', name: '🎵 Simon Says', desc: 'Repeat sequence' },
+                    { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
+                    { id: 'race', name: '🏎️ Race', desc: 'Dodge obstacles' },
+                    { id: 'whack', name: '🦫 Whack-a-Mole', desc: 'Hit the moles' },
+                    { id: 'wordle', name: '📝 Wordle', desc: 'Guess the word' },
+                    { id: 'zip', name: '🧩 Zip', desc: 'Connect the dots' },
+                  ].map((game) => (
+                    <button
+                      key={game.id}
+                      onClick={() => setSelectedGame(game.id)}
+                      className={`group relative p-8 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 flex-shrink-0 w-[calc(33.333%-0.67rem)] md:w-[calc(33.333%-0.67rem)] ${
+                        isDarkMode
+                          ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
+                          : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
+                      }`}
+                    >
+                      <div className={`text-5xl mb-4 transition-transform duration-300 group-hover:scale-110`}>
+                        {game.name.split(' ')[0]}
+                      </div>
+                      <div className={`font-bold text-lg mb-2 ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
+                        {game.name.substring(game.name.indexOf(' ') + 1)}
+                      </div>
+                      <div className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+                        {game.desc}
+                      </div>
+                      <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                        isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
+                      }`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dots Indicator */}
+              <div className="flex justify-center gap-2 mt-6">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCarouselIndex(i);
+                    }}
+                    className={`h-2 rounded-full transition-all ${
+                      i === carouselIndex
+                        ? isDarkMode
+                          ? "w-8 bg-emerald-400"
+                          : "w-8 bg-blue-600"
+                        : isDarkMode
+                        ? "w-2 bg-slate-600 hover:bg-slate-500"
+                        : "w-2 bg-slate-300 hover:bg-slate-400"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
