@@ -243,7 +243,6 @@ export default function Home() {
           backgroundSize: "cover",
           backgroundPosition: "43% center",
           backgroundAttachment: "fixed",
-          filter: "grayscale(100%)",
         }}
       >
         {/* Color tint overlay */}
@@ -748,7 +747,7 @@ export default function Home() {
 
       <footer className={`py-8 text-center text-sm ${bodyTextClass}`}>
         <p>
-          Built with ❤️ by Mohit Unecha • Want to play a{" "}
+          © 2026 Mohit Unecha. All rights reserved. • Want to play a{" "}
           <span
             className={`cursor-pointer font-semibold underline decoration-dotted ${accentTextClass} hover:opacity-70`}
             onClick={() => setShowSnakeGame(true)}
