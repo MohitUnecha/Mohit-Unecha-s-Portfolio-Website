@@ -151,9 +151,9 @@ export default function Home() {
   const accentBgHoverClass = isDarkMode ? "hover:bg-emerald-400/10" : "hover:bg-blue-50";
   const projectHoverClass = isDarkMode ? "group-hover:text-emerald-300" : "group-hover:text-blue-700";
   const buttonClass = isDarkMode
-    ? "border-emerald-400/80 bg-emerald-500/40 text-emerald-50 font-semibold shadow-xl shadow-emerald-500/40"
-    : "border-blue-400 bg-blue-400/70 text-white font-semibold shadow-xl shadow-blue-500/40";
-  const overlayClass = "bg-black/85";
+    ? "border-emerald-400 bg-emerald-500/60 text-white font-bold shadow-2xl shadow-emerald-500/60"
+    : "border-blue-600 bg-blue-600 text-white font-bold shadow-2xl shadow-blue-600/60";
+  const overlayClass = isDarkMode ? "bg-black/90" : "bg-white/75";
 
   return (
     <div className={`min-h-screen ${pageClass}`}>
@@ -247,8 +247,10 @@ export default function Home() {
         <div 
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%)",
-            transition: "opacity 0.5s ease-out",
+            background: isDarkMode 
+              ? "linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(59, 130, 246, 0.35) 100%)"
+              : "linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(240, 248, 255, 0.6) 100%)",
+            transition: "background 0.3s ease-out",
           }}
         />
         
@@ -273,28 +275,29 @@ export default function Home() {
           }}
         />
         
-        <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress, transition: "opacity 0.5s ease-out" }}>
+        <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress * 2.5, transition: "opacity 0.3s ease-out" }}>
             <div
               className={`mb-8 h-48 w-48 overflow-hidden rounded-full border-4 shadow-2xl ${
                 isDarkMode ? "border-emerald-400/40" : "border-blue-600/40"
               }`}
-              style={{ transition: "all 0.5s ease-out" }}
+              style={{ transition: "all 0.3s ease-out" }}
             >
 
               <img
                 src={profile.photoUrl}
                 alt={`${profile.name} headshot`}
                 className="h-full w-full object-cover"
+                style={{ filter: "grayscale(100%) contrast(1.1)" }}
               />
             </div>
-            <h1 className="mb-4 text-6xl font-bold tracking-tight md:text-7xl" style={{ transition: "all 0.5s ease-out" }}>
+            <h1 className="mb-4 text-6xl font-bold tracking-tight md:text-7xl" style={{ transition: "all 0.3s ease-out" }}>
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
-            <p className={`mb-8 max-w-2xl text-2xl font-light ${bodyTextClass}`} style={{ transition: "all 0.5s ease-out" }}>
+            <p className={`mb-8 max-w-2xl text-2xl font-light ${bodyTextClass}`} style={{ transition: "all 0.3s ease-out" }}>
               {profile.headline}
             </p>
-            <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.5s ease-out" }}>
+            <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.3s ease-out" }}>
               <a
                 href={`https://${profile.linkedIn}`}
                 target="_blank"
@@ -316,8 +319,8 @@ export default function Home() {
             </div>
             <a
               href="#about"
-              className={`mt-12 animate-bounce transition-all duration-500 ${accentHoverTextClass} ${sectionLabelClass}`}
-              style={{ transition: "all 0.5s ease-out" }}
+              className={`mt-12 animate-bounce transition-all duration-300 ${accentHoverTextClass} ${sectionLabelClass}`}
+              style={{ transition: "all 0.3s ease-out" }}
             >
               <svg
                 className="h-6 w-6"
@@ -738,6 +741,19 @@ export default function Home() {
           </div>
         </section>
         </main>
+
+      <footer className={`py-8 text-center text-sm ${bodyTextClass}`}>
+        <p>
+          Built with ❤️ by Mohit Unecha • Want to play a{" "}
+          <span
+            className={`cursor-pointer font-semibold underline decoration-dotted ${accentTextClass} hover:opacity-70`}
+            onClick={() => window.open("https://www.google.com/search?q=snake+game&igu=1", "_blank")}
+          >
+            game
+          </span>
+          ?
+        </p>
+      </footer>
 
       {isHeaderVisible && (
         <button
