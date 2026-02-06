@@ -685,6 +685,14 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const gameStateRef = React.useRef({
+    playerX: 180,
+    bullets: [] as { x: number; y: number }[],
+    aliens: [] as { x: number; y: number; alive: boolean }[],
+    alienSpeed: 1,
+    alienDirection: 1,
+    gameRunning: true,
+  });
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -695,90 +703,126 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
     canvas.width = 400;
     canvas.height = 500;
 
-    let playerX = 180;
-    let bullets: { x: number; y: number }[] = [];
-    let aliens: { x: number; y: number; alive: boolean }[] = [];
-    let alienSpeed = 1;
-    let alienDirection = 1;
+    // Reset game state
+    gameStateRef.current = {
+      playerX: 180,
+      bullets: [],
+      aliens: [],
+      alienSpeed: 1,
+      alienDirection: 1,
+      gameRunning: true,
+    };
 
+    // Initialize aliens
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 8; col++) {
-        aliens.push({ x: col * 45 + 20, y: row * 40 + 30, alive: true });
+        gameStateRef.current.aliens.push({ x: col * 45 + 20, y: row * 40 + 30, alive: true });
       }
     }
 
     const shoot = () => {
-      bullets.push({ x: playerX + 18, y: 450 });
+      if (gameStateRef.current.gameRunning) {
+        gameStateRef.current.bullets.push({ x: gameStateRef.current.playerX + 18, y: 450 });
+      }
     };
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") playerX = Math.max(0, playerX - 20);
-      if (e.key === "ArrowRight") playerX = Math.min(360, playerX + 20);
-      if (e.key === " ") shoot();
+      if (!gameStateRef.current.gameRunning) return;
+      if (e.key === "ArrowLeft") gameStateRef.current.playerX = Math.max(0, gameStateRef.current.playerX - 20);
+      if (e.key === "ArrowRight") gameStateRef.current.playerX = Math.min(360, gameStateRef.current.playerX + 20);
+      if (e.key === " ") {
+        e.preventDefault();
+        shoot();
+      }
     };
 
     const handleTouch = (e: TouchEvent) => {
+      if (!gameStateRef.current.gameRunning) return;
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const touchX = e.touches[0].clientX - rect.left;
-      if (touchX < canvas.width / 3) playerX = Math.max(0, playerX - 20);
-      else if (touchX > (canvas.width * 2) / 3) playerX = Math.min(360, playerX + 20);
+      if (touchX < canvas.width / 3) gameStateRef.current.playerX = Math.max(0, gameStateRef.current.playerX - 20);
+      else if (touchX > (canvas.width * 2) / 3) gameStateRef.current.playerX = Math.min(360, gameStateRef.current.playerX + 20);
       else shoot();
     };
 
+    let animationId: number;
     const gameLoop = () => {
-      if (gameOver) return;
+      const state = gameStateRef.current;
+      
+      if (!state.gameRunning) {
+        animationId = requestAnimationFrame(gameLoop);
+        return;
+      }
 
       ctx.fillStyle = isDarkMode ? "#0f172a" : "#f1f5f9";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Draw player
       ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
-      ctx.fillRect(playerX, 460, 40, 20);
+      ctx.fillRect(state.playerX, 460, 40, 20);
 
-      bullets.forEach((b, i) => {
+      // Update and draw bullets
+      state.bullets = state.bullets.filter(b => {
         b.y -= 5;
-        if (b.y < 0) bullets.splice(i, 1);
+        if (b.y < 0) return false;
         ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
         ctx.fillRect(b.x, b.y, 4, 10);
+        return true;
       });
 
-      aliens.forEach((alien) => {
+      // Update and draw aliens
+      let allDead = true;
+      state.aliens.forEach((alien) => {
         if (!alien.alive) return;
-        alien.x += alienSpeed * alienDirection;
+        allDead = false;
+        alien.x += state.alienSpeed * state.alienDirection;
         ctx.fillStyle = "#ef4444";
         ctx.fillRect(alien.x, alien.y, 30, 20);
 
-        bullets.forEach((b, i) => {
+        // Check bullet collisions
+        state.bullets = state.bullets.filter(b => {
           if (b.x > alien.x && b.x < alien.x + 30 && b.y > alien.y && b.y < alien.y + 20) {
             alien.alive = false;
-            bullets.splice(i, 1);
             setScore(s => s + 10);
+            return false;
           }
+          return true;
         });
 
-        if (alien.y > 440) setGameOver(true);
+        // Check if alien reached bottom
+        if (alien.y > 440) {
+          state.gameRunning = false;
+          setGameOver(true);
+        }
       });
 
-      const rightMost = Math.max(...aliens.filter(a => a.alive).map(a => a.x));
-      const leftMost = Math.min(...aliens.filter(a => a.alive).map(a => a.x));
-      
-      if (rightMost > 370 || leftMost < 0) {
-        alienDirection *= -1;
-        aliens.forEach(a => { if (a.alive) a.y += 20; });
+      // Check if all aliens defeated
+      if (allDead && state.aliens.length > 0) {
+        state.gameRunning = false;
+        setGameOver(true);
       }
 
-      if (aliens.every(a => !a.alive)) setGameOver(true);
+      // Move aliens down and change direction if needed
+      const rightMost = Math.max(...state.aliens.filter(a => a.alive).map(a => a.x), 0);
+      const leftMost = Math.min(...state.aliens.filter(a => a.alive).map(a => a.x), 400);
+      
+      if (rightMost > 370 || leftMost < 0) {
+        state.alienDirection *= -1;
+        state.aliens.forEach(a => { if (a.alive) a.y += 20; });
+      }
 
-      requestAnimationFrame(gameLoop);
+      animationId = requestAnimationFrame(gameLoop);
     };
 
     window.addEventListener("keydown", handleKey);
     canvas.addEventListener("touchstart", handleTouch);
-    gameLoop();
+    animationId = requestAnimationFrame(gameLoop);
 
     return () => {
       window.removeEventListener("keydown", handleKey);
       canvas.removeEventListener("touchstart", handleTouch);
+      cancelAnimationFrame(animationId);
     };
   }, [isDarkMode, gameOver]);
 
@@ -789,7 +833,7 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
       <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
       {gameOver && (
         <>
-          <p className={`font-semibold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Game Over! Score: {score}</p>
+          <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over! Final Score: {score}</p>
           <button 
             onClick={() => { setScore(0); setGameOver(false); }}
             className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
@@ -798,7 +842,7 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
           </button>
         </>
       )}
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right/middle to play</p>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right/middle to play • SPACE or middle to shoot</p>
     </div>
   );
 }
