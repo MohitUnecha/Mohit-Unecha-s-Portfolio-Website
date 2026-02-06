@@ -243,6 +243,7 @@ export default function Home() {
           backgroundSize: "cover",
           backgroundPosition: "43% center",
           backgroundAttachment: "fixed",
+          filter: "grayscale(100%)",
         }}
       >
         {/* Color tint overlay */}
@@ -274,6 +275,7 @@ export default function Home() {
             transform: `scale(${1 + zoomProgress * 0.5})`,
             opacity: 1 - zoomProgress * 0.3,
             transition: "transform 0.1s ease-out, opacity 0.1s ease-out",
+            filter: "grayscale(100%)",
           }}
         />
         
@@ -776,7 +778,7 @@ export default function Home() {
       {/* Snake Game Modal */}
       {showSnakeGame && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={() => setShowSnakeGame(false)}
         >
           <div 
@@ -810,6 +812,13 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const [gameKey, setGameKey] = React.useState(0);
+
+  const restartGame = () => {
+    setScore(0);
+    setGameOver(false);
+    setGameKey(prev => prev + 1);
+  };
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -830,6 +839,10 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
     let gameRunning = true;
 
     const handleKeyPress = (e: KeyboardEvent) => {
+      if (gameOver) {
+        restartGame();
+        return;
+      }
       if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -1; }
       if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 1; }
       if (e.key === "ArrowLeft" && dx === 0) { dx = -1; dy = 0; }
@@ -878,7 +891,7 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
       clearInterval(gameLoop);
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [isDarkMode, gameOver]);
+  }, [isDarkMode, gameOver, gameKey]);
 
   return (
     <div className="flex flex-col items-center gap-4">

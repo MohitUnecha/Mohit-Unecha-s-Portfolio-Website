@@ -14,6 +14,15 @@ html {
   cursor: auto !important;
 }
 
+/* Show cursor in snake game modal */
+.snake-game-modal {
+  cursor: auto !important;
+}
+
+.snake-game-modal * {
+  cursor: auto !important;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
