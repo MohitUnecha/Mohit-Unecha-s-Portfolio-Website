@@ -3,11 +3,13 @@
 import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
 import { useState, useEffect } from "react";
+import React from "react";
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
@@ -287,7 +289,6 @@ export default function Home() {
                 src={profile.photoUrl}
                 alt={`${profile.name} headshot`}
                 className="h-full w-full object-cover"
-                style={{ filter: "grayscale(100%) contrast(1.1)" }}
               />
             </div>
             <h1 className="mb-4 text-6xl font-bold tracking-tight md:text-7xl" style={{ transition: "all 0.3s ease-out" }}>
@@ -747,7 +748,7 @@ export default function Home() {
           Built with ❤️ by Mohit Unecha • Want to play a{" "}
           <span
             className={`cursor-pointer font-semibold underline decoration-dotted ${accentTextClass} hover:opacity-70`}
-            onClick={() => window.open("https://www.google.com/search?q=snake+game&igu=1", "_blank")}
+            onClick={() => setShowSnakeGame(true)}
           >
             game
           </span>
@@ -771,6 +772,134 @@ export default function Home() {
       )}
 
       {isHeaderVisible && <ChatbotPanel isDarkMode={isDarkMode} />}
+
+      {/* Snake Game Modal */}
+      {showSnakeGame && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setShowSnakeGame(false)}
+        >
+          <div 
+            className={`relative rounded-2xl border p-8 shadow-2xl ${
+              isDarkMode 
+                ? "border-emerald-400/30 bg-slate-900" 
+                : "border-blue-400/30 bg-white"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowSnakeGame(false)}
+              className={`absolute right-4 top-4 text-2xl font-bold transition hover:opacity-70 ${
+                isDarkMode ? "text-emerald-400" : "text-blue-600"
+              }`}
+            >
+              ×
+            </button>
+            <h2 className={`mb-4 text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+              Snake Game
+            </h2>
+            <SnakeGame isDarkMode={isDarkMode} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [score, setScore] = React.useState(0);
+  const [gameOver, setGameOver] = React.useState(false);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const gridSize = 20;
+    const tileCount = 20;
+    canvas.width = gridSize * tileCount;
+    canvas.height = gridSize * tileCount;
+
+    let snake = [{ x: 10, y: 10 }];
+    let food = { x: 15, y: 15 };
+    let dx = 0;
+    let dy = 0;
+    let gameRunning = true;
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -1; }
+      if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 1; }
+      if (e.key === "ArrowLeft" && dx === 0) { dx = -1; dy = 0; }
+      if (e.key === "ArrowRight" && dx === 0) { dx = 1; dy = 0; }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    const gameLoop = setInterval(() => {
+      if (!gameRunning) return;
+
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+      if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount || 
+          snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        gameRunning = false;
+        setGameOver(true);
+        return;
+      }
+
+      snake.unshift(head);
+
+      if (head.x === food.x && head.y === food.y) {
+        setScore(s => s + 10);
+        food = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+      } else {
+        snake.pop();
+      }
+
+      ctx.fillStyle = isDarkMode ? "#0f172a" : "#f8fafc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+      snake.forEach(segment => {
+        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+      });
+
+      ctx.fillStyle = isDarkMode ? "#f87171" : "#ef4444";
+      ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+    }, 100);
+
+    return () => {
+      clearInterval(gameLoop);
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [isDarkMode, gameOver]);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+        Score: {score}
+      </div>
+      <canvas 
+        ref={canvasRef}
+        className="rounded-lg border-2"
+        style={{ 
+          borderColor: isDarkMode ? "#10b981" : "#3b82f6"
+        }}
+      />
+      {gameOver && (
+        <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>
+          Game Over! Press any arrow key to restart.
+        </p>
+      )}
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        Use arrow keys to play
+      </p>
     </div>
   );
 }
