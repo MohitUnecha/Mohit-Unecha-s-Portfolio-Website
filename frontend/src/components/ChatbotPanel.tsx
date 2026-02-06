@@ -21,6 +21,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showDisclosure, setShowDisclosure] = useState(false);
+  const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to latest message
@@ -32,6 +33,13 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setShowDisclosure(true);
+      setIsDisclosureOpen(false);
+    }
+  }, [isOpen]);
+
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
@@ -39,6 +47,8 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInput("");
     setIsLoading(true);
+    setShowDisclosure(false);
+    setIsDisclosureOpen(false);
 
     try {
       const apiBaseUrl = "https://mohit-unecha-s-portfolio-website.vercel.app";
@@ -141,22 +151,24 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowDisclosure(true)}
-            className="mx-auto mt-4 block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold text-slate-200 transition hover:bg-white/10"
-          >
-            AI Disclosure
-          </button>
-
           {showDisclosure && (
+            <button
+              type="button"
+              onClick={() => setIsDisclosureOpen(true)}
+              className="mx-auto mt-4 block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold text-slate-200 transition hover:bg-white/10"
+            >
+              AI Disclosure
+            </button>
+          )}
+
+          {isDisclosureOpen && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 p-4">
               <div className="w-full rounded-2xl border border-white/10 bg-slate-950/95 p-4 text-[11px] leading-relaxed text-slate-200">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs font-semibold text-white">AI Disclosure</span>
                   <button
                     type="button"
-                    onClick={() => setShowDisclosure(false)}
+                    onClick={() => setIsDisclosureOpen(false)}
                     className="text-xs text-slate-300 hover:text-white"
                   >
                     Close
