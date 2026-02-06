@@ -4,12 +4,14 @@ import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
 import { useState, useEffect } from "react";
 import React from "react";
+import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame } from "@/components/Games";
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
-  const [showSnakeGame, setShowSnakeGame] = useState(false);
+  const [showGameSelector, setShowGameSelector] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
@@ -153,8 +155,8 @@ export default function Home() {
   const accentBgHoverClass = isDarkMode ? "hover:bg-emerald-400/10" : "hover:bg-blue-50";
   const projectHoverClass = isDarkMode ? "group-hover:text-emerald-300" : "group-hover:text-blue-700";
   const buttonClass = isDarkMode
-    ? "border-emerald-300 bg-emerald-500/90 text-white font-bold shadow-2xl shadow-emerald-500/70"
-    : "border-blue-500 bg-blue-600/95 text-white font-bold shadow-2xl shadow-blue-600/70";
+    ? "border-emerald-300 bg-emerald-500/50 text-white font-bold shadow-2xl shadow-emerald-500/70"
+    : "border-blue-500 bg-blue-600/50 text-white font-bold shadow-2xl shadow-blue-600/70";
   const overlayClass = isDarkMode ? "bg-black/90" : "bg-white/75";
 
   return (
@@ -750,7 +752,7 @@ export default function Home() {
           © 2026 Mohit Unecha. All rights reserved. • Want to play a{" "}
           <span
             className={`cursor-pointer font-semibold underline decoration-dotted ${accentTextClass} hover:opacity-70`}
-            onClick={() => setShowSnakeGame(true)}
+            onClick={() => setShowGameSelector(true)}
           >
             game
           </span>
@@ -775,11 +777,65 @@ export default function Home() {
 
       {isHeaderVisible && <ChatbotPanel isDarkMode={isDarkMode} />}
 
-      {/* Snake Game Modal */}
-      {showSnakeGame && (
+      {/* Game Selector Modal */}
+      {showGameSelector && !selectedGame && (
+        <div 
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm overflow-y-auto"
+          onClick={() => setShowGameSelector(false)}
+        >
+          <div 
+            className={`relative rounded-2xl border p-8 shadow-2xl max-w-4xl w-full mx-4 ${
+              isDarkMode 
+                ? "border-emerald-400/30 bg-slate-900" 
+                : "border-blue-400/30 bg-white"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowGameSelector(false)}
+              className={`absolute right-4 top-4 text-2xl font-bold transition hover:opacity-70 ${
+                isDarkMode ? "text-emerald-400" : "text-blue-600"
+              }`}
+            >
+              ×
+            </button>
+            <h2 className={`mb-6 text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+              Choose a Game
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {[
+                { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
+                { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
+                { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
+                { id: 'flappy', name: '🐦 Flappy Bird', desc: 'Tap to fly' },
+                { id: '2048', name: '🔢 2048', desc: 'Merge tiles' },
+                { id: 'breakout', name: '🧱 Breakout', desc: 'Brick breaker' },
+              ].map((game) => (
+                <button
+                  key={game.id}
+                  onClick={() => setSelectedGame(game.id)}
+                  className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
+                    isDarkMode
+                      ? "border-emerald-400/30 bg-slate-800/50 hover:bg-slate-800 hover:border-emerald-400/60"
+                      : "border-blue-400/30 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-400/60"
+                  }`}
+                >
+                  <div className={`text-3xl mb-2`}>{game.name}</div>
+                  <div className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+                    {game.desc}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected Game Modal */}
+      {showGameSelector && selectedGame && (
         <div 
           className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-          onClick={() => setShowSnakeGame(false)}
+          onClick={() => { setSelectedGame(null); setShowGameSelector(false); }}
         >
           <div 
             className={`relative rounded-2xl border p-8 shadow-2xl ${
@@ -790,17 +846,19 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setShowSnakeGame(false)}
+              onClick={() => setSelectedGame(null)}
               className={`absolute right-4 top-4 text-2xl font-bold transition hover:opacity-70 ${
                 isDarkMode ? "text-emerald-400" : "text-blue-600"
               }`}
             >
-              ×
+              ←
             </button>
-            <h2 className={`mb-4 text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
-              Snake Game
-            </h2>
-            <SnakeGame isDarkMode={isDarkMode} />
+            {selectedGame === 'snake' && <SnakeGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'pong' && <PongGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'tetris' && <TetrisGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'flappy' && <FlappyGame isDarkMode={isDarkMode} />}
+            {selectedGame === '2048' && <Game2048 isDarkMode={isDarkMode} />}
+            {selectedGame === 'breakout' && <BreakoutGame isDarkMode={isDarkMode} />}
           </div>
         </div>
       )}
