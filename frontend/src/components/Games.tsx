@@ -1262,49 +1262,86 @@ export function WordleGame({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
-// Zip Game (LinkedIn-style path connection puzzle)
+// Zip Game (LinkedIn-style path connection puzzle with difficulty levels)
 export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
+  type Difficulty = 'easy' | 'medium' | 'hard';
+  
   const [grid, setGrid] = React.useState<(number | null)[][]>([]);
   const [path, setPath] = React.useState<{ row: number; col: number }[]>([]);
   const [checkpoints, setCheckpoints] = React.useState<{ num: number; row: number; col: number }[]>([]);
   const [solved, setSolved] = React.useState(false);
   const [dragging, setDragging] = React.useState(false);
   const [currentSequence, setCurrentSequence] = React.useState(1);
+  const [difficulty, setDifficulty] = React.useState<Difficulty>('medium');
+  const [gameStarted, setGameStarted] = React.useState(false);
+  const [gridSize, setGridSize] = React.useState(6);
+  const [cellSize, setCellSize] = React.useState('w-14 h-14');
 
-  const initPuzzle = () => {
-    // Create 6x6 grid
-    const newGrid: (number | null)[][] = Array(6).fill(null).map(() => Array(6).fill(null));
-    const newCheckpoints = [
-      { num: 1, row: 4, col: 2 },
-      { num: 2, row: 5, col: 1 },
-      { num: 3, row: 4, col: 3 },
-      { num: 4, row: 1, col: 5 },
-      { num: 5, row: 4, col: 5 },
-      { num: 6, row: 5, col: 5 },
-      { num: 7, row: 5, col: 3 },
-      { num: 8, row: 3, col: 3 },
-      { num: 9, row: 2, col: 0 },
-      { num: 10, row: 2, col: 1 },
-      { num: 11, row: 2, col: 2 },
-      { num: 12, row: 1, col: 2 },
-      { num: 13, row: 1, col: 0 },
-      { num: 14, row: 0, col: 3 },
-      { num: 15, row: 2, col: 4 },
-      { num: 16, row: 0, col: 1 },
-    ];
+  const getCheckpointsByDifficulty = (diff: Difficulty) => {
+    if (diff === 'easy') {
+      // 4x4 grid with 6 checkpoints
+      return [
+        { num: 1, row: 2, col: 1 },
+        { num: 2, row: 1, col: 3 },
+        { num: 3, row: 2, col: 3 },
+        { num: 4, row: 3, col: 1 },
+        { num: 5, row: 0, col: 1 },
+        { num: 6, row: 0, col: 3 },
+      ];
+    } else if (diff === 'hard') {
+      // 8x8 grid with all 24 checkpoints
+      return [
+        { num: 1, row: 5, col: 2 }, { num: 2, row: 6, col: 1 }, { num: 3, row: 5, col: 3 }, { num: 4, row: 2, col: 6 },
+        { num: 5, row: 5, col: 6 }, { num: 6, row: 6, col: 6 }, { num: 7, row: 6, col: 4 }, { num: 8, row: 4, col: 4 },
+        { num: 9, row: 3, col: 0 }, { num: 10, row: 3, col: 1 }, { num: 11, row: 3, col: 2 }, { num: 12, row: 2, col: 2 },
+        { num: 13, row: 2, col: 0 }, { num: 14, row: 1, col: 4 }, { num: 15, row: 3, col: 5 }, { num: 16, row: 1, col: 1 },
+        { num: 17, row: 0, col: 3 }, { num: 18, row: 1, col: 7 }, { num: 19, row: 4, col: 7 }, { num: 20, row: 7, col: 5 },
+        { num: 21, row: 7, col: 0 }, { num: 22, row: 0, col: 7 }, { num: 23, row: 4, col: 0 }, { num: 24, row: 7, col: 7 },
+      ];
+    } else {
+      // Medium: 6x6 grid with 16 checkpoints
+      return [
+        { num: 1, row: 4, col: 2 }, { num: 2, row: 5, col: 1 }, { num: 3, row: 4, col: 3 }, { num: 4, row: 1, col: 5 },
+        { num: 5, row: 4, col: 5 }, { num: 6, row: 5, col: 5 }, { num: 7, row: 5, col: 3 }, { num: 8, row: 3, col: 3 },
+        { num: 9, row: 2, col: 0 }, { num: 10, row: 2, col: 1 }, { num: 11, row: 2, col: 2 }, { num: 12, row: 1, col: 2 },
+        { num: 13, row: 1, col: 0 }, { num: 14, row: 0, col: 3 }, { num: 15, row: 2, col: 4 }, { num: 16, row: 0, col: 1 },
+      ];
+    }
+  };
+
+  const initPuzzle = (diff: Difficulty) => {
+    let size = 6;
+    let cellClass = 'w-14 h-14';
+    
+    if (diff === 'easy') {
+      size = 4;
+      cellClass = 'w-16 h-16';
+    } else if (diff === 'hard') {
+      size = 8;
+      cellClass = 'w-10 h-10';
+    }
+
+    const newGrid: (number | null)[][] = Array(size).fill(null).map(() => Array(size).fill(null));
+    const newCheckpoints = getCheckpointsByDifficulty(diff);
+    
     newCheckpoints.forEach(cp => {
       newGrid[cp.row][cp.col] = cp.num;
     });
+    
+    setGridSize(size);
+    setCellSize(cellClass);
     setGrid(newGrid);
     setCheckpoints(newCheckpoints);
     setPath([]);
     setCurrentSequence(1);
     setSolved(false);
     setDragging(false);
+    setDifficulty(diff);
+    setGameStarted(true);
   };
 
   React.useEffect(() => {
-    initPuzzle();
+    initPuzzle('medium');
   }, []);
 
   const isAdjacent = (cell1: { row: number; col: number }, cell2: { row: number; col: number }) => {
@@ -1318,7 +1355,7 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
   };
 
   const handleCellInteraction = (row: number, col: number) => {
-    if (solved) return;
+    if (solved || !gameStarted) return;
 
     const cellValue = grid[row][col];
     const isStart = cellValue === 1;
@@ -1349,8 +1386,9 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
       if (cellValue === currentSequence) {
         setCurrentSequence(currentSequence + 1);
         
-        // Check if solved: all 36 cells filled and all checkpoints hit
-        if (newPath.length === 36 && currentSequence === checkpoints.length) {
+        // Check if solved: all cells filled and all checkpoints hit
+        const totalCells = gridSize * gridSize;
+        if (newPath.length === totalCells && currentSequence === checkpoints.length + 1) {
           setSolved(true);
           setDragging(false);
         }
@@ -1414,15 +1452,13 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
   };
 
   const getGradientColor = (index: number, total: number) => {
-    const progress = index / total;
+    const progress = total > 0 ? index / total : 0;
     if (isDarkMode) {
-      // Purple to blue gradient
       const r = Math.round(168 - progress * 68);
       const g = Math.round(85 - progress * 26);
       const b = Math.round(247 - progress * 71);
       return `rgb(${r}, ${g}, ${b})`;
     } else {
-      // Orange to blue gradient
       const r = Math.round(255 - progress * 196);
       const g = Math.round(140 - progress * 11);
       const b = Math.round(0 + progress * 246);
@@ -1430,77 +1466,124 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
     }
   };
 
+  const getDifficultyLabel = () => {
+    if (difficulty === 'easy') return '4x4 Grid (6 Checkpoints)';
+    if (difficulty === 'hard') return '8x8 Grid (24 Checkpoints)';
+    return '6x6 Grid (16 Checkpoints)';
+  };
+
   return (
     <div className="flex flex-col items-center gap-4" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onTouchEnd={handleTouchEnd} onTouchMove={handleTouchMove}>
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Zip</h2>
-      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
-        Path: {path.length}/36 • Next: {currentSequence <= checkpoints.length ? currentSequence : "✓"}
-      </div>
-      <div 
-        className="grid grid-cols-6 gap-1 p-4 rounded-2xl select-none" 
-        style={{ background: isDarkMode ? "#1e293b" : "#e2e8f0" }}
-      >
-        {grid.map((row, i) => row.map((cell, j) => {
-          const isCheckpoint = cell !== null;
-          const inPath = isInPath(i, j);
-          const pathIndex = path.findIndex(p => p.row === i && p.col === j);
-          const bgColor = inPath 
-            ? getGradientColor(pathIndex, path.length - 1) 
-            : (isDarkMode ? "#334155" : "#cbd5e1");
-          
-          return (
-            <div
-              key={`${i}-${j}`}
-              data-cell={`${i}-${j}`}
-              onMouseDown={() => handleMouseDown(i, j)}
-              onMouseEnter={() => handleMouseEnter(i, j)}
-              onTouchStart={(e) => handleTouchStart(i, j, e)}
-              className={`w-14 h-14 rounded-lg font-bold text-lg transition-all relative cursor-pointer ${
-                inPath ? "shadow-lg" : ""
-              }`}
-              style={{ 
-                background: bgColor,
-                color: inPath || isCheckpoint ? "#fff" : isDarkMode ? "#64748b" : "#94a3b8"
-              }}
+      
+      {!gameStarted ? (
+        <div className="flex flex-col items-center gap-4">
+          <p className={`text-lg font-semibold ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>Select Difficulty:</p>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => initPuzzle('easy')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${isDarkMode ? "bg-blue-500 hover:bg-blue-600 text-white" : "bg-blue-400 hover:bg-blue-500 text-white"}`}
             >
-              {isCheckpoint && (
-                <div className={`absolute inset-0 rounded-lg flex items-center justify-center pointer-events-none ${
-                  inPath ? "bg-black/30" : "bg-black/60"
-                }`}>
-                  <span className="relative z-10 font-bold text-xl">{cell}</span>
+              🟢 Easy
+            </button>
+            <button 
+              onClick={() => initPuzzle('medium')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${isDarkMode ? "bg-yellow-600 hover:bg-yellow-700 text-white" : "bg-yellow-500 hover:bg-yellow-600 text-white"}`}
+            >
+              🟡 Medium
+            </button>
+            <button 
+              onClick={() => initPuzzle('hard')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${isDarkMode ? "bg-red-600 hover:bg-red-700 text-white" : "bg-red-500 hover:bg-red-600 text-white"}`}
+            >
+              🔴 Hard
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className={`text-sm font-semibold px-3 py-1 rounded-full ${isDarkMode ? "bg-slate-700 text-slate-200" : "bg-slate-300 text-slate-700"}`}>
+            {getDifficultyLabel()}
+          </div>
+          <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+            Path: {path.length}/{gridSize * gridSize} • Next: {currentSequence <= checkpoints.length ? currentSequence : "✓"}
+          </div>
+          <div 
+            className={`grid gap-1 p-4 rounded-2xl select-none`}
+            style={{ 
+              background: isDarkMode ? "#1e293b" : "#e2e8f0",
+              gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`
+            }}
+          >
+            {grid.map((row, i) => row.map((cell, j) => {
+              const isCheckpoint = cell !== null;
+              const inPath = isInPath(i, j);
+              const pathIndex = path.findIndex(p => p.row === i && p.col === j);
+              const bgColor = inPath 
+                ? getGradientColor(pathIndex, path.length - 1) 
+                : (isDarkMode ? "#334155" : "#cbd5e1");
+              
+              return (
+                <div
+                  key={`${i}-${j}`}
+                  data-cell={`${i}-${j}`}
+                  onMouseDown={() => handleMouseDown(i, j)}
+                  onMouseEnter={() => handleMouseEnter(i, j)}
+                  onTouchStart={(e) => handleTouchStart(i, j, e)}
+                  className={`${cellSize} rounded-lg font-bold text-lg transition-all relative cursor-pointer ${
+                    inPath ? "shadow-lg" : ""
+                  }`}
+                  style={{ 
+                    background: bgColor,
+                    color: inPath || isCheckpoint ? "#fff" : isDarkMode ? "#64748b" : "#94a3b8"
+                  }}
+                >
+                  {isCheckpoint && (
+                    <div className={`absolute inset-0 rounded-lg flex items-center justify-center pointer-events-none ${
+                      inPath ? "bg-black/30" : "bg-black/60"
+                    }`}>
+                      <span className="relative z-10 font-bold">{cell}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        }))}
-      </div>
-      <div className="flex gap-3">
-        <button 
-          onClick={handleUndo} 
-          disabled={path.length === 0}
-          className={`px-6 py-2 rounded-lg font-semibold transition-all ${
-            path.length === 0
-              ? isDarkMode ? "bg-slate-700 text-slate-500 cursor-not-allowed" : "bg-slate-300 text-slate-500 cursor-not-allowed"
-              : isDarkMode ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-slate-400 text-white hover:bg-slate-500"
-          }`}
-        >
-          Undo
-        </button>
-        <button 
-          onClick={initPuzzle} 
-          className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
-        >
-          Reset
-        </button>
-      </div>
-      {solved && (
-        <p className={`font-bold text-xl animate-bounce ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
-          🎉 Perfect! All 36 cells connected!
-        </p>
+              );
+            }))}
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={handleUndo} 
+              disabled={path.length === 0}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                path.length === 0
+                  ? isDarkMode ? "bg-slate-700 text-slate-500 cursor-not-allowed" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                  : isDarkMode ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-slate-400 text-white hover:bg-slate-500"
+              }`}
+            >
+              ↶ Undo
+            </button>
+            <button 
+              onClick={() => setGameStarted(false)}
+              className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-slate-400 text-white hover:bg-slate-500"}`}
+            >
+              Change Level
+            </button>
+            <button 
+              onClick={() => initPuzzle(difficulty)}
+              className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+            >
+              🔄 Reset
+            </button>
+          </div>
+          {solved && (
+            <p className={`font-bold text-xl animate-bounce ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+              🎉 Perfect! All cells connected!
+            </p>
+          )}
+          <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+            Click & drag (or touch & swipe) to draw<br/>Connect 1→{checkpoints.length} in order & fill every cell
+          </p>
+        </>
       )}
-      <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-        Click & drag (or touch & swipe) to draw<br/>Connect 1→16 in order & fill every cell
-      </p>
     </div>
   );
 }
