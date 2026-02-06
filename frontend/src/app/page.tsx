@@ -4,7 +4,7 @@ import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
 import { useState, useEffect } from "react";
 import React from "react";
-import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame, RaceGame, WhackAMoleGame } from "@/components/Games";
+import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame, RaceGame, WhackAMoleGame, WordleGame, SlidePuzzleGame } from "@/components/Games";
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
@@ -816,6 +816,8 @@ export default function Home() {
                 { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
                 { id: 'race', name: '🏎️ Race', desc: 'Dodge obstacles' },
                 { id: 'whack', name: '🦫 Whack-a-Mole', desc: 'Hit the moles' },
+                { id: 'wordle', name: '📝 Wordle', desc: 'Guess the word' },
+                { id: 'slide', name: '🧩 Slide Puzzle', desc: 'Arrange tiles' },
               ].map((game) => (
                 <button
                   key={game.id}
@@ -879,6 +881,8 @@ export default function Home() {
             {selectedGame === 'tictactoe' && <TicTacToeGame isDarkMode={isDarkMode} />}
             {selectedGame === 'race' && <RaceGame isDarkMode={isDarkMode} />}
             {selectedGame === 'whack' && <WhackAMoleGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'wordle' && <WordleGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'slide' && <SlidePuzzleGame isDarkMode={isDarkMode} />}
           </div>
         </div>
       )}

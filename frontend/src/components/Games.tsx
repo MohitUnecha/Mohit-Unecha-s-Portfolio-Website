@@ -1123,3 +1123,200 @@ export function WhackAMoleGame({ isDarkMode }: { isDarkMode: boolean }) {
     </div>
   );
 }
+
+// Wordle Unlimited Game
+export function WordleGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const wordList = ["REACT", "GAMES", "CODER", "BUILD", "NEXTS", "TYPES", "STATE", "PROPS", "HOOKS", "ARRAY", "STACK", "QUERY", "DEBUG", "FRONT", "STYLE"];
+  const [targetWord, setTargetWord] = React.useState("");
+  const [guesses, setGuesses] = React.useState<string[]>([]);
+  const [currentGuess, setCurrentGuess] = React.useState("");
+  const [gameWon, setGameWon] = React.useState(false);
+  const [gameLost, setGameLost] = React.useState(false);
+
+  React.useEffect(() => {
+    setTargetWord(wordList[Math.floor(Math.random() * wordList.length)]);
+  }, []);
+
+  const handleKeyPress = (letter: string) => {
+    if (gameWon || gameLost) return;
+    if (letter === "ENTER") {
+      if (currentGuess.length === 5) {
+        const newGuesses = [...guesses, currentGuess];
+        setGuesses(newGuesses);
+        if (currentGuess === targetWord) {
+          setGameWon(true);
+        } else if (newGuesses.length >= 6) {
+          setGameLost(true);
+        }
+        setCurrentGuess("");
+      }
+    } else if (letter === "DEL") {
+      setCurrentGuess(currentGuess.slice(0, -1));
+    } else if (currentGuess.length < 5) {
+      setCurrentGuess(currentGuess + letter);
+    }
+  };
+
+  const getLetterColor = (letter: string, index: number, guess: string) => {
+    if (targetWord[index] === letter) {
+      return isDarkMode ? "bg-emerald-600" : "bg-green-600";
+    } else if (targetWord.includes(letter)) {
+      return isDarkMode ? "bg-yellow-600" : "bg-yellow-500";
+    }
+    return isDarkMode ? "bg-slate-700" : "bg-slate-400";
+  };
+
+  const resetGame = () => {
+    setTargetWord(wordList[Math.floor(Math.random() * wordList.length)]);
+    setGuesses([]);
+    setCurrentGuess("");
+    setGameWon(false);
+    setGameLost(false);
+  };
+
+  const keyboard = [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+    ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "DEL"],
+  ];
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Wordle Unlimited</h2>
+      <div className="flex flex-col gap-2">
+        {Array(6).fill(0).map((_, rowIndex) => (
+          <div key={rowIndex} className="flex gap-2">
+            {Array(5).fill(0).map((_, colIndex) => {
+              const guess = guesses[rowIndex];
+              const letter = guess ? guess[colIndex] : (rowIndex === guesses.length ? currentGuess[colIndex] : "");
+              const isGuessed = rowIndex < guesses.length;
+              return (
+                <div
+                  key={colIndex}
+                  className={`w-12 h-12 border-2 flex items-center justify-center font-bold text-xl ${
+                    isGuessed
+                      ? getLetterColor(letter, colIndex, guess)
+                      : isDarkMode ? "border-slate-600 text-slate-200" : "border-slate-300 text-slate-700"
+                  } ${letter ? "text-white" : ""}`}
+                >
+                  {letter}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      {(gameWon || gameLost) && (
+        <div className="text-center">
+          <p className={`font-bold text-xl mb-2 ${gameWon ? (isDarkMode ? "text-emerald-400" : "text-green-600") : (isDarkMode ? "text-red-400" : "text-red-600")}`}>
+            {gameWon ? "You Won! 🎉" : `Game Over! Word was: ${targetWord}`}
+          </p>
+          <button onClick={resetGame} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
+            Play Again
+          </button>
+        </div>
+      )}
+      <div className="flex flex-col gap-1">
+        {keyboard.map((row, i) => (
+          <div key={i} className="flex gap-1 justify-center">
+            {row.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleKeyPress(key)}
+                className={`${key === "ENTER" || key === "DEL" ? "px-4" : "w-8"} h-10 rounded font-semibold text-sm ${
+                  isDarkMode ? "bg-slate-700 text-slate-200 hover:bg-slate-600" : "bg-slate-300 text-slate-700 hover:bg-slate-400"
+                }`}
+              >
+                {key === "DEL" ? "⌫" : key}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Guess the 5-letter word in 6 tries</p>
+    </div>
+  );
+}
+
+// Slide Puzzle Game (Zip-style)
+export function SlidePuzzleGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const [tiles, setTiles] = React.useState<number[]>([]);
+  const [moves, setMoves] = React.useState(0);
+  const [solved, setSolved] = React.useState(false);
+
+  const initPuzzle = () => {
+    let arr = Array.from({ length: 16 }, (_, i) => i);
+    // Shuffle
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    setTiles(arr);
+    setMoves(0);
+    setSolved(false);
+  };
+
+  React.useEffect(() => {
+    initPuzzle();
+  }, []);
+
+  const canMove = (index: number) => {
+    const emptyIndex = tiles.indexOf(0);
+    const row = Math.floor(index / 4);
+    const col = index % 4;
+    const emptyRow = Math.floor(emptyIndex / 4);
+    const emptyCol = emptyIndex % 4;
+    return (Math.abs(row - emptyRow) === 1 && col === emptyCol) || (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+  };
+
+  const handleTileClick = (index: number) => {
+    if (!canMove(index) || solved) return;
+    const emptyIndex = tiles.indexOf(0);
+    const newTiles = [...tiles];
+    [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
+    setTiles(newTiles);
+    setMoves(m => m + 1);
+    
+    // Check if solved
+    const isSolved = newTiles.every((tile, i) => tile === i);
+    if (isSolved) setSolved(true);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Slide Puzzle</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Moves: {moves}</div>
+      <div className="grid grid-cols-4 gap-1 p-4 rounded-lg" style={{ background: isDarkMode ? "#1e293b" : "#e2e8f0" }}>
+        {tiles.map((tile, i) => (
+          <button
+            key={i}
+            onClick={() => handleTileClick(i)}
+            disabled={tile === 0}
+            className={`w-16 h-16 rounded font-bold text-xl transition-all ${
+              tile === 0
+                ? "invisible"
+                : canMove(i)
+                ? isDarkMode 
+                  ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:scale-105 cursor-pointer" 
+                  : "bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:scale-105 cursor-pointer"
+                : isDarkMode
+                ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                : "bg-slate-300 text-slate-600 cursor-not-allowed"
+            }`}
+          >
+            {tile !== 0 && tile}
+          </button>
+        ))}
+      </div>
+      {solved && (
+        <p className={`font-bold text-xl ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+          Solved in {moves} moves! 🎉
+        </p>
+      )}
+      <button onClick={initPuzzle} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
+        New Puzzle
+      </button>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrange tiles from 1-15 in order</p>
+    </div>
+  );
+}
