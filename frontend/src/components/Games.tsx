@@ -928,3 +928,198 @@ export function TicTacToeGame({ isDarkMode }: { isDarkMode: boolean }) {
     </div>
   );
 }
+
+// Race Game
+export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [score, setScore] = React.useState(0);
+  const [gameOver, setGameOver] = React.useState(false);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 400;
+    canvas.height = 600;
+
+    let carX = 175;
+    let carY = 500;
+    let obstacles: { x: number; y: number; lane: number }[] = [];
+    let speed = 3;
+    let roadOffset = 0;
+
+    const lanes = [50, 150, 250, 350];
+
+    const addObstacle = () => {
+      const lane = Math.floor(Math.random() * 4);
+      obstacles.push({ x: lanes[lane], y: -50, lane });
+    };
+
+    let obstacleTimer = 0;
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && carX > 50) carX -= 100;
+      if (e.key === "ArrowRight" && carX < 350) carX += 100;
+    };
+
+    const handleTouch = (e: TouchEvent) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touchX = e.touches[0].clientX - rect.left;
+      if (touchX < canvas.width / 2 && carX > 50) carX -= 100;
+      if (touchX > canvas.width / 2 && carX < 350) carX += 100;
+    };
+
+    const gameLoop = () => {
+      if (gameOver) return;
+
+      roadOffset = (roadOffset + speed) % 40;
+
+      ctx.fillStyle = isDarkMode ? "#1e293b" : "#94a3b8";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw road lanes
+      ctx.strokeStyle = isDarkMode ? "#475569" : "#cbd5e1";
+      ctx.lineWidth = 4;
+      for (let i = 0; i < canvas.height; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, i + roadOffset);
+        ctx.lineTo(canvas.width / 2, i + roadOffset + 20);
+        ctx.stroke();
+      }
+
+      // Draw car
+      ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+      ctx.fillRect(carX - 20, carY, 40, 60);
+
+      // Draw obstacles
+      obstacles.forEach((obs, i) => {
+        obs.y += speed;
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(obs.x - 20, obs.y, 40, 60);
+
+        // Collision detection
+        if (
+          obs.y + 60 > carY &&
+          obs.y < carY + 60 &&
+          Math.abs(obs.x - carX) < 40
+        ) {
+          setGameOver(true);
+        }
+
+        // Remove passed obstacles and increase score
+        if (obs.y > canvas.height) {
+          obstacles.splice(i, 1);
+          setScore(s => s + 1);
+          if (score % 10 === 0) speed += 0.5;
+        }
+      });
+
+      // Add new obstacles
+      obstacleTimer++;
+      if (obstacleTimer > 60 / speed) {
+        addObstacle();
+        obstacleTimer = 0;
+      }
+
+      requestAnimationFrame(gameLoop);
+    };
+
+    window.addEventListener("keydown", handleKey);
+    canvas.addEventListener("touchstart", handleTouch);
+    gameLoop();
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      canvas.removeEventListener("touchstart", handleTouch);
+    };
+  }, [isDarkMode, gameOver]);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Race Game</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
+      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Crashed! Final Score: {score}</p>}
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right to dodge</p>
+    </div>
+  );
+}
+
+// Whack-a-Mole Game
+export function WhackAMoleGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const [moles, setMoles] = React.useState<boolean[]>(Array(9).fill(false));
+  const [score, setScore] = React.useState(0);
+  const [timeLeft, setTimeLeft] = React.useState(30);
+  const [gameStarted, setGameStarted] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!gameStarted || timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(t => t - 1);
+    }, 1000);
+
+    const moleTimer = setInterval(() => {
+      const newMoles = Array(9).fill(false);
+      const randomIndex = Math.floor(Math.random() * 9);
+      newMoles[randomIndex] = true;
+      setMoles(newMoles);
+    }, 800);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(moleTimer);
+    };
+  }, [gameStarted, timeLeft]);
+
+  const whackMole = (index: number) => {
+    if (!gameStarted || timeLeft <= 0) return;
+    if (moles[index]) {
+      setScore(s => s + 1);
+      setMoles(m => m.map((_, i) => i === index ? false : _));
+    }
+  };
+
+  const startGame = () => {
+    setScore(0);
+    setTimeLeft(30);
+    setGameStarted(true);
+    setMoles(Array(9).fill(false));
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Whack-a-Mole</h2>
+      <div className={`flex gap-8 text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+        <span>Score: {score}</span>
+        <span>Time: {timeLeft}s</span>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {moles.map((active, i) => (
+          <button
+            key={i}
+            onClick={() => whackMole(i)}
+            className={`w-20 h-20 rounded-full text-4xl transition-all ${
+              active
+                ? isDarkMode ? "bg-emerald-500 scale-110" : "bg-blue-500 scale-110"
+                : isDarkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
+            {active ? "🦫" : "🕳️"}
+          </button>
+        ))}
+      </div>
+      {(!gameStarted || timeLeft <= 0) && (
+        <button onClick={startGame} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
+          {timeLeft <= 0 && score > 0 ? `Play Again (${score} points!)` : "Start Game"}
+        </button>
+      )}
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        {gameStarted && timeLeft > 0 ? "Tap the moles!" : "Hit as many moles as you can in 30 seconds"}
+      </p>
+    </div>
+  );
+}

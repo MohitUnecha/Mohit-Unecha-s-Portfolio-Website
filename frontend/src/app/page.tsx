@@ -4,7 +4,7 @@ import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
 import { useState, useEffect } from "react";
 import React from "react";
-import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame } from "@/components/Games";
+import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame, RaceGame, WhackAMoleGame } from "@/components/Games";
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
@@ -802,8 +802,8 @@ export default function Home() {
             <h2 className={`mb-6 text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
               Choose a Game
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {[
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {
                 { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
                 { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
                 { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
@@ -814,6 +814,8 @@ export default function Home() {
                 { id: 'invaders', name: '👾 Space Invaders', desc: 'Shoot aliens' },
                 { id: 'simon', name: '🎵 Simon Says', desc: 'Repeat sequence' },
                 { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
+                { id: 'race', name: '🏎️ Race', desc: 'Dodge obstacles' },
+                { id: 'whack', name: '🦫 Whack-a-Mole', desc: 'Hit the moles' },
               ].map((game) => (
                 <button
                   key={game.id}
@@ -867,6 +869,8 @@ export default function Home() {
             {selectedGame === 'invaders' && <SpaceInvadersGame isDarkMode={isDarkMode} />}
             {selectedGame === 'simon' && <SimonSaysGame isDarkMode={isDarkMode} />}
             {selectedGame === 'tictactoe' && <TicTacToeGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'race' && <RaceGame isDarkMode={isDarkMode} />}
+            {selectedGame === 'whack' && <WhackAMoleGame isDarkMode={isDarkMode} />}
           </div>
         </div>
       )}
