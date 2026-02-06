@@ -25,7 +25,14 @@ export function PongGame({ isDarkMode }: { isDarkMode: boolean }) {
       playerY = e.clientY - rect.top - paddleHeight / 2;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      playerY = e.touches[0].clientY - rect.top - paddleHeight / 2;
+    };
+
     canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("touchmove", handleTouchMove);
 
     const gameLoop = setInterval(() => {
       // Move ball
@@ -72,6 +79,7 @@ export function PongGame({ isDarkMode }: { isDarkMode: boolean }) {
     return () => {
       clearInterval(gameLoop);
       canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("touchmove", handleTouchMove);
     };
   }, [isDarkMode]);
 
@@ -82,7 +90,7 @@ export function PongGame({ isDarkMode }: { isDarkMode: boolean }) {
         You: {score.player} | Computer: {score.computer}
       </div>
       <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Move your mouse to control the paddle</p>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Move mouse or touch to control</p>
     </div>
   );
 }
@@ -121,7 +129,13 @@ export function FlappyGame({ isDarkMode }: { isDarkMode: boolean }) {
       }
     };
 
+    const handleTouch = (e: TouchEvent) => {
+      e.preventDefault();
+      handleClick();
+    };
+
     canvas.addEventListener("click", handleClick);
+    canvas.addEventListener("touchstart", handleTouch);
 
     const gameLoop = setInterval(() => {
       if (!gameRunning) return;
@@ -173,6 +187,7 @@ export function FlappyGame({ isDarkMode }: { isDarkMode: boolean }) {
     return () => {
       clearInterval(gameLoop);
       canvas.removeEventListener("click", handleClick);
+      canvas.removeEventListener("touchstart", handleTouch);
     };
   }, [isDarkMode, gameOver]);
 
@@ -182,7 +197,7 @@ export function FlappyGame({ isDarkMode }: { isDarkMode: boolean }) {
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
       <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
       {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over! Click to restart</p>}
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Click to flap</p>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Click or tap to flap</p>
     </div>
   );
 }
@@ -236,8 +251,29 @@ export function Game2048({ isDarkMode }: { isDarkMode: boolean }) {
         newGrid[i] = merge(compress(newGrid[i]));
         if (JSON.stringify(old) !== JSON.stringify(newGrid[i])) moved = true;
       }
+    } else if (direction === "right") {
+      for (let i = 0; i < 4; i++) {
+        const old = [...newGrid[i]];
+        newGrid[i] = merge(compress(newGrid[i].reverse())).reverse();
+        if (JSON.stringify(old) !== JSON.stringify(newGrid[i])) moved = true;
+      }
+    } else if (direction === "up") {
+      for (let c = 0; c < 4; c++) {
+        let col = newGrid.map(row => row[c]);
+        const old = [...col];
+        col = merge(compress(col));
+        if (JSON.stringify(old) !== JSON.stringify(col)) moved = true;
+        col.forEach((val, r) => newGrid[r][c] = val);
+      }
+    } else if (direction === "down") {
+      for (let c = 0; c < 4; c++) {
+        let col = newGrid.map(row => row[c]);
+        const old = [...col];
+        col = merge(compress(col.reverse())).reverse();
+        if (JSON.stringify(old) !== JSON.stringify(col)) moved = true;
+        col.forEach((val, r) => newGrid[r][c] = val);
+      }
     }
-    // Add other directions similarly...
 
     if (moved) {
       addNumber(newGrid);
@@ -246,14 +282,48 @@ export function Game2048({ isDarkMode }: { isDarkMode: boolean }) {
   };
 
   React.useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+
     const handleKey = (e: KeyboardEvent) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
         e.preventDefault();
         if (e.key === "ArrowLeft") move("left");
+        if (e.key === "ArrowRight") move("right");
+        if (e.key === "ArrowUp") move("up");
+        if (e.key === "ArrowDown") move("down");
       }
     };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 30) move("right");
+        else if (dx < -30) move("left");
+      } else {
+        if (dy > 30) move("down");
+        else if (dy < -30) move("up");
+      }
+    };
+
     window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    document.addEventListener("touchstart", handleTouchStart);
+    document.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
   }, [grid]);
 
   return (
@@ -271,31 +341,274 @@ export function Game2048({ isDarkMode }: { isDarkMode: boolean }) {
       <button onClick={initGrid} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
         New Game
       </button>
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Use arrow keys (left working)</p>
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Use arrow keys or swipe to play</p>
     </div>
   );
 }
 
-// Tetris Game (simplified)
+// Tetris Game (fully implemented)
 export function TetrisGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [score, setScore] = React.useState(0);
+  const [gameOver, setGameOver] = React.useState(false);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 300;
+    canvas.height = 600;
+
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK = 30;
+
+    let grid = Array(ROWS).fill(0).map(() => Array(COLS).fill(0));
+    let currentPiece = { x: 3, y: 0, shape: [[1,1,1,1]] };
+    let gameRunning = true;
+
+    const pieces = [
+      [[1,1,1,1]], // I
+      [[1,1],[1,1]], // O
+      [[0,1,0],[1,1,1]], // T
+      [[1,0,0],[1,1,1]], // L
+      [[0,0,1],[1,1,1]], // J
+      [[0,1,1],[1,1,0]], // S
+      [[1,1,0],[0,1,1]], // Z
+    ];
+
+    const newPiece = () => {
+      currentPiece = {
+        x: 3,
+        y: 0,
+        shape: pieces[Math.floor(Math.random() * pieces.length)]
+      };
+    };
+
+    const collision = (x: number, y: number, shape: number[][]) => {
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c]) {
+            const newX = x + c;
+            const newY = y + r;
+            if (newX < 0 || newX >= COLS || newY >= ROWS) return true;
+            if (newY >= 0 && grid[newY][newX]) return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    const merge = () => {
+      currentPiece.shape.forEach((row, r) => {
+        row.forEach((val, c) => {
+          if (val) {
+            const y = currentPiece.y + r;
+            const x = currentPiece.x + c;
+            if (y >= 0) grid[y][x] = 1;
+          }
+        });
+      });
+
+      // Clear lines
+      grid = grid.filter(row => row.some(cell => cell === 0));
+      const cleared = ROWS - grid.length;
+      setScore(s => s + cleared * 100);
+      while (grid.length < ROWS) grid.unshift(Array(COLS).fill(0));
+
+      newPiece();
+      if (collision(currentPiece.x, currentPiece.y, currentPiece.shape)) {
+        gameRunning = false;
+        setGameOver(true);
+      }
+    };
+
+    const move = (dir: string) => {
+      if (!gameRunning) return;
+      if (dir === "left" && !collision(currentPiece.x - 1, currentPiece.y, currentPiece.shape)) currentPiece.x--;
+      if (dir === "right" && !collision(currentPiece.x + 1, currentPiece.y, currentPiece.shape)) currentPiece.x++;
+      if (dir === "down") {
+        if (!collision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+          currentPiece.y++;
+        } else {
+          merge();
+        }
+      }
+      if (dir === "rotate") {
+        const rotated = currentPiece.shape[0].map((_, i) => currentPiece.shape.map(row => row[i]).reverse());
+        if (!collision(currentPiece.x, currentPiece.y, rotated)) currentPiece.shape = rotated;
+      }
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") move("left");
+      if (e.key === "ArrowRight") move("right");
+      if (e.key === "ArrowDown") move("down");
+      if (e.key === "ArrowUp") move("rotate");
+    };
+
+    const handleTouch = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      
+      if (y > canvas.height * 0.8) {
+        if (x < canvas.width / 3) move("left");
+        else if (x > canvas.width * 2/3) move("right");
+        else move("down");
+      } else {
+        move("rotate");
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    canvas.addEventListener("touchstart", handleTouch);
+
+    const gameLoop = setInterval(() => {
+      if (!gameRunning) return;
+      move("down");
+
+      // Draw
+      ctx.fillStyle = isDarkMode ? "#0f172a" : "#f8fafc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw grid
+      grid.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          if (cell) {
+            ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+            ctx.fillRect(c * BLOCK, r * BLOCK, BLOCK - 1, BLOCK - 1);
+          }
+        });
+      });
+
+      // Draw current piece
+      ctx.fillStyle = isDarkMode ? "#fbbf24" : "#f59e0b";
+      currentPiece.shape.forEach((row, r) => {
+        row.forEach((val, c) => {
+          if (val) {
+            ctx.fillRect((currentPiece.x + c) * BLOCK, (currentPiece.y + r) * BLOCK, BLOCK - 1, BLOCK - 1);
+          }
+        });
+      });
+    }, 500);
+
+    return () => {
+      clearInterval(gameLoop);
+      window.removeEventListener("keydown", handleKey);
+      canvas.removeEventListener("touchstart", handleTouch);
+    };
+  }, [isDarkMode, gameOver]);
+
   return (
     <div className="flex flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Tetris</h2>
-      <div className={`text-center p-8 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
-        Coming soon! 🎮
-      </div>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
+      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>}
+      <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        Keyboard: Arrow keys | Touch: Tap sides to move, top to rotate
+      </p>
     </div>
   );
 }
 
 // Breakout Game
 export function BreakoutGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [score, setScore] = React.useState(0);
+  const [gameOver, setGameOver] = React.useState(false);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 480;
+    canvas.height = 600;
+
+    let ballX = 240, ballY = 400, ballDX = 4, ballDY = -4;
+    let paddleX = 200;
+    const paddleW = 80, paddleH = 10;
+
+    const bricks: { x: number; y: number; status: number }[] = [];
+    for (let c = 0; c < 8; c++) {
+      for (let r = 0; r < 5; r++) {
+        bricks.push({ x: c * 60, y: r * 30 + 50, status: 1 });
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      paddleX = e.clientX - rect.left - paddleW / 2;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      paddleX = e.touches[0].clientX - rect.left - paddleW / 2;
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("touchmove", handleTouchMove);
+
+    const gameLoop = setInterval(() => {
+      ballX += ballDX;
+      ballY += ballDY;
+
+      if (ballX <= 0 || ballX >= canvas.width) ballDX *= -1;
+      if (ballY <= 0) ballDY *= -1;
+      if (ballY >= canvas.height) {
+        setGameOver(true);
+        return;
+      }
+
+      if (ballY + 10 >= canvas.height - paddleH && ballX >= paddleX && ballX <= paddleX + paddleW) {
+        ballDY *= -1;
+      }
+
+      bricks.forEach(brick => {
+        if (brick.status === 1 && ballX >= brick.x && ballX <= brick.x + 50 && ballY >= brick.y && ballY <= brick.y + 20) {
+          ballDY *= -1;
+          brick.status = 0;
+          setScore(s => s + 10);
+        }
+      });
+
+      ctx.fillStyle = isDarkMode ? "#0f172a" : "#f8fafc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+      bricks.forEach(brick => {
+        if (brick.status === 1) ctx.fillRect(brick.x, brick.y, 50, 20);
+      });
+
+      ctx.fillRect(paddleX, canvas.height - paddleH, paddleW, paddleH);
+
+      ctx.fillStyle = isDarkMode ? "#f87171" : "#ef4444";
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }, 1000 / 60);
+
+    return () => {
+      clearInterval(gameLoop);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [isDarkMode, gameOver]);
+
   return (
     <div className="flex flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Breakout</h2>
-      <div className={`text-center p-8 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
-        Coming soon! 🎮
-      </div>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
+      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>}
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Move mouse or touch to control paddle</p>
     </div>
   );
 }
