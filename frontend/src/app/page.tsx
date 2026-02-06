@@ -252,7 +252,7 @@ export default function Home() {
           style={{
             background: isDarkMode 
               ? "linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(59, 130, 246, 0.35) 100%)"
-              : "linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(240, 248, 255, 0.6) 100%)",
+              : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)",
             transition: "background 0.3s ease-out",
           }}
         />
