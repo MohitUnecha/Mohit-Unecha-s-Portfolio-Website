@@ -787,7 +787,17 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Space Invaders</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
       <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
-      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Game Over!</p>}
+      {gameOver && (
+        <>
+          <p className={`font-semibold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Game Over! Score: {score}</p>
+          <button 
+            onClick={() => { setScore(0); setGameOver(false); }}
+            className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+          >
+            Play Again
+          </button>
+        </>
+      )}
       <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right/middle to play</p>
     </div>
   );
@@ -1046,7 +1056,17 @@ export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Race Game</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
       <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
-      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Crashed! Final Score: {score}</p>}
+      {gameOver && (
+        <>
+          <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Crashed! Final Score: {score}</p>
+          <button 
+            onClick={() => { setScore(0); setGameOver(false); }}
+            className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+          >
+            Play Again
+          </button>
+        </>
+      )}
       <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right to dodge</p>
     </div>
   );
@@ -1328,12 +1348,12 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
       // Check if we hit the next checkpoint
       if (cellValue === currentSequence) {
         setCurrentSequence(currentSequence + 1);
-      }
-
-      // Check if solved: path length equals grid size and all checkpoints visited
-      if (newPath.length === 36 && currentSequence > checkpoints.length) {
-        setSolved(true);
-        setDragging(false);
+        
+        // Check if solved: all 36 cells filled and all checkpoints hit
+        if (newPath.length === 36 && currentSequence === checkpoints.length) {
+          setSolved(true);
+          setDragging(false);
+        }
       }
     }
   };
@@ -1349,6 +1369,30 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
   };
 
   const handleMouseUp = () => {
+    setDragging(false);
+  };
+
+  const handleTouchStart = (row: number, col: number, e: React.TouchEvent) => {
+    e.preventDefault();
+    handleCellInteraction(row, col);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (!dragging) return;
+    
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (element) {
+      const cellData = element.getAttribute('data-cell');
+      if (cellData) {
+        const [row, col] = cellData.split('-').map(Number);
+        handleCellInteraction(row, col);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
     setDragging(false);
   };
 
@@ -1387,7 +1431,7 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+    <div className="flex flex-col items-center gap-4" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onTouchEnd={handleTouchEnd} onTouchMove={handleTouchMove}>
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Zip</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
         Path: {path.length}/36 • Next: {currentSequence <= checkpoints.length ? currentSequence : "✓"}
@@ -1407,8 +1451,10 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
           return (
             <div
               key={`${i}-${j}`}
+              data-cell={`${i}-${j}`}
               onMouseDown={() => handleMouseDown(i, j)}
               onMouseEnter={() => handleMouseEnter(i, j)}
+              onTouchStart={(e) => handleTouchStart(i, j, e)}
               className={`w-14 h-14 rounded-lg font-bold text-lg transition-all relative cursor-pointer ${
                 inPath ? "shadow-lg" : ""
               }`}
@@ -1418,7 +1464,7 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
               }}
             >
               {isCheckpoint && (
-                <div className={`absolute inset-0 rounded-lg flex items-center justify-center ${
+                <div className={`absolute inset-0 rounded-lg flex items-center justify-center pointer-events-none ${
                   inPath ? "bg-black/30" : "bg-black/60"
                 }`}>
                   <span className="relative z-10 font-bold text-xl">{cell}</span>
@@ -1434,7 +1480,7 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
           disabled={path.length === 0}
           className={`px-6 py-2 rounded-lg font-semibold transition-all ${
             path.length === 0
-              ? isDarkMode ? "bg-slate-700 text-slate-500" : "bg-slate-300 text-slate-500"
+              ? isDarkMode ? "bg-slate-700 text-slate-500 cursor-not-allowed" : "bg-slate-300 text-slate-500 cursor-not-allowed"
               : isDarkMode ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-slate-400 text-white hover:bg-slate-500"
           }`}
         >
@@ -1453,7 +1499,7 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
         </p>
       )}
       <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-        Click & drag to draw a path<br/>Connect 1→16 in order & fill every cell
+        Click & drag (or touch & swipe) to draw<br/>Connect 1→16 in order & fill every cell
       </p>
     </div>
   );
