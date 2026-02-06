@@ -780,30 +780,30 @@ export default function Home() {
       {/* Game Selector Modal */}
       {showGameSelector && !selectedGame && (
         <div 
-          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm overflow-y-auto"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md overflow-y-auto py-8"
           onClick={() => setShowGameSelector(false)}
         >
           <div 
-            className={`relative rounded-2xl border p-8 shadow-2xl max-w-4xl w-full mx-4 ${
+            className={`relative rounded-3xl border-2 p-8 shadow-2xl max-w-6xl w-full mx-4 ${
               isDarkMode 
-                ? "border-emerald-400/30 bg-slate-900" 
-                : "border-blue-400/30 bg-white"
+                ? "border-emerald-400/40 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30" 
+                : "border-blue-400/40 bg-gradient-to-br from-white via-white to-blue-50"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setShowGameSelector(false)}
-              className={`absolute right-4 top-4 text-2xl font-bold transition hover:opacity-70 ${
-                isDarkMode ? "text-emerald-400" : "text-blue-600"
+              className={`absolute right-6 top-6 text-3xl font-bold transition-all hover:scale-110 hover:rotate-90 ${
+                isDarkMode ? "text-emerald-400 hover:text-emerald-300" : "text-blue-600 hover:text-blue-700"
               }`}
             >
               ×
             </button>
-            <h2 className={`mb-6 text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
-              Choose a Game
+            <h2 className={`mb-8 text-3xl font-bold text-center ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+              🎮 Choose Your Game
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-5">
+              {[
                 { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
                 { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
                 { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
@@ -820,16 +820,24 @@ export default function Home() {
                 <button
                   key={game.id}
                   onClick={() => setSelectedGame(game.id)}
-                  className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
+                  className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
                     isDarkMode
-                      ? "border-emerald-400/30 bg-slate-800/50 hover:bg-slate-800 hover:border-emerald-400/60"
-                      : "border-blue-400/30 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-400/60"
+                      ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
+                      : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
                   }`}
                 >
-                  <div className={`text-3xl mb-2`}>{game.name}</div>
+                  <div className={`text-4xl mb-3 transition-transform duration-300 group-hover:scale-110`}>
+                    {game.name.split(' ')[0]}
+                  </div>
+                  <div className={`font-semibold text-sm mb-1 ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
+                    {game.name.substring(game.name.indexOf(' ') + 1)}
+                  </div>
                   <div className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
                     {game.desc}
                   </div>
+                  <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                    isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
+                  }`} />
                 </button>
               ))}
             </div>
