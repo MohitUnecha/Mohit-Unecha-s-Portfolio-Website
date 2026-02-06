@@ -291,6 +291,7 @@ export default function Home() {
                 src={profile.photoUrl}
                 alt={`${profile.name} headshot`}
                 className="h-full w-full object-cover"
+                style={{ filter: "none" }}
               />
             </div>
             <h1 className={`mb-4 text-6xl font-bold tracking-tight md:text-7xl ${isDarkMode ? "" : "text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
@@ -853,6 +854,20 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
 
     const gameLoop = setInterval(() => {
       if (!gameRunning) return;
+
+      if (dx === 0 && dy === 0) {
+        ctx.fillStyle = isDarkMode ? "#0f172a" : "#f8fafc";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
+        snake.forEach(segment => {
+          ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+        });
+
+        ctx.fillStyle = isDarkMode ? "#f87171" : "#ef4444";
+        ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+        return;
+      }
 
       const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
