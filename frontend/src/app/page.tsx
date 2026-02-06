@@ -308,19 +308,19 @@ export default function Home() {
                 href={`https://${profile.linkedIn}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center rounded-full border p-2 transition-all duration-300 hover:opacity-70 ${isDarkMode ? "border-white/40" : "border-black/40"}`}
+                className={`flex items-center justify-center rounded-full border-2 p-3 transition-all duration-300 hover:scale-110 ${isDarkMode ? "border-emerald-500 bg-emerald-500/90 shadow-lg shadow-emerald-500/50" : "border-blue-500 bg-blue-500/90 shadow-lg shadow-blue-500/50"}`}
                 aria-label="LinkedIn"
               >
-                <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2)' }} />
+                <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-7 w-7" style={{ filter: 'brightness(2.5)' }} />
               </a>
               <a
                 href={`https://${profile.github}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center rounded-full border p-2 transition hover:opacity-70 ${isDarkMode ? "border-white/40" : "border-black/40"}`}
+                className={`flex items-center justify-center rounded-full border-2 p-3 transition-all duration-300 hover:scale-110 ${isDarkMode ? "border-emerald-500 bg-emerald-500/90 shadow-lg shadow-emerald-500/50" : "border-blue-500 bg-blue-500/90 shadow-lg shadow-blue-500/50"}`}
                 aria-label="GitHub"
               >
-                <img src="/Githublogo.png" alt="GitHub" className="h-7 w-7" style={{ filter: 'grayscale(1) brightness(2.8)' }} />
+                <img src="/Githublogo.png" alt="GitHub" className="h-7 w-7" style={{ filter: 'brightness(2.8)' }} />
               </a>
             </div>
             <a
