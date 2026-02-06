@@ -949,6 +949,8 @@ export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
     let obstacles: { x: number; y: number; lane: number }[] = [];
     let speed = 3;
     let roadOffset = 0;
+    let animationId: number;
+    let localScore = 0;
 
     const lanes = [50, 150, 250, 350];
 
@@ -1012,8 +1014,9 @@ export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
         // Remove passed obstacles and increase score
         if (obs.y > canvas.height) {
           obstacles.splice(i, 1);
-          setScore(s => s + 1);
-          if (score % 10 === 0) speed += 0.5;
+          localScore++;
+          setScore(localScore);
+          if (localScore % 10 === 0 && speed < 8) speed += 0.3;
         }
       });
 
@@ -1024,16 +1027,17 @@ export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
         obstacleTimer = 0;
       }
 
-      requestAnimationFrame(gameLoop);
+      animationId = requestAnimationFrame(gameLoop);
     };
 
     window.addEventListener("keydown", handleKey);
     canvas.addEventListener("touchstart", handleTouch);
-    gameLoop();
+    animationId = requestAnimationFrame(gameLoop);
 
     return () => {
       window.removeEventListener("keydown", handleKey);
       canvas.removeEventListener("touchstart", handleTouch);
+      cancelAnimationFrame(animationId);
     };
   }, [isDarkMode, gameOver]);
 
@@ -1238,21 +1242,41 @@ export function WordleGame({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
-// Slide Puzzle Game (Zip-style)
-export function SlidePuzzleGame({ isDarkMode }: { isDarkMode: boolean }) {
-  const [tiles, setTiles] = React.useState<number[]>([]);
-  const [moves, setMoves] = React.useState(0);
+// Zip Game (LinkedIn-style path connection puzzle)
+export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
+  const [grid, setGrid] = React.useState<(number | null)[][]>([]);
+  const [path, setPath] = React.useState<number[]>([]);
+  const [checkpoints, setCheckpoints] = React.useState<{ num: number; row: number; col: number }[]>([]);
   const [solved, setSolved] = React.useState(false);
+  const [dragging, setDragging] = React.useState(false);
 
   const initPuzzle = () => {
-    let arr = Array.from({ length: 16 }, (_, i) => i);
-    // Shuffle
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    setTiles(arr);
-    setMoves(0);
+    // Create 6x6 grid
+    const newGrid: (number | null)[][] = Array(6).fill(null).map(() => Array(6).fill(null));
+    const newCheckpoints = [
+      { num: 1, row: 4, col: 2 },
+      { num: 2, row: 5, col: 1 },
+      { num: 3, row: 4, col: 3 },
+      { num: 4, row: 1, col: 5 },
+      { num: 5, row: 4, col: 5 },
+      { num: 6, row: 5, col: 5 },
+      { num: 7, row: 5, col: 3 },
+      { num: 8, row: 3, col: 3 },
+      { num: 9, row: 2, col: 0 },
+      { num: 10, row: 2, col: 1 },
+      { num: 11, row: 2, col: 2 },
+      { num: 12, row: 1, col: 2 },
+      { num: 13, row: 1, col: 0 },
+      { num: 14, row: 0, col: 3 },
+      { num: 15, row: 2, col: 4 },
+      { num: 16, row: 0, col: 1 },
+    ];
+    newCheckpoints.forEach(cp => {
+      newGrid[cp.row][cp.col] = cp.num;
+    });
+    setGrid(newGrid);
+    setCheckpoints(newCheckpoints);
+    setPath([]);
     setSolved(false);
   };
 
@@ -1260,63 +1284,118 @@ export function SlidePuzzleGame({ isDarkMode }: { isDarkMode: boolean }) {
     initPuzzle();
   }, []);
 
-  const canMove = (index: number) => {
-    const emptyIndex = tiles.indexOf(0);
-    const row = Math.floor(index / 4);
-    const col = index % 4;
-    const emptyRow = Math.floor(emptyIndex / 4);
-    const emptyCol = emptyIndex % 4;
-    return (Math.abs(row - emptyRow) === 1 && col === emptyCol) || (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+  const handleCellClick = (row: number, col: number) => {
+    const cellValue = grid[row][col];
+    if (cellValue === null) return;
+
+    if (path.length === 0 && cellValue === 1) {
+      setPath([1]);
+    } else if (path.length > 0 && cellValue === path.length + 1) {
+      const newPath = [...path, cellValue];
+      setPath(newPath);
+      if (newPath.length === checkpoints.length) {
+        setSolved(true);
+      }
+    }
   };
 
-  const handleTileClick = (index: number) => {
-    if (!canMove(index) || solved) return;
-    const emptyIndex = tiles.indexOf(0);
-    const newTiles = [...tiles];
-    [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
-    setTiles(newTiles);
-    setMoves(m => m + 1);
-    
-    // Check if solved
-    const isSolved = newTiles.every((tile, i) => tile === i);
-    if (isSolved) setSolved(true);
+  const handleUndo = () => {
+    if (path.length > 0) {
+      setPath(path.slice(0, -1));
+      setSolved(false);
+    }
+  };
+
+  const isInPath = (row: number, col: number) => {
+    const cellValue = grid[row][col];
+    return cellValue !== null && path.includes(cellValue);
+  };
+
+  const isNextInSequence = (row: number, col: number) => {
+    const cellValue = grid[row][col];
+    return cellValue === path.length + 1;
+  };
+
+  const getGradientColor = (num: number) => {
+    const progress = (num - 1) / (checkpoints.length - 1);
+    if (isDarkMode) {
+      // Purple to blue gradient
+      const r = Math.round(168 - progress * 68); // 168 -> 100
+      const g = Math.round(85 - progress * 26);  // 85 -> 59
+      const b = Math.round(247 - progress * 71); // 247 -> 176
+      return `rgb(${r}, ${g}, ${b})`;
+    } else {
+      // Blue gradient
+      const r = Math.round(147 - progress * 88); // 147 -> 59
+      const g = Math.round(51 + progress * 79);  // 51 -> 130
+      const b = Math.round(234 - progress * 28); // 234 -> 246
+      return `rgb(${r}, ${g}, ${b})`;
+    }
   };
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Slide Puzzle</h2>
-      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Moves: {moves}</div>
-      <div className="grid grid-cols-4 gap-1 p-4 rounded-lg" style={{ background: isDarkMode ? "#1e293b" : "#e2e8f0" }}>
-        {tiles.map((tile, i) => (
-          <button
-            key={i}
-            onClick={() => handleTileClick(i)}
-            disabled={tile === 0}
-            className={`w-16 h-16 rounded font-bold text-xl transition-all ${
-              tile === 0
-                ? "invisible"
-                : canMove(i)
-                ? isDarkMode 
-                  ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:scale-105 cursor-pointer" 
-                  : "bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:scale-105 cursor-pointer"
-                : isDarkMode
-                ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                : "bg-slate-300 text-slate-600 cursor-not-allowed"
-            }`}
-          >
-            {tile !== 0 && tile}
-          </button>
-        ))}
+      <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Zip</h2>
+      <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+        Connect: {path.length}/{checkpoints.length}
+      </div>
+      <div className="grid grid-cols-6 gap-1 p-4 rounded-2xl" style={{ background: isDarkMode ? "#1e293b" : "#e2e8f0" }}>
+        {grid.map((row, i) => row.map((cell, j) => {
+          const isCheckpoint = cell !== null;
+          const inPath = isInPath(i, j);
+          const isNext = isNextInSequence(i, j);
+          const bgColor = inPath ? getGradientColor(cell!) : (isDarkMode ? "#334155" : "#cbd5e1");
+          
+          return (
+            <button
+              key={`${i}-${j}`}
+              onClick={() => handleCellClick(i, j)}
+              className={`w-14 h-14 rounded-lg font-bold text-lg transition-all relative ${
+                isNext ? "ring-4 ring-yellow-400 animate-pulse" : ""
+              } ${inPath ? "scale-105 shadow-lg" : ""}`}
+              style={{ 
+                background: bgColor,
+                color: inPath || isCheckpoint ? "#fff" : isDarkMode ? "#64748b" : "#94a3b8"
+              }}
+            >
+              {isCheckpoint && (
+                <div className={`absolute inset-0 rounded-lg flex items-center justify-center ${
+                  inPath ? "bg-black/40" : ""
+                }`}>
+                  <span className="relative z-10">{cell}</span>
+                </div>
+              )}
+            </button>
+          );
+        }))}
+      </div>
+      <div className="flex gap-3">
+        <button 
+          onClick={handleUndo} 
+          disabled={path.length === 0}
+          className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+            path.length === 0
+              ? isDarkMode ? "bg-slate-700 text-slate-500" : "bg-slate-300 text-slate-500"
+              : isDarkMode ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-slate-400 text-white hover:bg-slate-500"
+          }`}
+        >
+          Undo
+        </button>
+        <button 
+          onClick={initPuzzle} 
+          className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+        >
+          New Puzzle
+        </button>
       </div>
       {solved && (
         <p className={`font-bold text-xl ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
-          Solved in {moves} moves! 🎉
+          Perfect! All connected! 🎉
         </p>
       )}
-      <button onClick={initPuzzle} className={`px-4 py-2 rounded ${isDarkMode ? "bg-emerald-500" : "bg-blue-500"} text-white font-semibold`}>
-        New Puzzle
-      </button>
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrange tiles from 1-15 in order</p>
+      <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        Connect dots 1 → 16 in order<br/>Fill every cell!
+      </p>
     </div>
   );
 }
