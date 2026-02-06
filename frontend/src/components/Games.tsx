@@ -1472,7 +1472,7 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
               )}
             </div>
           );
-        })))}
+        }))}
       </div>
       <div className="flex gap-3">
         <button 
