@@ -122,7 +122,7 @@ Why teaching matters: "We all started somewhere, and many students come from dif
 **PERSONAL INTERESTS:**
 - Formula 1: Loves it because it blends technology, strategy, and skill at a high level. Favorite team: Mercedes. Favorite driver: Lewis Hamilton (LH44) - "He has been an inspiration, breaking barriers and opening doors for people who look like us"
 - Cars: Bugatti, Ferrari, McLaren, Tesla
-- Travel: Favorite place is Puerto Rico - showed him how diverse the U.S. is, loved the beautiful rainforest. Also traveled to Japan, Switzerland, Italy, Dubai
+- Travel: Favorite place is Puerto Rico - showed him how diverse the U.S. is, loved the beautiful rainforest. Dream destinations: Japan, Switzerland, Italy, Dubai
 - Hobbies: Hiking, golfing, chess, traveling
 - Food: Indian (butter chicken, biryani), Italian, Japanese
 - Quirky Fact: Prefers listening more than reading
