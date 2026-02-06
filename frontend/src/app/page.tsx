@@ -293,11 +293,11 @@ export default function Home() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <h1 className="mb-4 text-6xl font-bold tracking-tight md:text-7xl" style={{ transition: "all 0.3s ease-out" }}>
+            <h1 className={`mb-4 text-6xl font-bold tracking-tight md:text-7xl ${isDarkMode ? "" : "text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
-            <p className={`mb-8 max-w-2xl text-2xl font-light ${bodyTextClass}`} style={{ transition: "all 0.3s ease-out" }}>
+            <p className={`mb-8 max-w-2xl text-2xl font-light ${isDarkMode ? bodyTextClass : "text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
               {profile.headline}
             </p>
             <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.3s ease-out" }}>
