@@ -1384,11 +1384,12 @@ export function ZipGame({ isDarkMode }: { isDarkMode: boolean }) {
 
       // Check if we hit the next checkpoint
       if (cellValue === currentSequence) {
-        setCurrentSequence(currentSequence + 1);
+        const newSequence = currentSequence + 1;
+        setCurrentSequence(newSequence);
         
         // Check if solved: all cells filled and all checkpoints hit
         const totalCells = gridSize * gridSize;
-        if (newPath.length === totalCells && currentSequence === checkpoints.length + 1) {
+        if (newPath.length === totalCells && newSequence > checkpoints.length) {
           setSolved(true);
           setDragging(false);
         }
