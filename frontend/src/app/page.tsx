@@ -759,6 +759,15 @@ export default function Home() {
           </span>
           ?
         </p>
+        <p className="mt-2">
+          Contact: {" "}
+          <a
+            href="mailto:contact@mohitunecha.com"
+            className={`font-semibold underline decoration-dotted transition ${accentTextClass} hover:opacity-70`}
+          >
+            contact@mohitunecha.com
+          </a>
+        </p>
       </footer>
 
       {isHeaderVisible && (
