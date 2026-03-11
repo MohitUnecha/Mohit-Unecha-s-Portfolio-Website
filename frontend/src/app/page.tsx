@@ -24,6 +24,19 @@ export default function Home() {
   const [isOverInteractive, setIsOverInteractive] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [roleText, setRoleText] = useState("");
+  const [roleIndex, setRoleIndex] = useState(0);
+  const [rolePhase, setRolePhase] = useState<"typing" | "pausing" | "erasing">("typing");
+
+  const roles = [
+    "Software Engineer",
+    "Product Manager",
+    "F1 Enthusiast",
+    "Builder & Creator",
+    "CS + Econ @ Rutgers",
+  ];
+
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
 
@@ -37,6 +50,40 @@ export default function Home() {
       }
     };
     typeWriter();
+  }, []);
+
+  // Role rotator typewriter effect
+  useEffect(() => {
+    const currentRole = roles[roleIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (rolePhase === "typing") {
+      if (roleText.length < currentRole.length) {
+        timeout = setTimeout(() => setRoleText(currentRole.slice(0, roleText.length + 1)), 60);
+      } else {
+        timeout = setTimeout(() => setRolePhase("pausing"), 1800);
+      }
+    } else if (rolePhase === "pausing") {
+      timeout = setTimeout(() => setRolePhase("erasing"), 400);
+    } else if (rolePhase === "erasing") {
+      if (roleText.length > 0) {
+        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 35);
+      } else {
+        setRoleIndex((prev) => (prev + 1) % roles.length);
+        setRolePhase("typing");
+      }
+    }
+    return () => clearTimeout(timeout);
+  }, [roleText, rolePhase, roleIndex]);
+
+  // Visitor counter
+  useEffect(() => {
+    fetch("https://api.counterapi.dev/v1/mohitunecha-portfolio/visits/up")
+      .then((r) => r.json())
+      .then((data) => {
+        if (typeof data?.count === "number") setVisitorCount(data.count);
+      })
+      .catch(() => {});
   }, []);
 
   // Auto-refresh reCAPTCHA token every 12 minutes
@@ -301,8 +348,13 @@ export default function Home() {
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
-            <p className={`mb-8 max-w-2xl text-2xl font-light ${isDarkMode ? bodyTextClass : "text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
-              {profile.headline}
+            {/* Role rotator */}
+            <p
+              className={`mb-8 max-w-2xl text-2xl font-light min-h-[2rem] ${isDarkMode ? bodyTextClass : "text-white"}`}
+              style={{ transition: "all 0.3s ease-out" }}
+            >
+              <span className={accentTextClass}>{roleText}</span>
+              <span className="animate-pulse opacity-70">|</span>
             </p>
             <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.3s ease-out" }}>
               <a
@@ -957,6 +1009,11 @@ export default function Home() {
           </span>
           ?
         </p>
+        {visitorCount !== null && (
+          <p className={`mt-2 text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+            <span className={`font-semibold ${accentTextClass}`}>{visitorCount.toLocaleString()}</span> visitors and counting
+          </p>
+        )}
         <p className="mt-2">
           Contact: {" "}
           <a
