@@ -9,6 +9,7 @@ export type ExperienceItem = {
 export type ProjectItem = {
   name: string;
   summary: string;
+  technicalDetails: string[];
   stack: string[];
   impact: string[];
   link?: string;
@@ -153,98 +154,133 @@ export const profile = {
 ] as ExperienceItem[],
   projects: [
     {
-      name: "Scarlet Agent",
-      summary:
-        "AI-driven personal assistant for students that integrates Canvas LMS, Google Drive, and multi-modal communication (text & voice) to streamline academic life.",
-      stack: ["Python", "Streamlit", "Gemini API", "ElevenLabs", "Snowflake", "Node.js", "HTML/CSS"],
-      impact: [
-        "Successfully scraped Canvas data when API access failed",
-        "Real-time assignment deadline pulling and resource discovery",
-        "Multi-modal interface enabling text and voice interaction",
-        "HackRU Fall 2025 submission demonstrating working multi-agent AI ecosystem",
-      ],
-    },
-    {
-      name: "AI Stock Predictor",
-      summary:
-        "Barclays Data Hackathon winner: Stock market prediction system fusing market data, financial news, and AI sentiment analysis into actionable trading signals.",
-      stack: ["Python", "Machine Learning", "NLP", "Sentiment Analysis", "Finance APIs"],
-      link: "https://github.com/CANTSOAR/bitsdatathon",
-      impact: [
-        "1st place winner at Rutgers Data Hackathon sponsored by Barclays",
-        "Custom Retrieval-Augmented Transformer (RAT) model for real-time predictions",
-        "Generated buy/sell signals by analyzing news sentiment and market trends",
-        "Showcased creativity and teamwork under tight competition deadlines",
-      ],
-    },
-    {
-      name: "Personal Creative Platform",
-      summary:
-        "Minimalist personal website (mohitwrites.xyz) showcasing writing, projects, and creative storytelling with multimedia integration.",
-      stack: ["HTML5", "CSS3", "JavaScript", "GitHub Pages"],
-      link: "https://github.com/MohitUnecha/tech_portfolio_site",
-      impact: [
-        "Clean, modern design for sharing poetry, essays, and podcasts",
-        "Multimedia-rich storytelling experience with audio and image integration",
-        "Demonstrates web development skills and design sensibility",
-        "Active creative outlet blending technical skills with artistic expression",
-      ],
-    },
-    {
-      name: "Personal Portfolio Website",
-      summary:
-        "Full-stack portfolio website showcasing projects, experience, and AI-powered chatbot assistant. Built with Next.js frontend deployed on GitHub Pages and Express backend on Vercel.",
-      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Express.js", "Node.js", "Groq API", "Nodemailer", "reCAPTCHA"],
-      link: "https://github.com/MohitUnecha/Mohit-Unecha-s-Portfolio-Website",
-      impact: [
-        "Deployed full-stack application with GitHub Pages (frontend) and Vercel (backend)",
-        "Integrated Jarvis AI chatbot powered by Groq API with Llama 3.3 model for interactive career guidance",
-        "Implemented contact form with email notifications, rate limiting, and reCAPTCHA v3 verification",
-        "Responsive design with dark mode support and smooth animations using Tailwind CSS",
-        "Auto-scrolling chat with clickable email and social media links",
-      ],
-    },
-    {
       name: "Every Lap — F1 Analytics",
       summary:
-        "Full-stack Formula 1 intelligence platform combining 25 years of race data (2000–2026), ensemble ML predictions (XGBoost + LightGBM + CatBoost), interactive 60 FPS race replays, and deep telemetry analytics in one polished interface.",
+        "A Formula 1 analytics platform that predicts race outcomes, replays races on an interactive track map, and lets you explore 25 years of telemetry data.",
+      technicalDetails: [
+        "Ensemble ML models (XGBoost + LightGBM + CatBoost) achieve 85% podium hit rate via walk-forward validation",
+        "40+ engineered features across driver form, team performance, track history, practice pace, qualifying, strategy, weather, and context",
+        "SHAP-based model explainability with human-readable explanations for every prediction",
+        "DuckDB + Parquet columnar storage for high-performance telemetry queries",
+        "FastAPI REST backend serving data to Next.js frontend with React Query and Zustand state management",
+      ],
       stack: ["Python", "FastAPI", "FastF1", "XGBoost", "LightGBM", "CatBoost", "PostgreSQL", "DuckDB", "Redis", "Next.js", "TypeScript", "Canvas API"],
       link: "https://github.com/MohitUnecha/formula1",
       impact: [
-        "Ensemble ML models achieve 85% podium hit rate and ±1.8 position MAE via walk-forward validation on 2023–2024 seasons",
-        "Built interactive 60 FPS Canvas-based race replay with variable speed control, tyre compounds, pit events, and safety car visualization",
-        "Engineered 40+ features across 8 categories — driver form, team performance, track-specific history, practice pace, qualifying gaps, strategy, weather, and context",
-        "SHAP-based model explainability showing top contributing features, contribution direction, and human-readable explanations for every prediction",
-        "Scalable architecture with PostgreSQL for relational data and DuckDB + Parquet for high-performance telemetry storage",
-        "REST APIs with FastAPI serving race data, predictions, and replay frames to Next.js/React frontend with React Query and Zustand",
+        "Interactive 60 FPS Canvas-based race replay with tyre compounds, pit events, and safety car visualization",
+        "Predicts win, podium, and top-10 probabilities using historical telemetry and weekend data",
+        "Covers 2000–2026 F1 seasons with full data ingestion pipeline",
       ],
     },
     {
       name: "Basement at 6:17",
       summary:
-        "Interactive murder mystery web app with a host control panel for running in-person game nights. Features token-based player login, real-time clue reveals, detective vote weighting, and optional Twilio phone call support for 13+ players.",
+        "A web app for hosting in-person murder mystery game nights. The host gets a control panel to reveal clues, manage votes, and call players — while 13+ players join from their phones.",
+      technicalDetails: [
+        "Token-based authentication with separate host and player PINs supporting 13+ concurrent sessions",
+        "Host-only admin APIs for clue reveals, vote management, tally computation, and round reset",
+        "Twilio SDK integration for phone call notifications with graceful fallback to in-app alerts",
+        "Deployed on Vercel with serverless backend functions and GitHub Actions CI/CD",
+        "Detective vote weighting system for balanced game mechanics",
+      ],
       stack: ["React", "Vite", "Node.js", "Express", "Vercel", "Twilio", "JavaScript", "CSS"],
       link: "https://github.com/MohitUnecha/basement-murder-mystery",
       impact: [
-        "Built full-stack game engine with host-only admin APIs for clue reveals, vote management, tally, and round reset",
-        "Designed token-based authentication system with separate host and player PINs supporting 13+ concurrent players",
-        "Integrated Twilio SDK for phone call notifications when meetings start, with graceful fallback to in-app alerts",
-        "Deployed on Vercel with serverless backend functions and GitHub Actions CI/CD pipeline",
-        "One-vote-per-voter system with detective vote weighting for balanced game mechanics",
+        "Supports 13+ concurrent players with real-time clue reveals and voting",
+        "Host control panel with full game state management",
+        "Optional Twilio phone calls when meetings start",
       ],
     },
     {
       name: "SignalForge",
       summary:
-        "Datathon-winning AI failure intelligence studio that verifies company failures, benchmarks survivor peers, runs digital twin counterfactual simulations, and generates polished analyst reports with multi-LLM reasoning.",
+        "A datathon-winning app that checks if a company actually failed, compares it to survivors, simulates what-if scenarios, and writes a polished analyst report — all powered by AI.",
+      technicalDetails: [
+        "End-to-end pipeline: failure verification gate → survivor cohort benchmarking → digital twin risk simulation → NLP forensics",
+        "Negation-aware distress parsing with theme-level severity scoring and evidence extraction",
+        "Multi-LLM provider support (Groq + IBM watsonx.ai) with runtime switching and automatic failover",
+        "Trained local logistic classifier on distress scenarios for offline reasoning",
+        "JSON + Markdown export for judge-ready deliverables",
+      ],
       stack: ["Python", "Streamlit", "Groq", "IBM watsonx.ai", "Tavily", "NLP", "Scikit-learn", "SHAP"],
       link: "https://github.com/Hitayu12/Datathon_S26",
       impact: [
-        "Built end-to-end pipeline: failure verification gate, survivor cohort benchmarking, digital twin risk simulation, and NLP forensics layer",
-        "Negation-aware distress parsing with theme-level severity scoring, evidence extraction, and distress intensity/confidence scoring",
-        "Multi-LLM provider support (Groq + IBM watsonx.ai) with runtime switching and automatic failover",
-        "Interactive Scenario Lab, Ask Report Q&A, hover glossary/tooltips, and JSON + Markdown export for judge-ready deliverables",
-        "Trained local analyst model (logistic classifier) on distress scenarios for offline reasoning capability",
+        "Datathon winner — built in 48 hours",
+        "Digital twin counterfactual simulation for failure analysis",
+        "Interactive Scenario Lab and Ask Report Q&A for judges",
+      ],
+    },
+    {
+      name: "Scarlet Agent",
+      summary:
+        "An AI assistant for college students that pulls assignments from Canvas, finds files in Google Drive, and talks to you via text or voice — all in one dashboard.",
+      technicalDetails: [
+        "Multi-agent AI ecosystem orchestrating Canvas LMS scraping, Google Drive search, and conversational AI",
+        "ElevenLabs voice synthesis for natural text-to-speech interaction",
+        "Gemini API for intelligent reasoning and context-aware responses",
+        "Snowflake integration for structured data queries",
+        "Built as HackRU Fall 2025 submission with working prototype",
+      ],
+      stack: ["Python", "Streamlit", "Gemini API", "ElevenLabs", "Snowflake", "Node.js", "HTML/CSS"],
+      impact: [
+        "Real-time assignment deadlines and resource discovery from Canvas",
+        "Multi-modal interface with text and voice interaction",
+        "HackRU Fall 2025 submission with working multi-agent system",
+      ],
+    },
+    {
+      name: "AI Stock Predictor",
+      summary:
+        "1st place hackathon project that predicts stock market moves by combining real-time market data with AI-powered news sentiment analysis.",
+      technicalDetails: [
+        "Custom Retrieval-Augmented Transformer (RAT) model architecture for context-aware predictions",
+        "Real-time market data ingestion from financial APIs with streaming pipeline",
+        "NLP sentiment analysis on financial news for signal generation",
+        "Buy/sell signal generation by fusing technical indicators with sentiment scores",
+        "Built and deployed functional prototype within 48 hours under competition pressure",
+      ],
+      stack: ["Python", "Machine Learning", "NLP", "Sentiment Analysis", "Finance APIs"],
+      link: "https://github.com/CANTSOAR/bitsdatathon",
+      impact: [
+        "1st place at Rutgers Data Hackathon sponsored by Barclays",
+        "Generates actionable buy/sell signals from news sentiment and market trends",
+        "Demonstrated rapid prototyping and teamwork under pressure",
+      ],
+    },
+    {
+      name: "Personal Creative Platform",
+      summary:
+        "A minimalist website for sharing writing, projects, poetry, and podcasts with a clean multimedia experience.",
+      technicalDetails: [
+        "Static site architecture with GitHub Pages deployment",
+        "Responsive design with custom CSS animations",
+        "Audio and image integration for multimedia storytelling",
+      ],
+      stack: ["HTML5", "CSS3", "JavaScript", "GitHub Pages"],
+      link: "https://github.com/MohitUnecha/tech_portfolio_site",
+      impact: [
+        "Clean design for sharing poetry, essays, and podcasts",
+        "Multimedia-rich storytelling with audio and images",
+        "Active creative outlet blending tech and art",
+      ],
+    },
+    {
+      name: "Personal Portfolio Website",
+      summary:
+        "This website! A full-stack portfolio with an AI chatbot assistant (Jarvis), contact form, dark mode, and mini games hidden in the footer.",
+      technicalDetails: [
+        "Next.js frontend with TypeScript and Tailwind CSS deployed on GitHub Pages",
+        "Express.js backend on Vercel with Groq API (Llama 3.3) powering Jarvis chatbot",
+        "Nodemailer contact form with rate limiting and reCAPTCHA v3 verification",
+        "13 playable mini games (Pong, Tetris, Flappy Bird, etc.) built with Canvas API",
+        "Vercel Analytics for page view tracking",
+      ],
+      stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Express.js", "Node.js", "Groq API", "Nodemailer", "reCAPTCHA"],
+      link: "https://github.com/MohitUnecha/Mohit-Unecha-s-Portfolio-Website",
+      impact: [
+        "AI chatbot for interactive career guidance",
+        "Contact form with email notifications and spam protection",
+        "Responsive dark/light mode with smooth animations",
       ],
     },
   ] as ProjectItem[],

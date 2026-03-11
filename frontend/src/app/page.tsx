@@ -23,6 +23,7 @@ export default function Home() {
   const [isClickingCursor, setIsClickingCursor] = useState(false);
   const [isOverInteractive, setIsOverInteractive] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
 
@@ -391,30 +392,83 @@ export default function Home() {
           <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
             Experience
           </h2>
-          <div className="mx-auto max-w-4xl space-y-16">
-            {profile.experience.map((item) => (
-              <article key={`${item.company}-${item.role}`} className="space-y-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <div>
-                    <h3 className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
-                      {item.role}
-                    </h3>
-                    <p className={`text-xl ${bodyTextClass}`}>{item.company}</p>
-                    <p className={`text-base ${sectionLabelClass}`}>{item.location}</p>
+          <div className="relative mx-auto max-w-5xl">
+            {/* Center timeline line */}
+            <div className={`absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 hidden md:block ${isDarkMode ? "bg-white/15" : "bg-slate-300"}`} />
+            
+            {profile.experience.map((item, index) => {
+              const isLeft = index % 2 === 0;
+              return (
+                <div key={`${item.company}-${item.role}`} className="relative mb-12 last:mb-0">
+                  {/* Timeline dot - desktop */}
+                  <div className={`absolute left-1/2 top-6 z-10 hidden h-4 w-4 -translate-x-1/2 rounded-full border-2 md:block ${
+                    isDarkMode ? "border-emerald-400 bg-slate-950" : "border-blue-500 bg-slate-50"
+                  }`} />
+                  
+                  {/* Mobile: stacked layout */}
+                  <div className="md:hidden">
+                    <article className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}>
+                      <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
+                        {item.timeline}
+                      </p>
+                      <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                        {item.role}
+                      </h3>
+                      <p className={`text-base ${bodyTextClass}`}>{item.company}</p>
+                      <p className={`text-sm ${sectionLabelClass}`}>{item.location}</p>
+                      <ul className={`mt-3 ml-5 space-y-1.5 ${bodyTextClass}`}>
+                        {item.highlights.map((h) => (
+                          <li key={h} className="list-disc text-sm leading-relaxed">{h}</li>
+                        ))}
+                      </ul>
+                    </article>
                   </div>
-                  <p className={`text-sm font-medium uppercase tracking-wider ${accentTextClass}`}>
-                    {item.timeline}
-                  </p>
+
+                  {/* Desktop: alternating left/right */}
+                  <div className={`hidden md:grid md:grid-cols-2 md:gap-8`}>
+                    {isLeft ? (
+                      <>
+                        <article className={`rounded-2xl border p-6 transition text-right ${cardClass} ${cardHoverClass}`}>
+                          <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
+                            {item.timeline}
+                          </p>
+                          <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                            {item.role}
+                          </h3>
+                          <p className={`text-base ${bodyTextClass}`}>{item.company}</p>
+                          <p className={`text-sm ${sectionLabelClass}`}>{item.location}</p>
+                          <ul className={`mt-3 space-y-1.5 ${bodyTextClass}`}>
+                            {item.highlights.map((h) => (
+                              <li key={h} className="text-sm leading-relaxed">{h}</li>
+                            ))}
+                          </ul>
+                        </article>
+                        <div />
+                      </>
+                    ) : (
+                      <>
+                        <div />
+                        <article className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}>
+                          <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
+                            {item.timeline}
+                          </p>
+                          <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                            {item.role}
+                          </h3>
+                          <p className={`text-base ${bodyTextClass}`}>{item.company}</p>
+                          <p className={`text-sm ${sectionLabelClass}`}>{item.location}</p>
+                          <ul className={`mt-3 ml-5 space-y-1.5 ${bodyTextClass}`}>
+                            {item.highlights.map((h) => (
+                              <li key={h} className="list-disc text-sm leading-relaxed">{h}</li>
+                            ))}
+                          </ul>
+                        </article>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <ul className={`ml-6 space-y-2 ${bodyTextClass}`}>
-                  {item.highlights.map((highlight) => (
-                    <li key={highlight} className="list-disc leading-relaxed">
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -427,10 +481,12 @@ export default function Home() {
             Projects
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {profile.projects.map((project) => (
+            {profile.projects.map((project) => {
+              const isExpanded = expandedProject === project.name;
+              return (
               <article
                 key={project.name}
-                className={`group interactive rounded-2xl border p-6 transition duration-300 ${cardClass} ${cardHoverClass}`}
+                className={`group interactive rounded-2xl border p-6 transition duration-300 flex flex-col ${cardClass} ${cardHoverClass}`}
                 style={{
                   boxShadow: 'none',
                   cursor: 'pointer'
@@ -445,7 +501,7 @@ export default function Home() {
                   {project.summary}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {project.stack.map((tech) => (
+                  {project.stack.slice(0, 5).map((tech) => (
                     <span
                       key={tech}
                       className={`rounded-full px-3 py-1 text-xs ${
@@ -455,22 +511,91 @@ export default function Home() {
                       {tech}
                     </span>
                   ))}
+                  {project.stack.length > 5 && (
+                    <span className={`rounded-full px-3 py-1 text-xs ${isDarkMode ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-500"}`}>
+                      +{project.stack.length - 5}
+                    </span>
+                  )}
                 </div>
-                {project.link && (
+
+                {/* Expandable technical details */}
+                <div
+                  className="overflow-hidden transition-all duration-300"
+                  style={{
+                    maxHeight: isExpanded ? '600px' : '0px',
+                    opacity: isExpanded ? 1 : 0,
+                  }}
+                >
+                  <div className="mt-4 space-y-3">
+                    {isExpanded && project.stack.length > 5 && (
+                      <div className="flex flex-wrap gap-2">
+                        {project.stack.slice(5).map((tech) => (
+                          <span
+                            key={tech}
+                            className={`rounded-full px-3 py-1 text-xs ${
+                              isDarkMode ? "bg-white/10 text-slate-300" : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div>
+                      <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${accentTextClass}`}>Technical Details</p>
+                      <ul className={`space-y-1.5 ${bodyTextClass}`}>
+                        {project.technicalDetails.map((detail) => (
+                          <li key={detail} className="flex items-start gap-2 text-xs leading-relaxed">
+                            <span className={`mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                            {detail}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-4 flex items-center gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedProject(isExpanded ? null : project.name);
+                    }}
+                    className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                      isDarkMode
+                        ? "border-white/10 hover:border-emerald-400/30 hover:bg-white/5 text-slate-300"
+                        : "border-slate-200 hover:border-blue-400/30 hover:bg-blue-50 text-slate-600"
+                    }`}
+                  >
+                    {isExpanded ? "Less Info" : "More Info"}
+                    <svg
+                      className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {project.link && (
                   <a
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`mt-4 inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition ${accentBorderHoverClass} ${accentBgHoverClass} ${buttonClass}`}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition ${accentBorderHoverClass} ${accentBgHoverClass} ${buttonClass}`}
                   >
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                     {project.linkLabel || "View Repository"}
                   </a>
-                )}
+                  )}
+                </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         </section>
 
