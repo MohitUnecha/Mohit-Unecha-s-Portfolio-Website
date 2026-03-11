@@ -205,19 +205,46 @@ export const profile = {
       ],
     },
     {
-      name: "Everything F1",
+      name: "Every Lap — F1 Analytics",
       summary:
-        "Full-stack Formula 1 analytics platform combining machine learning predictions with interactive race visualization. Predicts race outcomes using telemetry data and replays races on an interactive track map with lap-by-lap analysis.",
-      stack: ["Python", "FastF1", "LightGBM", "XGBoost", "PostgreSQL", "FastAPI", "Next.js", "React", "WebGL", "Pandas", "NumPy", "Scikit-learn"],
-      link: "https://github.com/MohitUnecha/Everything-F1",
-      linkLabel: "Incoming",
+        "Full-stack Formula 1 intelligence platform combining 25 years of race data (2000–2026), ensemble ML predictions (XGBoost + LightGBM + CatBoost), interactive 60 FPS race replays, and deep telemetry analytics in one polished interface.",
+      stack: ["Python", "FastAPI", "FastF1", "XGBoost", "LightGBM", "CatBoost", "PostgreSQL", "DuckDB", "Redis", "Next.js", "TypeScript", "Canvas API"],
+      link: "https://github.com/MohitUnecha/formula1",
       impact: [
-        "Developed ML models predicting F1 race outcomes including win, podium, and top-10 probabilities using historical telemetry and weekend data",
-        "Built interactive race replay system allowing users to scrub through races, visualize car positions, tyre strategies, pit stops, and safety cars on track map",
-        "Integrated FastF1 library to ingest official F1 timing data, telemetry (speed, throttle, brake, gears), and race control messages",
-        "Created explainable predictions showing pace comparisons, tyre degradation analysis, strategy impacts, and overtaking difficulty metrics",
-        "Designed scalable architecture with PostgreSQL for structured data and Parquet columnar storage for large telemetry time series",
-        "Built REST APIs with FastAPI serving race data, predictions, and replay frames to Next.js/React frontend",
+        "Ensemble ML models achieve 85% podium hit rate and ±1.8 position MAE via walk-forward validation on 2023–2024 seasons",
+        "Built interactive 60 FPS Canvas-based race replay with variable speed control, tyre compounds, pit events, and safety car visualization",
+        "Engineered 40+ features across 8 categories — driver form, team performance, track-specific history, practice pace, qualifying gaps, strategy, weather, and context",
+        "SHAP-based model explainability showing top contributing features, contribution direction, and human-readable explanations for every prediction",
+        "Scalable architecture with PostgreSQL for relational data and DuckDB + Parquet for high-performance telemetry storage",
+        "REST APIs with FastAPI serving race data, predictions, and replay frames to Next.js/React frontend with React Query and Zustand",
+      ],
+    },
+    {
+      name: "Basement at 6:17",
+      summary:
+        "Interactive murder mystery web app with a host control panel for running in-person game nights. Features token-based player login, real-time clue reveals, detective vote weighting, and optional Twilio phone call support for 13+ players.",
+      stack: ["React", "Vite", "Node.js", "Express", "Vercel", "Twilio", "JavaScript", "CSS"],
+      link: "https://github.com/MohitUnecha/basement-murder-mystery",
+      impact: [
+        "Built full-stack game engine with host-only admin APIs for clue reveals, vote management, tally, and round reset",
+        "Designed token-based authentication system with separate host and player PINs supporting 13+ concurrent players",
+        "Integrated Twilio SDK for phone call notifications when meetings start, with graceful fallback to in-app alerts",
+        "Deployed on Vercel with serverless backend functions and GitHub Actions CI/CD pipeline",
+        "One-vote-per-voter system with detective vote weighting for balanced game mechanics",
+      ],
+    },
+    {
+      name: "SignalForge",
+      summary:
+        "Datathon-winning AI failure intelligence studio that verifies company failures, benchmarks survivor peers, runs digital twin counterfactual simulations, and generates polished analyst reports with multi-LLM reasoning.",
+      stack: ["Python", "Streamlit", "Groq", "IBM watsonx.ai", "Tavily", "NLP", "Scikit-learn", "SHAP"],
+      link: "https://github.com/Hitayu12/Datathon_S26",
+      impact: [
+        "Built end-to-end pipeline: failure verification gate, survivor cohort benchmarking, digital twin risk simulation, and NLP forensics layer",
+        "Negation-aware distress parsing with theme-level severity scoring, evidence extraction, and distress intensity/confidence scoring",
+        "Multi-LLM provider support (Groq + IBM watsonx.ai) with runtime switching and automatic failover",
+        "Interactive Scenario Lab, Ask Report Q&A, hover glossary/tooltips, and JSON + Markdown export for judge-ready deliverables",
+        "Trained local analyst model (logistic classifier) on distress scenarios for offline reasoning capability",
       ],
     },
   ] as ProjectItem[],
@@ -255,4 +282,68 @@ export const profile = {
     "Goldman Sachs Engineering Possibilities Summit – Selected from 10,000+ applicants",
     "BNY Mellon Freshman Jumpstart Program – 2025",
   ],
+  pmSpecSheet: {
+    vision: "I build products at the intersection of engineering and strategy — translating user pain into shipped solutions that move metrics. My approach combines hands-on technical execution with rigorous discovery, data-driven prioritization, and cross-functional alignment.",
+    pillars: [
+      {
+        title: "Discovery & Research",
+        items: [
+          "User interviews, survey design, and behavioral analytics",
+          "Competitive landscape mapping and market sizing",
+          "Jobs-to-be-done framework for opportunity identification",
+          "Hypothesis-driven experimentation and A/B testing",
+        ],
+      },
+      {
+        title: "Strategy & Prioritization",
+        items: [
+          "RICE / ICE scoring for feature prioritization",
+          "OKR definition and roadmap planning",
+          "Go-to-market strategy and launch planning",
+          "Stakeholder alignment through structured decision frameworks",
+        ],
+      },
+      {
+        title: "Execution & Delivery",
+        items: [
+          "Writing PRDs, user stories, and acceptance criteria",
+          "Sprint planning, backlog grooming, and agile ceremonies",
+          "Cross-functional collaboration with design & engineering",
+          "Release management and feature rollout strategies",
+        ],
+      },
+      {
+        title: "Measurement & Iteration",
+        items: [
+          "KPI definition and dashboard design",
+          "Funnel analysis and conversion optimization",
+          "Post-launch retrospectives and iteration cycles",
+          "Data storytelling for executive stakeholder updates",
+        ],
+      },
+    ],
+    caseStudies: [
+      {
+        product: "Every Lap — F1 Analytics",
+        role: "Solo Builder & PM",
+        problem: "F1 fans lacked a unified platform to explore historical race data, predictions, and telemetry in one place.",
+        approach: "Defined user personas (casual fans vs. data analysts), scoped MVP features via impact/effort matrix, built ML pipeline and interactive replay system.",
+        outcome: "85% podium prediction accuracy, 40+ engineered features, full-stack platform with real-time race replay at 60 FPS.",
+      },
+      {
+        product: "SignalForge — Failure Intelligence",
+        role: "Co-builder & Technical PM",
+        problem: "Datathon judges needed a tool to verify company failures and understand root causes through data, not just narratives.",
+        approach: "Rapid prototyping with Streamlit, multi-LLM reasoning for robustness, designed judge-facing UX with export capabilities.",
+        outcome: "Datathon winner. Delivered failure verification, digital twin simulation, NLP forensics, and polished report export in 48 hours.",
+      },
+      {
+        product: "Basement at 6:17 — Murder Mystery",
+        role: "Solo Builder & Game Designer",
+        problem: "Running in-person murder mystery games required manual coordination for 13+ players with no real-time host dashboard.",
+        approach: "Designed token-based auth for host/player separation, built real-time clue reveal system, integrated Twilio for phone notifications.",
+        outcome: "Deployed game engine supporting 13+ concurrent players with host admin panel, vote weighting, and round reset on Vercel.",
+      },
+    ],
+  },
 };

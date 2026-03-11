@@ -231,6 +231,9 @@ export default function Home() {
             <a className={`transition ${accentHoverTextClass}`} href="#projects">
               Projects
             </a>
+            <a className={`transition ${accentHoverTextClass}`} href="#pm-spec">
+              PM Spec
+            </a>
             <a className={`transition ${accentHoverTextClass}`} href="#contact">
               Contact
             </a>
@@ -565,6 +568,80 @@ export default function Home() {
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PM Spec Sheet */}
+        <section id="pm-spec" className="py-24" style={{
+          opacity: visibleSections.has('pm-spec') ? 1 : 0,
+          transform: visibleSections.has('pm-spec') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <h2 className={`mb-6 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
+            Product Manager Spec Sheet
+          </h2>
+          <p className={`mx-auto mb-16 max-w-3xl text-center text-lg leading-relaxed ${bodyTextClass}`}>
+            {profile.pmSpecSheet.vision}
+          </p>
+
+          {/* Pillars */}
+          <div className="mx-auto max-w-5xl grid gap-6 md:grid-cols-2">
+            {profile.pmSpecSheet.pillars.map((pillar) => (
+              <div
+                key={pillar.title}
+                className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
+              >
+                <h3 className={`mb-4 text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                  {pillar.title}
+                </h3>
+                <ul className={`space-y-2 ${bodyTextClass}`}>
+                  {pillar.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm leading-relaxed">
+                      <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Case Studies */}
+          <div className="mx-auto mt-16 max-w-5xl">
+            <h3 className={`mb-8 text-center text-xs font-semibold uppercase tracking-wider ${accentTextClass}`}>
+              Case Studies
+            </h3>
+            <div className="space-y-8">
+              {profile.pmSpecSheet.caseStudies.map((cs) => (
+                <div
+                  key={cs.product}
+                  className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+                    <h4 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                      {cs.product}
+                    </h4>
+                    <span className={`text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
+                      {cs.role}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <span className={`text-xs font-semibold uppercase tracking-wider ${sectionLabelClass}`}>Problem</span>
+                      <p className={`mt-1 text-sm leading-relaxed ${bodyTextClass}`}>{cs.problem}</p>
+                    </div>
+                    <div>
+                      <span className={`text-xs font-semibold uppercase tracking-wider ${sectionLabelClass}`}>Approach</span>
+                      <p className={`mt-1 text-sm leading-relaxed ${bodyTextClass}`}>{cs.approach}</p>
+                    </div>
+                    <div>
+                      <span className={`text-xs font-semibold uppercase tracking-wider ${sectionLabelClass}`}>Outcome</span>
+                      <p className={`mt-1 text-sm leading-relaxed ${accentTextClass} font-medium`}>{cs.outcome}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
