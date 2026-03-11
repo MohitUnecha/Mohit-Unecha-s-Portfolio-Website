@@ -2,9 +2,11 @@
 
 import ChatbotPanel from "@/components/ChatbotPanel";
 import { profile } from "@/lib/profile";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import React from "react";
 import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame, RaceGame, WhackAMoleGame, WordleGame, ZipGame } from "@/components/Games";
+
+const KONAMI_CODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
@@ -28,6 +30,11 @@ export default function Home() {
   const [roleText, setRoleText] = useState("");
   const [roleIndex, setRoleIndex] = useState(0);
   const [rolePhase, setRolePhase] = useState<"typing" | "pausing" | "erasing">("typing");
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [tiltCard, setTiltCard] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [githubContribs, setGithubContribs] = useState<{ date: string; level: number; count: number }[]>([]);
+  const konamiRef = useRef(0);
 
   const roles = [
     "Software Engineer",
@@ -36,6 +43,13 @@ export default function Home() {
     "Builder & Creator",
     "CS + Econ @ Rutgers",
   ];
+
+  const handleCardTilt = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -16;
+    setTiltCard({ id, x, y });
+  };
 
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
   const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
@@ -86,6 +100,34 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
+  // Konami code easter egg
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === KONAMI_CODE[konamiRef.current]) {
+        konamiRef.current += 1;
+        if (konamiRef.current === KONAMI_CODE.length) {
+          setShowEasterEgg(true);
+          konamiRef.current = 0;
+        }
+      } else {
+        konamiRef.current = e.key === KONAMI_CODE[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // GitHub contributions heatmap
+  useEffect(() => {
+    fetch('https://github-contributions-api.jogruber.de/v4/MohitUnecha?y=last')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data?.contributions)) setGithubContribs(data.contributions);
+      })
+      .catch(() => {});
+  }, []);
+
   // Auto-refresh reCAPTCHA token every 12 minutes
   useEffect(() => {
     const refreshRecaptchaToken = () => {
@@ -109,6 +151,10 @@ export default function Home() {
       const scrollY = window.scrollY;
       const progress = Math.min(scrollY / heroHeight, 1);
       setZoomProgress(progress);
+
+      // Scroll progress bar
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) setScrollProgress(Math.round((window.scrollY / docHeight) * 100));
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -199,6 +245,9 @@ export default function Home() {
     ? "hover:border-emerald-400/30 hover:bg-white/10"
     : "hover:border-blue-500/40 hover:bg-blue-50";
   const accentTextClass = isDarkMode ? "text-emerald-300" : "text-blue-700";
+  const roleColorClass = isDarkMode
+    ? "bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent"
+    : "bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent";
   const accentHoverTextClass = isDarkMode ? "hover:text-emerald-300" : "hover:text-blue-700";
   const accentBorderHoverClass = isDarkMode ? "hover:border-emerald-400/50" : "hover:border-blue-500/50";
   const accentBgHoverClass = isDarkMode ? "hover:bg-emerald-400/10" : "hover:bg-blue-50";
@@ -210,6 +259,14 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen ${pageClass}`}>
+      {/* Scroll progress bar */}
+      <div className="pointer-events-none fixed top-0 left-0 right-0 z-[70] h-[3px]">
+        <div
+          className={`h-full ${isDarkMode ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' : 'bg-gradient-to-r from-sky-400 to-blue-500'}`}
+          style={{ width: `${scrollProgress}%`, transition: 'width 0.15s ease-out' }}
+        />
+      </div>
+
       {/* Cursor Tracker Glow */}
       <div
         className="pointer-events-none fixed z-40"
@@ -344,7 +401,7 @@ export default function Home() {
                 style={{ filter: "none" }}
               />
             </div>
-            <h1 className={`mb-4 text-6xl font-bold tracking-tight md:text-7xl ${isDarkMode ? "" : "text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
+            <h1 className={`mb-4 text-6xl font-bold tracking-tight md:text-7xl ${isDarkMode ? "drop-shadow-[0_0_30px_rgba(110,231,183,0.4)]" : "drop-shadow-[0_2px_12px_rgba(14,165,233,0.5)] text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
@@ -353,9 +410,20 @@ export default function Home() {
               className={`mb-8 max-w-2xl text-2xl font-light min-h-[2rem] ${isDarkMode ? bodyTextClass : "text-white"}`}
               style={{ transition: "all 0.3s ease-out" }}
             >
-              <span className={accentTextClass}>{roleText}</span>
+              <span className={`${roleColorClass} font-semibold`}>{roleText}</span>
               <span className="animate-pulse opacity-70">|</span>
             </p>
+            {/* Open to opportunities badge */}
+            <div className="mb-6 flex items-center justify-center gap-2">
+              <div className="relative flex h-2.5 w-2.5">
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDarkMode ? 'bg-emerald-400' : 'bg-green-400'}`} />
+                <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${isDarkMode ? 'bg-emerald-400' : 'bg-green-500'}`} />
+              </div>
+              <a href="#contact" className={`text-sm font-medium transition hover:underline ${isDarkMode ? 'text-emerald-300/90' : 'text-green-700'}`}>
+                Open to Opportunities
+              </a>
+            </div>
+
             <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.3s ease-out" }}>
               <a
                 href={`https://${profile.linkedIn}`}
@@ -535,10 +603,18 @@ export default function Home() {
               return (
               <article
                 key={project.name}
-                className={`group interactive rounded-2xl border p-6 transition duration-300 flex flex-col ${cardClass} ${cardHoverClass}`}
+                className={`group interactive rounded-2xl border p-6 flex flex-col ${cardClass} ${cardHoverClass}`}
+                onMouseMove={(e) => handleCardTilt(e, project.name)}
+                onMouseLeave={() => setTiltCard(null)}
                 style={{
-                  boxShadow: 'none',
-                  cursor: 'pointer'
+                  transform: tiltCard?.id === project.name
+                    ? `perspective(800px) rotateX(${tiltCard.y}deg) rotateY(${tiltCard.x}deg) scale(1.03)`
+                    : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)',
+                  transition: tiltCard?.id === project.name ? 'none' : 'transform 0.4s ease-out, box-shadow 0.4s ease-out',
+                  boxShadow: tiltCard?.id === project.name
+                    ? isDarkMode ? '0 25px 50px rgba(52,211,153,0.2), 0 0 0 1px rgba(52,211,153,0.15)' : '0 25px 50px rgba(59,130,246,0.15), 0 0 0 1px rgba(59,130,246,0.1)'
+                    : 'none',
+                  cursor: 'pointer',
                 }}
               >
                 <h3
@@ -819,6 +895,43 @@ export default function Home() {
         </section>
         */}
 
+        {/* GitHub Activity Heatmap */}
+        <section className="py-16">
+          <h2 className={`mb-3 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
+            GitHub Activity
+          </h2>
+          <p className={`mb-8 text-center text-xs ${sectionLabelClass}`}>
+            Last 52 Weeks •{" "}
+            <a href="https://github.com/MohitUnecha" target="_blank" rel="noopener noreferrer" className={`underline decoration-dotted ${accentTextClass}`}>
+              @MohitUnecha
+            </a>
+          </p>
+          {githubContribs.length > 0 ? (
+            <div className="overflow-x-auto pb-2">
+              <div className="flex gap-[3px] mx-auto w-fit">
+                {Array.from({ length: Math.ceil(githubContribs.length / 7) }, (_, weekIdx) => (
+                  <div key={weekIdx} className="flex flex-col gap-[3px]">
+                    {githubContribs.slice(weekIdx * 7, weekIdx * 7 + 7).map((day) => {
+                      const colors = isDarkMode
+                        ? ['bg-white/5 border border-white/5', 'bg-emerald-900/70', 'bg-emerald-700', 'bg-emerald-500', 'bg-emerald-400']
+                        : ['bg-slate-100 border border-slate-200', 'bg-blue-100', 'bg-blue-300', 'bg-blue-500', 'bg-blue-600'];
+                      return (
+                        <div
+                          key={day.date}
+                          title={`${day.date}: ${day.count} contribution${day.count !== 1 ? 's' : ''}`}
+                          className={`h-[11px] w-[11px] rounded-[2px] ${colors[day.level]}`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className={`text-center text-sm ${sectionLabelClass} animate-pulse`}>Loading...</p>
+          )}
+        </section>
+
         <section id="contact" className="py-24" style={{
           opacity: visibleSections.has('contact') ? 1 : 0,
           transform: visibleSections.has('contact') ? 'translateY(0)' : 'translateY(20px)',
@@ -998,6 +1111,38 @@ export default function Home() {
         </section>
         </main>
 
+      {/* Easter Egg Modal */}
+      {showEasterEgg && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setShowEasterEgg(false)}
+        >
+          <div
+            className={`relative mx-4 max-w-md rounded-3xl border-2 p-10 text-center shadow-2xl ${
+              isDarkMode
+                ? 'border-emerald-400/60 bg-slate-900 shadow-emerald-500/30'
+                : 'border-blue-400/60 bg-white shadow-blue-500/30'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 text-6xl">🎮</div>
+            <h2 className={`mb-3 text-2xl font-bold ${isDarkMode ? 'text-emerald-300' : 'text-blue-600'}`}>
+              You found the secret!
+            </h2>
+            <p className={`mb-2 text-sm ${bodyTextClass}`}>
+              Welcome to the inner circle. Mohit would be impressed.
+            </p>
+            <p className={`mb-6 text-xs ${sectionLabelClass}`}>↑↑↓↓←→←→BA — classic.</p>
+            <button
+              onClick={() => setShowEasterEgg(false)}
+              className={`rounded-full px-6 py-2 text-sm font-semibold transition ${buttonClass}`}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       <footer className={`py-8 text-center text-sm ${bodyTextClass}`}>
         <p>
           © 2026 Mohit Unecha. All rights reserved. • Want to play a{" "}
@@ -1023,6 +1168,7 @@ export default function Home() {
             contact@mohitunecha.com
           </a>
         </p>
+        <p className="mt-4 text-xs opacity-20 select-none tracking-widest" title="You know what to do 😉">↑↑↓↓←→←→BA</p>
       </footer>
 
       {isHeaderVisible && (
