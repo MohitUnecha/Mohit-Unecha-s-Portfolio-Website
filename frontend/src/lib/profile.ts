@@ -62,6 +62,18 @@ export const profile = {
     ]
   },
   {
+    role: "Technology Lead",
+    company: "Samaya Global",
+    location: "Edison, NJ (Remote)",
+    timeline: "Jan 2025 – Present",
+    highlights: [
+      "Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children through education, care, and community empowerment",
+      "Managing a small team of developers, setting the technical roadmap, and collaborating with operations to turn program needs into scalable tools",
+      "Saved over 100 hours of manual operational work by streamlining workflows across sites in the US, India, and beyond",
+      "Improving response times, reducing errors, and enabling staff to spend more time on direct community impact"
+    ]
+  },
+  {
     role: "Business Consulting Analyst",
     company: "Rutgers Consulting Group (RCG)",
     location: "New Brunswick, NJ",

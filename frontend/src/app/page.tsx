@@ -124,7 +124,7 @@ export default function Home() {
           }
         });
       },
-      { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
     );
 
     // Observe all sections with IDs
@@ -231,9 +231,6 @@ export default function Home() {
             </a>
             <a className={`transition ${accentHoverTextClass}`} href="#projects">
               Projects
-            </a>
-            <a className={`transition ${accentHoverTextClass}`} href="#pm-spec">
-              PM Spec
             </a>
             <a className={`transition ${accentHoverTextClass}`} href="#contact">
               Contact
@@ -697,7 +694,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* PM Spec Sheet */}
+        {/* PM Spec Sheet — hidden for now, data preserved in profile.ts
         <section id="pm-spec" className="py-24" style={{
           opacity: visibleSections.has('pm-spec') ? 1 : 0,
           transform: visibleSections.has('pm-spec') ? 'translateY(0)' : 'translateY(20px)',
@@ -710,7 +707,6 @@ export default function Home() {
             {profile.pmSpecSheet.vision}
           </p>
 
-          {/* Pillars */}
           <div className="mx-auto max-w-5xl grid gap-6 md:grid-cols-2">
             {profile.pmSpecSheet.pillars.map((pillar) => (
               <div
@@ -732,7 +728,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Case Studies */}
           <div className="mx-auto mt-16 max-w-5xl">
             <h3 className={`mb-8 text-center text-xs font-semibold uppercase tracking-wider ${accentTextClass}`}>
               Case Studies
@@ -770,6 +765,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        */}
 
         <section id="contact" className="py-24" style={{
           opacity: visibleSections.has('contact') ? 1 : 0,
