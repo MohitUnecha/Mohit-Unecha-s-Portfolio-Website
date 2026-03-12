@@ -49,6 +49,8 @@ export default function Home() {
   const konamiRef = useRef(0);
   const toastIdRef = useRef(0);
   const milestoneRef = useRef<Set<number>>(new Set());
+  const arcadeModeToastShownRef = useRef(false);
+  const easterEggToastShownRef = useRef(false);
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const [cmdSearch, setCmdSearch] = useState("");
   const cmdInputRef = useRef<HTMLInputElement>(null);
@@ -233,13 +235,15 @@ export default function Home() {
   }, [visitorCount, isDarkMode]);
 
   useEffect(() => {
-    if (showGameSelector) {
+    if (showGameSelector && !arcadeModeToastShownRef.current) {
+      arcadeModeToastShownRef.current = true;
       pushToast("Unlocked", "Arcade mode opened", "blue");
     }
   }, [showGameSelector]);
 
   useEffect(() => {
-    if (showEasterEgg) {
+    if (showEasterEgg && !easterEggToastShownRef.current) {
+      easterEggToastShownRef.current = true;
       pushToast("Unlocked", "Konami secret discovered", "green");
       setProModeUnlocked(true);
       if (typeof window !== "undefined") {
