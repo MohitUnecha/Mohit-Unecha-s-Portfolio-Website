@@ -185,6 +185,25 @@ export const profile = {
       ],
     },
     {
+      name: "Samaya Global Ticketing System",
+      summary:
+        "An internal ticketing and workflow management system for a nonprofit supporting women and children. Streamlines operations across multiple sites, enabling teams to focus on community impact instead of manual administrative work.",
+      technicalDetails: [
+        "Multi-site support across US and India with role-based access control (RBAC) for staff, managers, and admins",
+        "Real-time ticket tracking with status workflows, priority queuing, and SLA enforcement",
+        "Automated email notifications to stakeholders with ticket updates and escalation alerts",
+        "Reporting dashboard with metrics on ticket resolution times, staff workload, and operational bottlenecks",
+        "Built and deployed to production managing 100+ operational tickets per month",
+      ],
+      stack: ["React", "TypeScript", "Node.js", "PostgreSQL", "Express", "Nodemailer"],
+      impact: [
+        "Saved 100+ hours of manual operational work per cycle across multiple sites",
+        "Improved ticket resolution times by automating workflow coordination and notifications",
+        "Reduced administrative errors through centralized ticketing and audit logs",
+        "Enabled staff to redirect time from data entry to direct community impact",
+      ],
+    },
+    {
       name: "Basement at 6:17",
       summary:
         "A web app for hosting in-person murder mystery game nights. The host gets a control panel to reveal clues, manage votes, and call players — while 13+ players join from their phones.",
