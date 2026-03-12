@@ -10,17 +10,36 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
+const FRONTEND_ORIGIN_PROD = process.env.FRONTEND_ORIGIN_PROD || "https://mohitunecha.com";
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 const BACKUP_GROQ_API_KEY = process.env.BACKUP_GROQ_API_KEY || "";
 const EXTRA_GROQ_API_KEY = process.env.EXTRA_GROQ_API_KEY || "";
+const EXTRA_GROQ_API_KEY_2 = process.env.EXTRA_GROQ_API_KEY_2 || "";
+const EXTRA_GROQ_API_KEY_3 = process.env.EXTRA_GROQ_API_KEY_3 || "";
+const EXTRA_GROQ_API_KEY_4 = process.env.EXTRA_GROQ_API_KEY_4 || "";
+
+const ALLOWED_ORIGINS = [
+  FRONTEND_ORIGIN,
+  FRONTEND_ORIGIN_PROD,
+  "https://www.mohitunecha.com",
+  "https://mohit-unecha-s-portfolio-website.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
 
 // Groq API configuration (fast and free!)
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 
-app.use(cors({ 
-  origin: FRONTEND_ORIGIN,
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -29,7 +48,10 @@ app.use(express.json());
 
 // Add explicit CORS headers for all routes
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', FRONTEND_ORIGIN);
+  const requestOrigin = req.headers.origin;
+  if (requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)) {
+    res.header('Access-Control-Allow-Origin', requestOrigin);
+  }
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -85,7 +107,14 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
-  const groqKeys = [GROQ_API_KEY, BACKUP_GROQ_API_KEY, EXTRA_GROQ_API_KEY].filter(Boolean);
+  const groqKeys = [
+    GROQ_API_KEY,
+    BACKUP_GROQ_API_KEY,
+    EXTRA_GROQ_API_KEY,
+    EXTRA_GROQ_API_KEY_2,
+    EXTRA_GROQ_API_KEY_3,
+    EXTRA_GROQ_API_KEY_4,
+  ].filter(Boolean);
 
   // If Groq keys are not configured, return placeholder
   if (!groqKeys.length) {
