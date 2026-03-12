@@ -112,7 +112,7 @@ export default function Home() {
 
     if (greetingPhase === "typing") {
       if (displayedText.length < currentGreeting.length) {
-        timeout = setTimeout(() => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)), 22);
+        timeout = setTimeout(() => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)), 40);
       } else {
         timeout = setTimeout(() => setGreetingPhase("pausing"), 600);
       }
