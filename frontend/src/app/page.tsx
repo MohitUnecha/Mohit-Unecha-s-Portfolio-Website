@@ -48,7 +48,6 @@ export default function Home() {
   const [isProMode, setIsProMode] = useState(true);
   const konamiRef = useRef(0);
   const toastIdRef = useRef(0);
-  const milestoneRef = useRef<Set<number>>(new Set());
   const arcadeModeToastShownRef = useRef(false);
   const easterEggToastShownRef = useRef(false);
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
@@ -222,17 +221,6 @@ export default function Home() {
       })
       .catch(() => {});
   }, []);
-
-  useEffect(() => {
-    if (visitorCount == null) return;
-    const milestones = [100, 500, 1000, 5000, 10000];
-    milestones.forEach((milestone) => {
-      if (visitorCount >= milestone && !milestoneRef.current.has(milestone)) {
-        milestoneRef.current.add(milestone);
-        pushToast("Unlocked", `${milestone.toLocaleString()} visitors milestone`, isDarkMode ? "green" : "blue");
-      }
-    });
-  }, [visitorCount, isDarkMode]);
 
   useEffect(() => {
     if (showGameSelector && !arcadeModeToastShownRef.current) {
