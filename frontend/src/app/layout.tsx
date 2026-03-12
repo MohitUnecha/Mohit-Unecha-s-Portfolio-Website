@@ -35,7 +35,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.png" />
         <meta name="theme-color" content="#0f172a" />
         <script
-          src="https://www.google.com/recaptcha/api.js"
+          src="https://www.google.com/recaptcha/api.js?render=explicit"
           async
           defer
         ></script>

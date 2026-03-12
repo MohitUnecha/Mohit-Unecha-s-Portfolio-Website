@@ -300,7 +300,7 @@ export const profile = {
     {
       school: "Rutgers University",
       degree: "B.A. Computer Science & Economics (Dual Major)",
-      timeline: "Sep2024 – Dec 2027 (Expected)",
+      timeline: "Sep 2024 – Dec 2028 (Expected)",
       gpa: "3.89",
       details: [
         "Dean's List Scholar for academic excellence",

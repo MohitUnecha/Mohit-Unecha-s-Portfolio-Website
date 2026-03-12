@@ -8,6 +8,13 @@ import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGa
 
 const KONAMI_CODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
+type ToastItem = {
+  id: number;
+  title: string;
+  detail: string;
+  tone: "green" | "blue";
+};
+
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -18,6 +25,8 @@ export default function Home() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
+  const [greetingIndex, setGreetingIndex] = useState(0);
+  const [greetingPhase, setGreetingPhase] = useState<"typing" | "pausing" | "erasing">("typing");
   const [zoomProgress, setZoomProgress] = useState(0);
   const [cursorX, setCursorX] = useState(0);
   const [cursorY, setCursorY] = useState(0);
@@ -34,7 +43,15 @@ export default function Home() {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [tiltCard, setTiltCard] = useState<{ id: string; x: number; y: number } | null>(null);
   const [githubContribs, setGithubContribs] = useState<{ date: string; level: number; count: number }[]>([]);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [proModeUnlocked, setProModeUnlocked] = useState(true);
+  const [isProMode, setIsProMode] = useState(true);
   const konamiRef = useRef(0);
+  const toastIdRef = useRef(0);
+  const milestoneRef = useRef<Set<number>>(new Set());
+  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+  const [cmdSearch, setCmdSearch] = useState("");
+  const cmdInputRef = useRef<HTMLInputElement>(null);
 
   const roles = [
     "Software Engineer",
@@ -42,6 +59,19 @@ export default function Home() {
     "F1 Enthusiast",
     "Builder & Creator",
     "CS + Econ @ Rutgers",
+  ];
+  const firstName = profile.name.split(" ")[0];
+  const greetings = [
+    `Hi, I'm ${firstName}.`,
+    `Hola, soy ${firstName}.`,
+    `Bonjour, je suis ${firstName}.`,
+    `Ciao, sono ${firstName}.`,
+    `Hallo, ich bin ${firstName}.`,
+    `Olá, eu sou ${firstName}.`,
+    `Namaste, main ${firstName} hoon.`,
+    `こんにちは、${firstName}です。`,
+    `안녕, 나는 ${firstName}.`,
+    `你好，我是${firstName}。`,
   ];
 
   const handleCardTilt = (e: React.MouseEvent<HTMLElement>, id: string) => {
@@ -52,19 +82,52 @@ export default function Home() {
   };
 
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
-  const fullText = `Hi, I'm ${profile.name.split(" ")[0]}.`;
+
+  const pushToast = (title: string, detail: string, tone: "green" | "blue") => {
+    const id = ++toastIdRef.current;
+    setToasts((prev) => [...prev, { id, title, detail, tone }].slice(-4));
+    window.setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 3600);
+  };
+
+  const playVoiceIntro = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's an aspiring product manager and software engineer headed to Microsoft this summer, where he'll work on products used by millions. He leads tech at a nonprofit supporting women and children, has volunteered over 3000 hours as a lead volunteer at Hands of Hope, and is passionate about formula one and building intelligent AI solutions. When he's not coding or mentoring, you'll find him analyzing race data or exploring the intersection of tech and social impact. Feel free to explore his work — or chat with Jarvis to learn more!";
+    const utterance = new SpeechSynthesisUtterance(introText);
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    const preferredVoice = window.speechSynthesis.getVoices().find((v) => /Samantha|Google US English|en-US/i.test(v.name));
+    if (preferredVoice) utterance.voice = preferredVoice;
+    window.speechSynthesis.speak(utterance);
+    pushToast("Playing", "Meet Mohit — voice intro", "blue");
+  };
 
   useEffect(() => {
-    let index = 0;
-    const typeWriter = () => {
-      if (index <= fullText.length) {
-        setDisplayedText(fullText.substring(0, index));
-        index++;
-        setTimeout(typeWriter, 80);
+    const currentGreeting = greetings[greetingIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (greetingPhase === "typing") {
+      if (displayedText.length < currentGreeting.length) {
+        timeout = setTimeout(() => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)), 22);
+      } else {
+        timeout = setTimeout(() => setGreetingPhase("pausing"), 600);
       }
-    };
-    typeWriter();
-  }, []);
+    } else if (greetingPhase === "pausing") {
+      timeout = setTimeout(() => setGreetingPhase("erasing"), 100);
+    } else {
+      if (displayedText.length > 0) {
+        timeout = setTimeout(() => setDisplayedText(displayedText.slice(0, -1)), 10);
+      } else {
+        setGreetingIndex((prev) => (prev + 1) % greetings.length);
+        setGreetingPhase("typing");
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, greetingIndex, greetingPhase, greetings]);
 
   // Role rotator typewriter effect
   useEffect(() => {
@@ -73,15 +136,15 @@ export default function Home() {
 
     if (rolePhase === "typing") {
       if (roleText.length < currentRole.length) {
-        timeout = setTimeout(() => setRoleText(currentRole.slice(0, roleText.length + 1)), 60);
+        timeout = setTimeout(() => setRoleText(currentRole.slice(0, roleText.length + 1)), 35);
       } else {
-        timeout = setTimeout(() => setRolePhase("pausing"), 1800);
+        timeout = setTimeout(() => setRolePhase("pausing"), 1200);
       }
     } else if (rolePhase === "pausing") {
-      timeout = setTimeout(() => setRolePhase("erasing"), 400);
+      timeout = setTimeout(() => setRolePhase("erasing"), 200);
     } else if (rolePhase === "erasing") {
       if (roleText.length > 0) {
-        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 35);
+        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 18);
       } else {
         setRoleIndex((prev) => (prev + 1) % roles.length);
         setRolePhase("typing");
@@ -118,6 +181,36 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cmd+K command palette shortcut
+  useEffect(() => {
+    const handleCmdK = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdPaletteOpen((prev) => !prev);
+        setCmdSearch("");
+      }
+      if (e.key === 'Escape') {
+        setCmdPaletteOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleCmdK);
+    return () => window.removeEventListener('keydown', handleCmdK);
+  }, []);
+
+  useEffect(() => {
+    if (cmdPaletteOpen) {
+      setTimeout(() => cmdInputRef.current?.focus(), 100);
+    }
+  }, [cmdPaletteOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const unlocked = window.localStorage.getItem("proModeUnlocked") === "1";
+    if (unlocked) {
+      setProModeUnlocked(true);
+    }
+  }, []);
+
   // GitHub contributions heatmap
   useEffect(() => {
     fetch('https://github-contributions-api.jogruber.de/v4/MohitUnecha?y=last')
@@ -127,6 +220,33 @@ export default function Home() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (visitorCount == null) return;
+    const milestones = [100, 500, 1000, 5000, 10000];
+    milestones.forEach((milestone) => {
+      if (visitorCount >= milestone && !milestoneRef.current.has(milestone)) {
+        milestoneRef.current.add(milestone);
+        pushToast("Unlocked", `${milestone.toLocaleString()} visitors milestone`, isDarkMode ? "green" : "blue");
+      }
+    });
+  }, [visitorCount, isDarkMode]);
+
+  useEffect(() => {
+    if (showGameSelector) {
+      pushToast("Unlocked", "Arcade mode opened", "blue");
+    }
+  }, [showGameSelector]);
+
+  useEffect(() => {
+    if (showEasterEgg) {
+      pushToast("Unlocked", "Konami secret discovered", "green");
+      setProModeUnlocked(true);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("proModeUnlocked", "1");
+      }
+    }
+  }, [showEasterEgg]);
 
   // Auto-refresh reCAPTCHA token every 12 minutes
   useEffect(() => {
@@ -232,7 +352,13 @@ export default function Home() {
     };
   }, []);
 
-  const pageClass = isDarkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900";
+  const pageClass = isDarkMode
+    ? isProMode
+      ? "bg-slate-950 text-white"
+      : "bg-slate-950 text-white"
+    : isProMode
+      ? "bg-blue-50 text-slate-900"
+      : "bg-slate-50 text-slate-900";
   const headerClass = isDarkMode
     ? "border-white/5 bg-slate-950/80"
     : "border-slate-200/70 bg-white/80";
@@ -240,10 +366,20 @@ export default function Home() {
   const sectionLabelClass = isDarkMode ? "text-slate-400" : "text-slate-500";
   const bodyTextClass = isDarkMode ? "text-slate-300" : "text-slate-700";
   const subTextClass = isDarkMode ? "text-slate-200" : "text-slate-800";
-  const cardClass = isDarkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-white";
+  const cardClass = isDarkMode
+    ? isProMode
+      ? "border-emerald-300/30 bg-emerald-950/20"
+      : "border-white/10 bg-white/5"
+    : isProMode
+      ? "border-blue-300 bg-blue-50/90"
+      : "border-slate-200 bg-white";
   const cardHoverClass = isDarkMode
-    ? "hover:border-emerald-400/30 hover:bg-white/10"
-    : "hover:border-blue-500/40 hover:bg-blue-50";
+    ? isProMode
+      ? "hover:border-emerald-300/50 hover:bg-emerald-900/20"
+      : "hover:border-emerald-400/30 hover:bg-white/10"
+    : isProMode
+      ? "hover:border-blue-500/50 hover:bg-blue-100"
+      : "hover:border-blue-500/40 hover:bg-blue-50";
   const accentTextClass = isDarkMode ? "text-emerald-300" : "text-blue-700";
   const roleColorClass = isDarkMode
     ? "bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent"
@@ -258,7 +394,15 @@ export default function Home() {
   const overlayClass = isDarkMode ? "bg-black/90" : "bg-white/75";
 
   return (
-    <div className={`min-h-screen ${pageClass}`}>
+    <div className={`min-h-screen noise-bg ${pageClass}`}>
+      {isProMode && (
+        <div className="pointer-events-none fixed inset-0 z-0 opacity-70" style={{
+          background: isDarkMode
+            ? "radial-gradient(circle at 18% 12%, rgba(16,185,129,0.2), transparent 34%), radial-gradient(circle at 82% 86%, rgba(34,211,238,0.15), transparent 36%)"
+            : "radial-gradient(circle at 18% 12%, rgba(59,130,246,0.18), transparent 34%), radial-gradient(circle at 82% 86%, rgba(14,165,233,0.15), transparent 36%)",
+        }} />
+      )}
+
       {/* Scroll progress bar */}
       <div className="pointer-events-none fixed top-0 left-0 right-0 z-[70] h-[3px]">
         <div
@@ -267,9 +411,9 @@ export default function Home() {
         />
       </div>
 
-      {/* Cursor Tracker Glow */}
+      {/* Cursor Tracker Glow — hidden on touch/mobile */}
       <div
-        className="pointer-events-none fixed z-40"
+        className="pointer-events-none fixed z-40 hidden md:block"
         style={{
           left: `${cursorX}px`,
           top: `${cursorY}px`,
@@ -294,9 +438,9 @@ export default function Home() {
         />
       </div>
 
-      {/* Cursor Inner Circle */}
+      {/* Cursor Inner Circle — hidden on touch/mobile */}
       <div
-        className="pointer-events-none fixed z-40"
+        className="pointer-events-none fixed z-40 hidden md:block"
         style={{
           left: `${cursorX}px`,
           top: `${cursorY}px`,
@@ -322,11 +466,11 @@ export default function Home() {
           isHeaderVisible ? "opacity-100 shadow-lg" : "opacity-0 pointer-events-none"
         } ${headerClass}`}
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-4">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-8 md:py-4">
           <a href="#home" className={`transition ${accentHoverTextClass}`}>
-            <img src="/Logo.png" alt="Logo" className="h-10 w-auto" />
+            <img src="/Logo.png" alt="Logo" className="h-8 w-auto md:h-10" />
           </a>
-          <nav className={`flex items-center gap-8 text-sm font-medium ${navTextClass}`}>
+          <nav className={`flex items-center gap-3 text-xs font-medium md:gap-8 md:text-sm ${navTextClass}`}>
             <a className={`transition ${accentHoverTextClass}`} href="#about">
               About
             </a>
@@ -339,6 +483,18 @@ export default function Home() {
             <a className={`transition ${accentHoverTextClass}`} href="#contact">
               Contact
             </a>
+            <button
+              type="button"
+              onClick={() => { setCmdPaletteOpen(true); setCmdSearch(""); }}
+              className={`hidden md:flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] transition-all duration-200 ${
+                isDarkMode
+                  ? "border-white/10 text-slate-400 hover:border-emerald-400/30 hover:text-emerald-300"
+                  : "border-slate-300 text-slate-500 hover:border-blue-400/30 hover:text-blue-500"
+              }`}
+            >
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" /></svg>
+              <kbd className="font-mono">⌘K</kbd>
+            </button>
           </nav>
         </div>
       </header>
@@ -388,8 +544,8 @@ export default function Home() {
         
         <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress * 2.5, transition: "opacity 0.3s ease-out" }}>
             <div
-              className={`mb-8 h-48 w-48 overflow-hidden rounded-full border-4 shadow-2xl ${
-                isDarkMode ? "border-emerald-400/40" : "border-blue-600/40"
+              className={`mb-8 h-32 w-32 overflow-hidden rounded-full border-4 shadow-2xl animate-float sm:h-40 sm:w-40 md:h-48 md:w-48 ${
+                isDarkMode ? "border-emerald-400/40 shadow-emerald-500/20" : "border-blue-600/40 shadow-blue-500/20"
               }`}
               style={{ transition: "all 0.3s ease-out" }}
             >
@@ -401,47 +557,76 @@ export default function Home() {
                 style={{ filter: "none" }}
               />
             </div>
-            <h1 className={`mb-4 text-6xl font-bold tracking-tight md:text-7xl ${isDarkMode ? "drop-shadow-[0_0_30px_rgba(110,231,183,0.4)]" : "drop-shadow-[0_2px_12px_rgba(14,165,233,0.5)] text-white"}`} style={{ transition: "all 0.3s ease-out" }}>
+            <h1 className={`mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-gradient-text ${isDarkMode ? "bg-gradient-to-r from-emerald-300 via-cyan-200 to-emerald-400" : "bg-gradient-to-r from-sky-400 via-blue-300 to-sky-500"}`} style={{ backgroundSize: '200% 200%', transition: "all 0.3s ease-out" }}>
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
             {/* Role rotator */}
             <p
-              className={`mb-8 max-w-2xl text-2xl font-light min-h-[2rem] ${isDarkMode ? bodyTextClass : "text-white"}`}
+              className={`mb-8 max-w-2xl text-lg font-light min-h-[2rem] sm:text-xl md:text-2xl ${isDarkMode ? bodyTextClass : "text-white"}`}
               style={{ transition: "all 0.3s ease-out" }}
             >
               <span className={`${roleColorClass} font-semibold`}>{roleText}</span>
               <span className="animate-pulse opacity-70">|</span>
             </p>
             {/* Open to opportunities badge */}
-            <div className="mb-6 flex items-center justify-center gap-2">
+            <div className={`mb-6 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 ${
+              isDarkMode
+                ? "border border-emerald-300/70 bg-emerald-500/20 shadow-emerald-500/30 hover:shadow-emerald-500/50"
+                : "border border-blue-300/70 bg-blue-500/25 shadow-blue-500/35 hover:shadow-blue-500/50"
+            }`}>
               <div className="relative flex h-2.5 w-2.5">
-                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDarkMode ? 'bg-emerald-400' : 'bg-green-400'}`} />
-                <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${isDarkMode ? 'bg-emerald-400' : 'bg-green-500'}`} />
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-80 ${isDarkMode ? "bg-emerald-300" : "bg-blue-300"}`} />
+                <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-400"}`} />
               </div>
-              <a href="#contact" className={`text-sm font-medium transition hover:underline ${isDarkMode ? 'text-emerald-300/90' : 'text-green-700'}`}>
+              <a
+                href="#contact"
+                className={`text-base font-semibold transition hover:underline md:text-lg ${
+                  isDarkMode
+                    ? "text-emerald-100 drop-shadow-[0_0_8px_rgba(110,231,183,0.9)]"
+                    : "text-blue-100 drop-shadow-[0_0_8px_rgba(147,197,253,0.9)]"
+                }`}
+              >
                 Open to Opportunities
               </a>
             </div>
 
-            <div className="mb-8 flex flex-wrap justify-center gap-4" style={{ transition: "all 0.3s ease-out" }}>
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={playVoiceIntro}
+                className={`group relative overflow-hidden rounded-full border px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 hover:scale-105 ${
+                  isDarkMode
+                    ? "border-cyan-300/60 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25 hover:shadow-lg hover:shadow-cyan-500/20"
+                    : "border-cyan-500 bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-lg hover:shadow-cyan-500/20"
+                }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                  Meet Mohit
+                </span>
+                <span className={`absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full`} />
+              </button>
+            </div>
+
+            <div className="mb-8 flex flex-wrap justify-center gap-5" style={{ transition: "all 0.3s ease-out" }}>
               <a
                 href={`https://${profile.linkedIn}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center rounded-full border-2 p-3 transition-all duration-300 hover:scale-110 ${isDarkMode ? "border-emerald-500 bg-emerald-500/90 shadow-lg shadow-emerald-500/50" : "border-blue-500 bg-blue-500/90 shadow-lg shadow-blue-500/50"}`}
+                className={`group flex items-center justify-center rounded-full border-2 p-3.5 transition-all duration-300 hover:scale-110 hover:-translate-y-1 ${isDarkMode ? "border-emerald-500 bg-emerald-500/90 shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/60" : "border-blue-500 bg-blue-500/90 shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/60"}`}
                 aria-label="LinkedIn"
               >
-                <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-7 w-7" style={{ filter: 'brightness(2.5)' }} />
+                <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" style={{ filter: 'brightness(2.5)' }} />
               </a>
               <a
                 href={`https://${profile.github}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center rounded-full border-2 p-3 transition-all duration-300 hover:scale-110 ${isDarkMode ? "border-emerald-500 bg-emerald-500/90 shadow-lg shadow-emerald-500/50" : "border-blue-500 bg-blue-500/90 shadow-lg shadow-blue-500/50"}`}
+                className={`group flex items-center justify-center rounded-full border-2 p-3.5 transition-all duration-300 hover:scale-110 hover:-translate-y-1 ${isDarkMode ? "border-emerald-500 bg-emerald-500/90 shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/60" : "border-blue-500 bg-blue-500/90 shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/60"}`}
                 aria-label="GitHub"
               >
-                <img src="/Githublogo.png" alt="GitHub" className="h-7 w-7" style={{ filter: 'brightness(2.8)' }} />
+                <img src="/Githublogo.png" alt="GitHub" className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" style={{ filter: 'brightness(2.8)' }} />
               </a>
             </div>
             <a
@@ -464,7 +649,7 @@ export default function Home() {
           </div>
         </section>
 
-        <main className="mx-auto w-full max-w-5xl px-8 pb-32">
+        <main className="mx-auto w-full max-w-5xl px-4 pb-32 sm:px-6 md:px-8">
           <section id="about" className="py-24" style={{
             opacity: visibleSections.has('about') ? 1 : 0,
             transform: visibleSections.has('about') ? 'translateY(0)' : 'translateY(20px)',
@@ -482,7 +667,7 @@ export default function Home() {
             {strengthsToShow.map((strength) => (
               <div
                 key={strength}
-                className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
+                className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass} ${isDarkMode ? "glow-pulse-dark" : "glow-pulse-light"}`}
               >
                 <p className={`font-medium ${subTextClass}`}>{strength}</p>
               </div>
@@ -501,12 +686,14 @@ export default function Home() {
           )}
         </section>
 
-        <section id="experience" className="py-24" style={{
-          opacity: visibleSections.has('experience') ? 1 : 0,
-          transform: visibleSections.has('experience') ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
-        }}>
-          <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
+        <section id="experience" className="py-24">
+          <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}
+            style={{
+              opacity: visibleSections.has('experience') ? 1 : 0,
+              transform: visibleSections.has('experience') ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'all 0.6s ease-out'
+            }}
+          >
             Experience
           </h2>
           <div className="relative mx-auto max-w-5xl">
@@ -516,7 +703,17 @@ export default function Home() {
             {profile.experience.map((item, index) => {
               const isLeft = index % 2 === 0;
               return (
-                <div key={`${item.company}-${item.role}`} className="relative mb-12 last:mb-0">
+                <div
+                  key={`${item.company}-${item.role}`}
+                  className="relative mb-12 last:mb-0"
+                  style={{
+                    opacity: visibleSections.has('experience') ? 1 : 0,
+                    transform: visibleSections.has('experience')
+                      ? 'translateY(0)'
+                      : `translateY(30px)`,
+                    transition: `all 0.6s ease-out ${index * 0.12}s`,
+                  }}
+                >
                   {/* Timeline dot - desktop */}
                   <div className={`absolute left-1/2 top-6 z-10 hidden h-4 w-4 -translate-x-1/2 rounded-full border-2 md:block ${
                     isDarkMode ? "border-emerald-400 bg-slate-950" : "border-blue-500 bg-slate-50"
@@ -524,7 +721,7 @@ export default function Home() {
                   
                   {/* Mobile: stacked layout */}
                   <div className="md:hidden">
-                    <article className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}>
+                    <article className={`rounded-2xl border p-6 transition-all duration-300 ${cardClass} ${cardHoverClass}`}>
                       <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
                         {item.timeline}
                       </p>
@@ -545,7 +742,7 @@ export default function Home() {
                   <div className={`hidden md:grid md:grid-cols-2 md:gap-8`}>
                     {isLeft ? (
                       <>
-                        <article className={`rounded-2xl border p-6 transition text-right ${cardClass} ${cardHoverClass}`}>
+                        <article className={`rounded-2xl border p-6 transition-all duration-300 text-right ${cardClass} ${cardHoverClass}`}>
                           <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
                             {item.timeline}
                           </p>
@@ -565,7 +762,7 @@ export default function Home() {
                     ) : (
                       <>
                         <div />
-                        <article className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}>
+                        <article className={`rounded-2xl border p-6 transition-all duration-300 ${cardClass} ${cardHoverClass}`}>
                           <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
                             {item.timeline}
                           </p>
@@ -728,9 +925,23 @@ export default function Home() {
           <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
             Education
           </h2>
-          <div className="mx-auto max-w-4xl space-y-12">
+          <div className="mx-auto max-w-4xl space-y-8">
             {profile.education.map((school) => (
-              <article key={school.school} className="space-y-3">
+              <article
+                key={school.school}
+                className={`group rounded-2xl border p-6 transition-all duration-300 ${cardClass} ${cardHoverClass}`}
+                onMouseMove={(e) => handleCardTilt(e, school.school)}
+                onMouseLeave={() => setTiltCard(null)}
+                style={{
+                  transform: tiltCard?.id === school.school
+                    ? `perspective(800px) rotateX(${tiltCard.y}deg) rotateY(${tiltCard.x}deg) scale(1.02)`
+                    : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)',
+                  transition: tiltCard?.id === school.school ? 'none' : 'transform 0.4s ease-out, box-shadow 0.4s ease-out',
+                  boxShadow: tiltCard?.id === school.school
+                    ? isDarkMode ? '0 25px 50px rgba(52,211,153,0.15), 0 0 0 1px rgba(52,211,153,0.1)' : '0 25px 50px rgba(59,130,246,0.1), 0 0 0 1px rgba(59,130,246,0.08)'
+                    : 'none',
+                }}
+              >
                 <div className="flex flex-wrap items-baseline justify-between gap-4">
                   <h3 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
                     {school.school}
@@ -739,14 +950,15 @@ export default function Home() {
                     {school.timeline}
                   </p>
                 </div>
-                <p className={`text-lg ${bodyTextClass}`}>{school.degree}</p>
+                <p className={`mt-2 text-lg ${bodyTextClass}`}>{school.degree}</p>
                 {school.gpa && (
-                  <p className={`text-sm font-medium ${accentTextClass}`}>GPA: {school.gpa}</p>
+                  <p className={`mt-1 text-sm font-semibold ${accentTextClass}`}>GPA: {school.gpa}</p>
                 )}
                 {school.details && (
-                  <ul className={`ml-6 space-y-1 ${bodyTextClass}`}>
+                  <ul className={`mt-4 space-y-2 ${bodyTextClass}`}>
                     {school.details.map((detail) => (
-                      <li key={detail} className="list-disc">
+                      <li key={detail} className="flex items-start gap-2 text-sm leading-relaxed">
+                        <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
                         {detail}
                       </li>
                     ))}
@@ -937,7 +1149,7 @@ export default function Home() {
           transform: visibleSections.has('contact') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <div className="mx-auto max-w-2xl px-8">
+          <div className="mx-auto max-w-2xl px-2 sm:px-4 md:px-8">
             <h2 className={`mb-8 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
               Get In Touch
             </h2>
@@ -1117,31 +1329,253 @@ export default function Home() {
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
           onClick={() => setShowEasterEgg(false)}
         >
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {[10, 18, 24, 31, 38, 45, 52, 59, 66, 73, 80, 87].map((left, idx) => (
+              <span
+                key={`rain-${left}`}
+                className="emoji-rain"
+                style={{
+                  left: `${left}%`,
+                  animationDelay: `${idx * 0.22}s`,
+                  animationDuration: `${2.4 + (idx % 4) * 0.4}s`,
+                  opacity: 0.7,
+                }}
+              >
+                {idx % 3 === 0 ? "🎉" : idx % 3 === 1 ? "🥳" : "✨"}
+              </span>
+            ))}
+          </div>
           <div
-            className={`relative mx-4 max-w-md rounded-3xl border-2 p-10 text-center shadow-2xl ${
+            className={`secret-pop-in relative mx-4 w-[92vw] max-w-md rounded-3xl border-2 p-6 text-center shadow-2xl md:p-10 ${
               isDarkMode
                 ? 'border-emerald-400/60 bg-slate-900 shadow-emerald-500/30'
                 : 'border-blue-400/60 bg-white shadow-blue-500/30'
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-4 text-6xl">🎮</div>
-            <h2 className={`mb-3 text-2xl font-bold ${isDarkMode ? 'text-emerald-300' : 'text-blue-600'}`}>
-              You found the secret!
+            <div className="mb-3 text-5xl md:text-6xl">🎮</div>
+            <h2 className={`mb-3 text-2xl font-bold md:text-3xl ${isDarkMode ? 'text-emerald-300' : 'text-blue-600'}`}>
+              Congrats! You found the secret!
             </h2>
-            <p className={`mb-2 text-sm ${bodyTextClass}`}>
+            <p className={`mb-2 text-sm md:text-base ${bodyTextClass}`}>
               Welcome to the inner circle. Mohit would be impressed.
             </p>
-            <p className={`mb-6 text-xs ${sectionLabelClass}`}>↑↑↓↓←→←→BA — classic.</p>
+            <p className={`mb-6 text-xs md:text-sm ${sectionLabelClass}`}>↑↑↓↓←→←→BA — classic.</p>
             <button
               onClick={() => setShowEasterEgg(false)}
-              className={`rounded-full px-6 py-2 text-sm font-semibold transition ${buttonClass}`}
+              className={`rounded-full px-7 py-2.5 text-sm font-semibold transition md:text-base ${buttonClass}`}
             >
               Close
             </button>
           </div>
         </div>
       )}
+
+      {/* Command Palette (Cmd+K) */}
+      {cmdPaletteOpen && (
+        <div
+          className="fixed inset-0 z-[110] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+          onClick={() => setCmdPaletteOpen(false)}
+        >
+          <div
+            className={`w-[min(92vw,540px)] rounded-2xl border shadow-2xl overflow-hidden ${
+              isDarkMode
+                ? "border-emerald-300/20 bg-slate-950/98 shadow-emerald-500/10"
+                : "border-blue-300/40 bg-white/98 shadow-blue-500/10"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={`flex items-center gap-3 border-b px-4 py-3 ${isDarkMode ? "border-white/10" : "border-slate-200"}`}>
+              <svg className={`h-5 w-5 flex-shrink-0 ${isDarkMode ? "text-emerald-400" : "text-blue-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" strokeLinecap="round" />
+              </svg>
+              <input
+                ref={cmdInputRef}
+                type="text"
+                value={cmdSearch}
+                onChange={(e) => setCmdSearch(e.target.value)}
+                placeholder="Search sections, actions, or ask Jarvis..."
+                className={`flex-1 bg-transparent text-sm outline-none ${isDarkMode ? "text-white placeholder:text-slate-400" : "text-slate-900 placeholder:text-slate-500"}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setCmdPaletteOpen(false);
+                  if (e.key === 'Enter') {
+                    const q = cmdSearch.toLowerCase();
+                    const commands = [
+                      { keywords: ['about', 'bio', 'summary', 'who'], action: () => document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['experience', 'work', 'jobs', 'career', 'microsoft'], action: () => document.querySelector('#experience')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['project', 'build', 'f1', 'every lap', 'signalforge'], action: () => document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['contact', 'email', 'reach', 'message', 'hire'], action: () => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['skill', 'tech', 'stack', 'python', 'react'], action: () => document.querySelector('#skills')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['education', 'rutgers', 'school', 'degree'], action: () => document.querySelector('#education')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['github', 'contrib', 'activity', 'heatmap'], action: () => document.querySelector('#github-activity')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['game', 'play', 'arcade', 'fun'], action: () => setShowGameSelector(true) },
+                      { keywords: ['dark', 'light', 'theme', 'mode'], action: () => setIsDarkMode((prev) => !prev) },
+                      { keywords: ['top', 'home', 'hero', 'start'], action: () => document.querySelector('#home')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['linkedin'], action: () => window.open(`https://${profile.linkedIn}`, '_blank') },
+                      { keywords: ['resume', 'cv', 'pdf'], action: () => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['voice', 'intro', 'jarvis', 'call'], action: () => playVoiceIntro() },
+                    ];
+                    const match = commands.find((cmd) => cmd.keywords.some((kw) => q.includes(kw)));
+                    if (match) {
+                      match.action();
+                    } else if (q.length > 0) {
+                      // Send to Jarvis as a question
+                      window.dispatchEvent(new CustomEvent("jarvis:prompt", { detail: cmdSearch }));
+                    }
+                    setCmdPaletteOpen(false);
+                  }
+                }}
+              />
+              <kbd className={`hidden sm:inline rounded border px-1.5 py-0.5 text-[10px] font-mono ${isDarkMode ? "border-white/10 text-slate-400" : "border-slate-300 text-slate-500"}`}>ESC</kbd>
+            </div>
+            <div className={`max-h-[50vh] overflow-y-auto px-2 py-2`}>
+              {[
+                { icon: '👤', label: 'About Me', desc: 'Bio & strengths', keywords: ['about', 'bio', 'summary', 'who'] },
+                { icon: '💼', label: 'Experience', desc: 'Work history & roles', keywords: ['experience', 'work', 'jobs', 'career', 'microsoft'] },
+                { icon: '🚀', label: 'Projects', desc: 'What I\'ve built', keywords: ['project', 'build', 'f1', 'every lap'] },
+                { icon: '📬', label: 'Contact', desc: 'Get in touch', keywords: ['contact', 'email', 'reach', 'message', 'hire'] },
+                { icon: '⚡', label: 'Skills', desc: 'Tech stack & tools', keywords: ['skill', 'tech', 'stack', 'python', 'react'] },
+                { icon: '🎓', label: 'Education', desc: 'Rutgers CS + Econ', keywords: ['education', 'rutgers', 'school', 'degree'] },
+                { icon: '🎮', label: 'Games Arcade', desc: 'Play 14 mini-games', keywords: ['game', 'play', 'arcade', 'fun'] },
+                { icon: '🎨', label: 'Toggle Theme', desc: 'Switch dark/light mode', keywords: ['dark', 'light', 'theme', 'mode'] },
+                { icon: '🎤', label: 'Voice Intro', desc: 'Hear Jarvis introduce Mohit', keywords: ['voice', 'intro', 'jarvis', 'call'] },
+                { icon: '🔗', label: 'Open LinkedIn', desc: 'View professional profile', keywords: ['linkedin'] },
+                { icon: '🏠', label: 'Back to Top', desc: 'Return to hero section', keywords: ['top', 'home', 'hero', 'start'] },
+              ]
+                .filter((item) => {
+                  if (!cmdSearch) return true;
+                  const q = cmdSearch.toLowerCase();
+                  return item.label.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q) || item.keywords.some((kw) => kw.includes(q));
+                })
+                .map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150 ${
+                      isDarkMode ? "hover:bg-white/10" : "hover:bg-slate-100"
+                    }`}
+                    onClick={() => {
+                      const q = item.label.toLowerCase();
+                      if (q.includes('theme') || q.includes('toggle')) setIsDarkMode((prev) => !prev);
+                      else if (q.includes('games')) setShowGameSelector(true);
+                      else if (q.includes('voice')) playVoiceIntro();
+                      else if (q.includes('linkedin')) window.open(`https://${profile.linkedIn}`, '_blank');
+                      else if (q.includes('top')) document.querySelector('#home')?.scrollIntoView({ behavior: 'smooth' });
+                      else {
+                        const sectionMap: Record<string, string> = { 'About Me': '#about', 'Experience': '#experience', 'Projects': '#projects', 'Contact': '#contact', 'Skills': '#skills', 'Education': '#education' };
+                        const anchor = sectionMap[item.label];
+                        if (anchor) document.querySelector(anchor)?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                      setCmdPaletteOpen(false);
+                    }}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-slate-900"}`}>{item.label}</p>
+                      <p className={`text-xs truncate ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>{item.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              {cmdSearch && (
+                <button
+                  type="button"
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150 ${
+                    isDarkMode ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("jarvis:prompt", { detail: cmdSearch }));
+                    setCmdPaletteOpen(false);
+                  }}
+                >
+                  <span className="text-lg">🤖</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-slate-900"}`}>Ask Jarvis: &ldquo;{cmdSearch}&rdquo;</p>
+                    <p className={`text-xs truncate ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>Get an AI-powered answer</p>
+                  </div>
+                </button>
+              )}
+            </div>
+            <div className={`border-t px-4 py-2 text-[10px] flex items-center justify-between ${isDarkMode ? "border-white/10 text-slate-500" : "border-slate-200 text-slate-400"}`}>
+              <span>Navigate with ↑↓ • Select with ↵</span>
+              <span className="flex items-center gap-1">
+                <kbd className={`rounded border px-1 py-0.5 font-mono ${isDarkMode ? "border-white/10" : "border-slate-300"}`}>⌘</kbd>
+                <kbd className={`rounded border px-1 py-0.5 font-mono ${isDarkMode ? "border-white/10" : "border-slate-300"}`}>K</kbd>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx global>{`
+        @keyframes emojiRain {
+          0% {
+            transform: translateY(-20vh) rotate(0deg);
+          }
+          100% {
+            transform: translateY(110vh) rotate(360deg);
+          }
+        }
+
+        @keyframes secretPopIn {
+          0% {
+            transform: scale(0.82) translateY(18px);
+            opacity: 0;
+          }
+          70% {
+            transform: scale(1.04) translateY(-2px);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .emoji-rain {
+          position: absolute;
+          top: -12vh;
+          font-size: 1.55rem;
+          animation-name: emojiRain;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+          filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.35));
+        }
+
+        .secret-pop-in {
+          animation: secretPopIn 0.5s cubic-bezier(0.2, 0.9, 0.2, 1);
+        }
+
+        @keyframes toastIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .toast-pop {
+          animation: toastIn 0.28s ease-out;
+        }
+      `}</style>
+
+      <div className="pointer-events-none fixed right-3 top-16 z-[95] flex w-[min(92vw,320px)] flex-col gap-2 md:right-6 md:top-20">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`toast-pop rounded-xl border px-3 py-2 text-xs backdrop-blur-md ${
+              toast.tone === "green"
+                ? "border-emerald-300/50 bg-emerald-500/25 text-emerald-50"
+                : "border-blue-300/50 bg-blue-500/25 text-blue-50"
+            }`}
+          >
+            <p className="font-semibold">{toast.title}</p>
+            <p className="opacity-90">{toast.detail}</p>
+          </div>
+        ))}
+      </div>
 
       <footer className={`py-8 text-center text-sm ${bodyTextClass}`}>
         <p>
@@ -1175,18 +1609,50 @@ export default function Home() {
         <button
           type="button"
           onClick={() => setIsDarkMode((prev) => !prev)}
-          className={`fixed bottom-6 left-6 z-40 flex items-center justify-center rounded-full p-3 transition-all duration-300 ${
+          className={`fixed bottom-6 left-6 z-40 flex items-center justify-center rounded-full p-3 transition-all duration-500 ${
             isDarkMode
-              ? "border border-emerald-400/30 bg-emerald-400/10 hover:bg-emerald-400/20"
-              : "border border-blue-400/30 bg-blue-400/10 hover:bg-blue-400/20"
+              ? "border border-emerald-400/30 bg-emerald-400/10 hover:bg-emerald-400/20 hover:shadow-lg hover:shadow-emerald-500/20"
+              : "border border-blue-400/30 bg-blue-400/10 hover:bg-blue-400/20 hover:shadow-lg hover:shadow-blue-500/20"
           }`}
           aria-label="Toggle dark/light mode"
         >
-          <span className="text-2xl" style={{ filter: "brightness(0)" }}>{isDarkMode ? "🌙" : "☀️"}</span>
+          <div className="relative h-6 w-6 overflow-hidden">
+            {/* Sun */}
+            <svg
+              className={`absolute inset-0 h-6 w-6 transition-all duration-500 ${isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <circle cx="12" cy="12" r="5" className={isDarkMode ? "stroke-emerald-300" : "stroke-amber-500"} fill={isDarkMode ? "none" : "rgb(245 158 11 / 0.3)"} />
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+                <line
+                  key={angle}
+                  x1="12" y1="1" x2="12" y2="3"
+                  className={isDarkMode ? "stroke-emerald-300" : "stroke-amber-500"}
+                  transform={`rotate(${angle} 12 12)`}
+                  strokeLinecap="round"
+                />
+              ))}
+            </svg>
+            {/* Moon */}
+            <svg
+              className={`absolute inset-0 h-6 w-6 transition-all duration-500 ${isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path
+                d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                className={isDarkMode ? "stroke-emerald-300" : "stroke-blue-400"}
+                fill={isDarkMode ? "rgb(52 211 153 / 0.2)" : "none"}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
         </button>
       )}
 
-      {isHeaderVisible && <ChatbotPanel isDarkMode={isDarkMode} />}
+
+
+      <ChatbotPanel isDarkMode={isDarkMode} />
 
       {/* Game Selector Modal */}
       {showGameSelector && !selectedGame && (
@@ -1275,7 +1741,7 @@ export default function Home() {
                     <button
                       key={game.id}
                       onClick={() => setSelectedGame(game.id)}
-                      className={`group relative p-8 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 flex-shrink-0 w-[calc(33.333%-0.67rem)] md:w-[calc(33.333%-0.67rem)] ${
+                      className={`group relative p-4 sm:p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 flex-shrink-0 w-[calc(100%-0.67rem)] sm:w-[calc(50%-0.67rem)] md:w-[calc(33.333%-0.67rem)] ${
                         isDarkMode
                           ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
                           : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
