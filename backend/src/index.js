@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 4000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+const BACKUP_GROQ_API_KEY = process.env.BACKUP_GROQ_API_KEY || "";
+const EXTRA_GROQ_API_KEY = process.env.EXTRA_GROQ_API_KEY || "";
 
 // Groq API configuration (fast and free!)
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -62,8 +64,18 @@ app.get("/api/health", (_req, res) => {
 
 // Jarvis AI Chat Endpoint with Groq API
 app.post("/api/chat", async (req, res) => {
-  const { message } = req.body || {};
+  const { message, history } = req.body || {};
   const safeMessage = typeof message === "string" ? message.trim() : "";
+  const safeHistory = Array.isArray(history)
+    ? history
+        .filter((item) => item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string")
+        .map((item) => ({
+          role: item.role,
+          content: item.content.trim().slice(0, 2000),
+        }))
+        .filter((item) => item.content)
+        .slice(-10)
+    : [];
 
   console.log("Chat request received:", { safeMessage: safeMessage.substring(0, 50) });
 
@@ -73,8 +85,10 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
-  // If Groq key is not configured, return placeholder
-  if (!GROQ_API_KEY) {
+  const groqKeys = [GROQ_API_KEY, BACKUP_GROQ_API_KEY, EXTRA_GROQ_API_KEY].filter(Boolean);
+
+  // If Groq keys are not configured, return placeholder
+  if (!groqKeys.length) {
     console.error("GROQ_API_KEY is not configured");
     return res.status(500).json({
       reply: "AI service not configured. Please contact the site owner.",
@@ -107,6 +121,7 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 5. AI Stock Predictor: 1st place Barclays Data Hackathon winner. Custom RAT model fusing market data + news sentiment into trading signals.
 6. Jarvis AI Chatbot: This portfolio website's intelligent assistant using Groq API with Llama 3.3.
 7. mohitwrites.xyz: Poetry, essays, podcasts
+8. Samaya Nonprofit Website: Full-stack ticketing and management system for Samaya Global, a nonprofit supporting women and children. Built with React frontend and Node.js backend with real-time updates. Features include volunteer coordination, admin dashboards, operations tracking across multiple locations in US and India. Directly saves 100+ operational hours per cycle.
 
 **WORK EXPERIENCE:**
 - Microsoft: Incoming Product & Software Engineer (May 2026)
@@ -173,30 +188,58 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
 
     console.log("Calling Groq API with model:", GROQ_MODEL);
     
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: GROQ_MODEL,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
+    const conversationMessages = safeHistory.length
+      ? safeHistory
+      : [
           {
             role: "user",
             content: safeMessage,
           },
-        ],
-        temperature: 0.7,
-        max_tokens: 300,
-      },
-      {
-        headers: {
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        ];
+
+    let response;
+    let lastError;
+
+    for (const [index, apiKey] of groqKeys.entries()) {
+      try {
+        response = await axios.post(
+          GROQ_API_URL,
+          {
+            model: GROQ_MODEL,
+            messages: [
+              {
+                role: "system",
+                content: systemPrompt,
+              },
+              ...conversationMessages,
+            ],
+            temperature: 0.7,
+            max_tokens: 300,
+          },
+          {
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (index > 0) {
+          console.log("Groq request succeeded with a fallback API key");
+        }
+        break;
+      } catch (error) {
+        lastError = error;
+        const status = error?.response?.status;
+        const canRetryWithNextKey = index < groqKeys.length - 1 && (status === 401 || status === 429 || status >= 500 || !status);
+        if (!canRetryWithNextKey) {
+          throw error;
+        }
       }
-    );
+    }
+
+    if (!response && lastError) {
+      throw lastError;
+    }
 
     const reply = response.data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
     console.log("Groq response received successfully");
