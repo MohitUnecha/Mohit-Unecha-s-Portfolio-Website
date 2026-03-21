@@ -62,6 +62,17 @@ export const profile = {
     ]
   },
   {
+    role: "PayPal Career Academy Program",
+    company: "PayPal",
+    location: "Remote",
+    timeline: "Feb 2026 – Present",
+    highlights: [
+      "Selected for PayPal's Career Academy Program internship, gaining exposure to fintech, product thinking, and professional development",
+      "Building experience in cross-functional collaboration, analytical problem solving, and business-focused communication within a remote environment",
+      "Strengthening readiness for fast-paced product and technology roles through mentorship, workshops, and hands-on learning"
+    ]
+  },
+  {
     role: "Business Consulting Analyst",
     company: "Rutgers Consulting Group (RCG)",
     location: "New Brunswick, NJ",
@@ -82,29 +93,6 @@ export const profile = {
       "Managed 50+ client relationships, coordinating schedules, payments, communications, and performance logistics",
       "Led planning and execution for a 3-day cultural dance festival featuring 50+ performers and reaching an audience of 1M+ viewers",
       "Coordinated cross-functional teams across choreography, stage production, marketing, and operations to ensure on-time delivery"
-    ]
-  },
-  {
-    role: "Technology Lead",
-    company: "Samaya Global",
-    location: "Edison, NJ (Remote)",
-    timeline: "Jan 2025 – Present",
-    highlights: [
-      "Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children through education, care, and community empowerment",
-      "Managing a small team of developers, setting the technical roadmap, and collaborating with operations to turn program needs into scalable tools",
-      "Saved over 100 hours of manual operational work by streamlining workflows across sites in the US, India, and beyond",
-      "Improving response times, reducing errors, and enabling staff to spend more time on direct community impact"
-    ]
-  },
-  {
-    role: "2025 Possibilities Summit",
-    company: "Goldman Sachs",
-    location: "New York, NY",
-    timeline: "Jan 2025 – Jan 2026",
-    highlights: [
-      "Completed training in Operations, Risk, and Controllers, gaining technical exposure to financial controls, risk frameworks, and compliance processes",
-      "Engaged in case-based workshops on data-driven decision making, emerging technologies, and cross-functional collaboration",
-      "Networked with industry professionals and developed professional communication and problem-solving skills"
     ]
   },
   {
@@ -131,6 +119,29 @@ export const profile = {
     ]
   },
   {
+    role: "Technology Lead",
+    company: "Samaya Global",
+    location: "Edison, NJ (Remote)",
+    timeline: "Jan 2025 – Present",
+    highlights: [
+      "Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children through education, care, and community empowerment",
+      "Managing a small team of developers, setting the technical roadmap, and collaborating with operations to turn program needs into scalable tools",
+      "Saved over 100 hours of manual operational work by streamlining workflows across sites in the US, India, and beyond",
+      "Improving response times, reducing errors, and enabling staff to spend more time on direct community impact"
+    ]
+  },
+  {
+    role: "2025 Possibilities Summit",
+    company: "Goldman Sachs",
+    location: "New York, NY",
+    timeline: "Jan 2025 – Jan 2026",
+    highlights: [
+      "Completed training in Operations, Risk, and Controllers, gaining technical exposure to financial controls, risk frameworks, and compliance processes",
+      "Engaged in case-based workshops on data-driven decision making, emerging technologies, and cross-functional collaboration",
+      "Networked with industry professionals and developed professional communication and problem-solving skills"
+    ]
+  },
+  {
     role: "Coding & Chess Teacher",
     company: "Alpha Minds Academy",
     location: "Jersey City, NJ",
@@ -150,17 +161,6 @@ export const profile = {
       "Analyzed 15,000+ rows of tri-state charter, private, and public school data using SQL, Excel, and Power BI",
       "Identified key demographic and enrollment trends that informed strategy and messaging for a successful campaign launch",
       "Designed data visualizations and reports to communicate insights clearly to non-technical stakeholders"
-    ]
-  },
-  {
-    role: "PayPal Career Academy Program",
-    company: "PayPal",
-    location: "Remote",
-    timeline: "Feb 2026 – Present",
-    highlights: [
-      "Selected for PayPal's Career Academy Program internship, gaining exposure to fintech, product thinking, and professional development",
-      "Building experience in cross-functional collaboration, analytical problem solving, and business-focused communication within a remote environment",
-      "Strengthening readiness for fast-paced product and technology roles through mentorship, workshops, and hands-on learning"
     ]
   },
   {
