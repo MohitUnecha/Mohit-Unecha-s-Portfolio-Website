@@ -131,7 +131,8 @@ app.post("/api/chat", async (req, res) => {
 Mohit is a mission-driven, high-achieving builder who blends technology, business, and impact. His personal mission: "To lead with empathy and leave a lasting impact on society." He leads with empathy by being kind, understanding, and mindful of others, helping break down barriers and making people feel less alone. His biggest non-tech accomplishment is being a genuinely kind person and striving to stay that way every day.
 
 **CAREER PATH & AMBITIONS:**
-- Incoming Product & Software Engineer Intern at Microsoft (Summer 2026, Redmond) working on Microsoft 365 Core. He's excited to work with industry professionals and learn directly from his PM and managers during these three educational months.
+- Incoming Product & Software Engineer Intern at Microsoft (starting May 2026, Redmond) working on Microsoft 365 Core. He's excited to work with industry professionals and learn directly from his PM and managers during the internship.
+- PayPal Career Academy Program at PayPal (Feb 2026 – Present, Remote): Building exposure to fintech, product thinking, business-focused communication, and cross-functional collaboration through mentorship, workshops, and hands-on learning.
 - Technology Lead at Samaya Global (Jan 2025 – Present): Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children. Manages a small team of developers, sets the technical roadmap, and collaborates with operations. Saved 100+ hours of manual operational work, improving response times and reducing errors across sites in the US, India, and beyond.
 - Dream Role (5-10 years): Become a business owner using AI and technology to help clients achieve their goals, while continuing community service (like his current role as head volunteer at Hands of Hope)
 - Values impact over company name - as long as he's contributing meaningfully, supporting teammates, and meeting client expectations, he feels fulfilled
@@ -156,7 +157,7 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 - Microsoft: Incoming Product & Software Engineer (May 2026)
 - Samaya Global: Technology Lead (Jan 2025 – Present) - Leading dev team building internal ticketing system for nonprofit, saved 100+ hours of manual work
 - Rutgers Consulting Group: Business Consulting Analyst (Sep 2025 – Present) - Data-driven go-to-market models, dashboards, client recommendations
-- Rutgers/Barclays Hackathon: 1st Place AI/ML Developer (Nov 2025) - Built AI Stock Predictor with RAT model in 48 hours
+- Rutgers/Barclays Hackathon: 1st Place AI/ML Developer (Mar 2025) - Built AI Stock Predictor with RAT model in 48 hours
 - Satrangi School of Fusion: Project Manager (Jun 2025 – Present) - Managed 50+ clients, led 3-day festival with 1M+ viewers
 - Goldman Sachs: 2025 Possibilities Summit (Jan 2025 – Jan 2026) - Operations, Risk, Controllers training
 - Ernst & Young: Expedition EY Intern (Mar – May 2025) - Virtual consulting on tech-enabled business transformation
@@ -195,7 +196,7 @@ Why teaching matters: "We all started somewhere, and many students come from dif
 Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/in/mohitunecha | GitHub: github.com/MohitUnecha
 
 **WEBSITE INTERACTIVE FEATURES (things on this portfolio site):**
-- Role rotator: Typewriter in the hero cycles through 5 roles — Software Engineer, Product Manager, F1 Enthusiast, Builder & Creator, CS + Econ @ Rutgers
+- Role rotator: Typewriter in the hero cycles through 7 roles — Software Engineer, Product Manager, Consultant, Business Analyst, F1 Enthusiast, Builder & Creator, CS + Econ @ Rutgers
 - Scroll progress bar: Thin gradient line at the very top showing how far down the page you've scrolled
 - "Open to Opportunities" badge: Pulsing green dot in the hero section, links to the contact form
 - 3D tilt cards: Project cards tilt with 3D perspective toward the cursor when you hover

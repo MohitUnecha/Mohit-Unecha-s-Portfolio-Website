@@ -62,29 +62,6 @@ export const profile = {
     ]
   },
   {
-    role: "Intern",
-    company: "PayPal Career Academy Program",
-    location: "Remote",
-    timeline: "Feb 2026 – Present",
-    highlights: [
-      "Participating in PayPal's Career Academy Program internship with exposure to fintech, product thinking, and professional development",
-      "Building experience in cross-functional collaboration, analytical problem solving, and business-focused communication within a remote setting",
-      "Strengthening readiness for fast-paced product and technology roles through mentorship, workshops, and hands-on learning"
-    ]
-  },
-  {
-    role: "Technology Lead",
-    company: "Samaya Global",
-    location: "Edison, NJ (Remote)",
-    timeline: "Jan 2025 – Present",
-    highlights: [
-      "Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children through education, care, and community empowerment",
-      "Managing a small team of developers, setting the technical roadmap, and collaborating with operations to turn program needs into scalable tools",
-      "Saved over 100 hours of manual operational work by streamlining workflows across sites in the US, India, and beyond",
-      "Improving response times, reducing errors, and enabling staff to spend more time on direct community impact"
-    ]
-  },
-  {
     role: "Business Consulting Analyst",
     company: "Rutgers Consulting Group (RCG)",
     location: "New Brunswick, NJ",
@@ -94,17 +71,6 @@ export const profile = {
       "Developed dashboards and analytical models evaluating 3+ business scenarios to quantify revenue potential, risk, and scalability",
       "Synthesized qualitative and quantitative insights into structured frameworks and slide-ready deliverables for stakeholders",
       "Partnered with a 4-person consulting team to define problem statements, test hypotheses, and deliver client-ready recommendations"
-    ]
-  },
-  {
-    role: "Hackathon Winner & AI/ML Developer",
-    company: "Rutgers University (Barclays Data Hackathon)",
-    location: "New Jersey",
-    timeline: "Nov 2025",
-    highlights: [
-      "Led a team to 1st place by designing and building an AI Stock Predictor using a Retrieval-Augmented Transformer (RAT) model",
-      "Integrated real-time market data, financial news, and sentiment analysis to generate data-backed trading signals",
-      "Built a functional prototype within 48 hours, demonstrating technical execution, teamwork, and rapid iteration under pressure"
     ]
   },
   {
@@ -119,25 +85,15 @@ export const profile = {
     ]
   },
   {
-    role: "Jr. Data Research Intern",
-    company: "Right Angle Solution",
-    location: "New Brunswick, NJ",
-    timeline: "Jun 2024 – Present",
+    role: "Technology Lead",
+    company: "Samaya Global",
+    location: "Edison, NJ (Remote)",
+    timeline: "Jan 2025 – Present",
     highlights: [
-      "Analyzed 15,000+ rows of tri-state charter, private, and public school data using SQL, Excel, and Power BI",
-      "Identified key demographic and enrollment trends that informed strategy and messaging for a successful campaign launch",
-      "Designed data visualizations and reports to communicate insights clearly to non-technical stakeholders"
-    ]
-  },
-  {
-    role: "Coding & Chess Teacher",
-    company: "Alpha Minds Academy",
-    location: "Jersey City, NJ",
-    timeline: "Sep 2024 – Present",
-    highlights: [
-      "Taught and mentored 250+ students in Python, Scratch, and computational thinking through structured lesson plans",
-      "Developed customized learning materials to improve student engagement and retention",
-      "Maintained strong relationships with parents and students, consistently receiving positive feedback"
+      "Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children through education, care, and community empowerment",
+      "Managing a small team of developers, setting the technical roadmap, and collaborating with operations to turn program needs into scalable tools",
+      "Saved over 100 hours of manual operational work by streamlining workflows across sites in the US, India, and beyond",
+      "Improving response times, reducing errors, and enabling staff to spend more time on direct community impact"
     ]
   },
   {
@@ -161,6 +117,50 @@ export const profile = {
       "Gained a practical understanding of what consulting entails, including problem structuring, stakeholder management, and solution delivery",
       "Worked through real-world case scenarios involving client discovery, data analysis, and strategic recommendations",
       "Learned how consultants balance technical insights with business strategy to create measurable client impact"
+    ]
+  },
+  {
+    role: "Hackathon Winner & AI/ML Developer",
+    company: "Rutgers University (Barclays Data Hackathon)",
+    location: "New Jersey",
+    timeline: "Mar 2025",
+    highlights: [
+      "Led a team to 1st place by designing and building an AI Stock Predictor using a Retrieval-Augmented Transformer (RAT) model",
+      "Integrated real-time market data, financial news, and sentiment analysis to generate data-backed trading signals",
+      "Built a functional prototype within 48 hours, demonstrating technical execution, teamwork, and rapid iteration under pressure"
+    ]
+  },
+  {
+    role: "Coding & Chess Teacher",
+    company: "Alpha Minds Academy",
+    location: "Jersey City, NJ",
+    timeline: "Sep 2024 – Present",
+    highlights: [
+      "Taught and mentored 250+ students in Python, Scratch, and computational thinking through structured lesson plans",
+      "Developed customized learning materials to improve student engagement and retention",
+      "Maintained strong relationships with parents and students, consistently receiving positive feedback"
+    ]
+  },
+  {
+    role: "Jr. Data Research Intern",
+    company: "Right Angle Solution",
+    location: "New Brunswick, NJ",
+    timeline: "Jun 2024 – Present",
+    highlights: [
+      "Analyzed 15,000+ rows of tri-state charter, private, and public school data using SQL, Excel, and Power BI",
+      "Identified key demographic and enrollment trends that informed strategy and messaging for a successful campaign launch",
+      "Designed data visualizations and reports to communicate insights clearly to non-technical stakeholders"
+    ]
+  },
+  {
+    role: "PayPal Career Academy Program",
+    company: "PayPal",
+    location: "Remote",
+    timeline: "Feb 2026 – Present",
+    highlights: [
+      "Selected for PayPal's Career Academy Program internship, gaining exposure to fintech, product thinking, and professional development",
+      "Building experience in cross-functional collaboration, analytical problem solving, and business-focused communication within a remote environment",
+      "Strengthening readiness for fast-paced product and technology roles through mentorship, workshops, and hands-on learning"
     ]
   },
   {

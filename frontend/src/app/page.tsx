@@ -97,7 +97,7 @@ export default function Home() {
   const playVoiceIntro = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's an aspiring product manager and software engineer headed to Microsoft this summer, where he'll work on products used by millions. He leads tech at a nonprofit supporting women and children, has volunteered over 3000 hours as a lead volunteer at Hands of Hope, and is passionate about formula one and building intelligent AI solutions. When he's not coding or mentoring, you'll find him analyzing race data or exploring the intersection of tech and social impact. Feel free to explore his work — or chat with Jarvis to learn more!";
+    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's an aspiring product manager and software engineer headed to Microsoft in May 2026, where he'll work on products used by millions. He also participates in PayPal's Career Academy Program, leads tech at a nonprofit supporting women and children, has volunteered over 3000 hours as a lead volunteer at Hands of Hope, and is passionate about formula one and building intelligent AI solutions. When he's not coding or mentoring, you'll find him analyzing race data or exploring the intersection of tech and social impact. Feel free to explore his work — or chat with Jarvis to learn more!";
     const utterance = new SpeechSynthesisUtterance(introText);
     utterance.rate = 0.95;
     utterance.pitch = 1;
