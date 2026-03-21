@@ -21,7 +21,6 @@ export default function Home() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
@@ -75,6 +74,22 @@ export default function Home() {
     `こんにちは、${firstName}です。`,
     `안녕, 나는 ${firstName}.`,
     `你好，我是${firstName}。`,
+  ];
+  const arcadeGames = [
+    { id: "snake", emoji: "🐍", title: "Snake", desc: "Classic snake game" },
+    { id: "pong", emoji: "🏓", title: "Pong", desc: "Arcade tennis" },
+    { id: "tetris", emoji: "🟦", title: "Tetris", desc: "Block stacking" },
+    { id: "flappy", emoji: "🐦", title: "Flappy Bird", desc: "Tap to fly" },
+    { id: "2048", emoji: "🔢", title: "2048", desc: "Merge tiles" },
+    { id: "breakout", emoji: "🧱", title: "Breakout", desc: "Brick breaker" },
+    { id: "memory", emoji: "🧠", title: "Memory", desc: "Match pairs" },
+    { id: "invaders", emoji: "👾", title: "Space Invaders", desc: "Shoot aliens" },
+    { id: "simon", emoji: "🎵", title: "Simon Says", desc: "Repeat sequence" },
+    { id: "tictactoe", emoji: "❌", title: "Tic Tac Toe", desc: "Get 3 in a row" },
+    { id: "race", emoji: "🏎️", title: "Race", desc: "Dodge obstacles" },
+    { id: "whack", emoji: "🦫", title: "Whack-a-Mole", desc: "Hit the moles" },
+    { id: "wordle", emoji: "📝", title: "Wordle", desc: "Guess the word" },
+    { id: "zip", emoji: "🧩", title: "Zip", desc: "Connect the dots" },
   ];
 
   const getTypeDelay = (text: string, index: number, base: number) => {
@@ -1665,11 +1680,11 @@ export default function Home() {
       {/* Game Selector Modal */}
       {showGameSelector && !selectedGame && (
         <div 
-          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md overflow-hidden"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/95 p-4 backdrop-blur-md"
           onClick={() => setShowGameSelector(false)}
         >
           <div 
-            className={`relative rounded-3xl border-2 p-8 shadow-2xl max-w-5xl w-full mx-4 ${
+            className={`relative w-full max-w-6xl rounded-3xl border-2 p-5 shadow-2xl sm:p-8 ${
               isDarkMode 
                 ? "border-emerald-400/40 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30" 
                 : "border-blue-400/40 bg-gradient-to-br from-white via-white to-blue-50"
@@ -1684,113 +1699,38 @@ export default function Home() {
             >
               ×
             </button>
-            <h2 className={`mb-8 text-3xl font-bold text-center ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+            <h2 className={`mb-2 text-center text-3xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
               🎮 Choose Your Game
             </h2>
-            
-            {/* Carousel */}
-            <div className="relative">
-              {/* Navigation Arrows */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCarouselIndex(Math.max(0, carouselIndex - 1));
-                }}
-                disabled={carouselIndex === 0}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                  carouselIndex === 0
-                    ? "opacity-30 cursor-not-allowed"
-                    : isDarkMode
-                    ? "bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/50"
-                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/50"
-                } text-white text-2xl font-bold`}
-              >
-                ‹
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCarouselIndex(Math.min(11, carouselIndex + 1));
-                }}
-                disabled={carouselIndex === 11}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                  carouselIndex === 11
-                    ? "opacity-30 cursor-not-allowed"
-                    : isDarkMode
-                    ? "bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/50"
-                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/50"
-                } text-white text-2xl font-bold`}
-              >
-                ›
-              </button>
+            <p className={`mb-6 text-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+              Built to work with keyboard, mouse, and touch.
+            </p>
 
-              {/* Games Container */}
-              <div className="overflow-hidden px-2">
-                <div 
-                  className="flex transition-transform duration-500 ease-out gap-4"
-                  style={{ transform: `translateX(-${carouselIndex * (100 / 3)}%)` }}
-                >
-                  {[
-                    { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
-                    { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
-                    { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
-                    { id: 'flappy', name: '🐦 Flappy Bird', desc: 'Tap to fly' },
-                    { id: '2048', name: '🔢 2048', desc: 'Merge tiles' },
-                    { id: 'breakout', name: '🧱 Breakout', desc: 'Brick breaker' },
-                    { id: 'memory', name: '🧠 Memory', desc: 'Match pairs' },
-                    { id: 'invaders', name: '👾 Space Invaders', desc: 'Shoot aliens' },
-                    { id: 'simon', name: '🎵 Simon Says', desc: 'Repeat sequence' },
-                    { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
-                    { id: 'race', name: '🏎️ Race', desc: 'Dodge obstacles' },
-                    { id: 'whack', name: '🦫 Whack-a-Mole', desc: 'Hit the moles' },
-                    { id: 'wordle', name: '📝 Wordle', desc: 'Guess the word' },
-                    { id: 'zip', name: '🧩 Zip', desc: 'Connect the dots' },
-                  ].map((game) => (
-                    <button
-                      key={game.id}
-                      onClick={() => setSelectedGame(game.id)}
-                      className={`group relative p-4 sm:p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 flex-shrink-0 w-[calc(100%-0.67rem)] sm:w-[calc(50%-0.67rem)] md:w-[calc(33.333%-0.67rem)] ${
-                        isDarkMode
-                          ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
-                          : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
-                      }`}
-                    >
-                      <div className={`text-5xl mb-4 transition-transform duration-300 group-hover:scale-110`}>
-                        {game.name.split(' ')[0]}
-                      </div>
-                      <div className={`font-bold text-lg mb-2 ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
-                        {game.name.substring(game.name.indexOf(' ') + 1)}
-                      </div>
-                      <div className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-                        {game.desc}
-                      </div>
-                      <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                        isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
-                      }`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dots Indicator */}
-              <div className="flex justify-center gap-2 mt-6">
-                {Array.from({ length: 12 }).map((_, i) => (
+            <div className="max-h-[70vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {arcadeGames.map((game) => (
                   <button
-                    key={i}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCarouselIndex(i);
-                    }}
-                    className={`h-2 rounded-full transition-all ${
-                      i === carouselIndex
-                        ? isDarkMode
-                          ? "w-8 bg-emerald-400"
-                          : "w-8 bg-blue-600"
-                        : isDarkMode
-                        ? "w-2 bg-slate-600 hover:bg-slate-500"
-                        : "w-2 bg-slate-300 hover:bg-slate-400"
+                    key={game.id}
+                    onClick={() => setSelectedGame(game.id)}
+                    className={`group relative rounded-2xl border-2 p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] sm:p-6 ${
+                      isDarkMode
+                        ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
+                        : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
                     }`}
-                  />
+                  >
+                    <div className="mb-4 text-5xl transition-transform duration-300 group-hover:scale-110">
+                      {game.emoji}
+                    </div>
+                    <div className={`mb-2 text-lg font-bold ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
+                      {game.title}
+                    </div>
+                    <div className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+                      {game.desc}
+                    </div>
+                    <div className={`pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
+                      isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
+                    }`} />
+                  </button>
                 ))}
               </div>
             </div>
@@ -1801,11 +1741,11 @@ export default function Home() {
       {/* Selected Game Modal */}
       {showGameSelector && selectedGame && (
         <div 
-          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/90 p-4 backdrop-blur-sm"
           onClick={() => { setSelectedGame(null); setShowGameSelector(false); }}
         >
           <div 
-            className={`relative rounded-2xl border p-8 shadow-2xl ${
+            className={`relative max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl border p-4 shadow-2xl sm:p-8 ${
               isDarkMode 
                 ? "border-emerald-400/30 bg-slate-900" 
                 : "border-blue-400/30 bg-white"
@@ -1846,16 +1786,28 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
   const [gameKey, setGameKey] = React.useState(0);
+  const controlsRef = React.useRef<{
+    up: () => void;
+    down: () => void;
+    left: () => void;
+    right: () => void;
+  }>({
+    up: () => {},
+    down: () => {},
+    left: () => {},
+    right: () => {},
+  });
 
   const restartGame = () => {
     setScore(0);
     setGameOver(false);
-    setGameKey(prev => prev + 1);
+    setGameKey((prev) => prev + 1);
   };
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const controls = controlsRef.current;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -1865,24 +1817,57 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
     canvas.width = gridSize * tileCount;
     canvas.height = gridSize * tileCount;
 
-    let snake = [{ x: 10, y: 10 }];
+    const snake = [{ x: 10, y: 10 }];
     let food = { x: 15, y: 15 };
     let dx = 0;
     let dy = 0;
     let gameRunning = true;
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const setDirection = (nextDx: number, nextDy: number) => {
+      if (!gameRunning) return;
+      if (nextDx !== 0 && dx === -nextDx) return;
+      if (nextDy !== 0 && dy === -nextDy) return;
+      dx = nextDx;
+      dy = nextDy;
+    };
+
+    controls.up = () => setDirection(0, -1);
+    controls.down = () => setDirection(0, 1);
+    controls.left = () => setDirection(-1, 0);
+    controls.right = () => setDirection(1, 0);
 
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (gameOver) {
-        restartGame();
-        return;
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
+      e.preventDefault();
+      if (e.key === "ArrowUp") setDirection(0, -1);
+      if (e.key === "ArrowDown") setDirection(0, 1);
+      if (e.key === "ArrowLeft") setDirection(-1, 0);
+      if (e.key === "ArrowRight") setDirection(1, 0);
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      const dxTouch = touch.clientX - touchStartX;
+      const dyTouch = touch.clientY - touchStartY;
+      if (Math.abs(dxTouch) < 24 && Math.abs(dyTouch) < 24) return;
+      if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
+        setDirection(dxTouch > 0 ? 1 : -1, 0);
+      } else {
+        setDirection(0, dyTouch > 0 ? 1 : -1);
       }
-      if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -1; }
-      if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 1; }
-      if (e.key === "ArrowLeft" && dx === 0) { dx = -1; dy = 0; }
-      if (e.key === "ArrowRight" && dx === 0) { dx = 1; dy = 0; }
     };
 
     window.addEventListener("keydown", handleKeyPress);
+    canvas.addEventListener("touchstart", handleTouchStart);
+    canvas.addEventListener("touchend", handleTouchEnd);
 
     const gameLoop = setInterval(() => {
       if (!gameRunning) return;
@@ -1937,28 +1922,55 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
     return () => {
       clearInterval(gameLoop);
       window.removeEventListener("keydown", handleKeyPress);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      controls.up = () => {};
+      controls.down = () => {};
+      controls.left = () => {};
+      controls.right = () => {};
     };
-  }, [isDarkMode, gameOver, gameKey]);
+  }, [isDarkMode, gameKey]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
         Score: {score}
       </div>
       <canvas 
         ref={canvasRef}
-        className="rounded-lg border-2"
+        className="block rounded-lg border-2 select-none"
         style={{ 
-          borderColor: isDarkMode ? "#10b981" : "#3b82f6"
+          borderColor: isDarkMode ? "#10b981" : "#3b82f6",
+          width: "100%",
+          maxWidth: "400px",
+          height: "auto",
+          touchAction: "none",
         }}
       />
+      <div className="flex flex-wrap justify-center gap-2">
+        <button onClick={() => controlsRef.current.up()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
+          Up
+        </button>
+        <button onClick={() => controlsRef.current.left()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
+          Left
+        </button>
+        <button onClick={() => controlsRef.current.down()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
+          Down
+        </button>
+        <button onClick={() => controlsRef.current.right()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
+          Right
+        </button>
+        <button onClick={restartGame} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
+          Restart
+        </button>
+      </div>
       {gameOver && (
         <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>
-          Game Over! Press any arrow key to restart.
+          Game Over! Tap restart to go again.
         </p>
       )}
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-        Use arrow keys to play
+      <p className={`text-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        Use arrow keys, swipe, or the on-screen controls.
       </p>
     </div>
   );

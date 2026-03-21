@@ -2,6 +2,19 @@
 
 import React from "react";
 
+const getArcadeCanvasStyle = (isDarkMode: boolean, maxWidth: number) => ({
+  borderColor: isDarkMode ? "#10b981" : "#3b82f6",
+  width: "100%",
+  maxWidth: `${maxWidth}px`,
+  height: "auto",
+  touchAction: "none" as const,
+});
+
+const getControlButtonClass = (isDarkMode: boolean) =>
+  `rounded-lg px-4 py-2 font-semibold text-white transition ${
+    isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"
+  }`;
+
 // Pong Game
 export function PongGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -84,12 +97,12 @@ export function PongGame({ isDarkMode }: { isDarkMode: boolean }) {
   }, [isDarkMode]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Pong</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
         You: {score.player} | Computer: {score.computer}
       </div>
-      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      <canvas ref={canvasRef} className="block rounded-lg border-2 select-none" style={getArcadeCanvasStyle(isDarkMode, 600)} />
       <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Move mouse or touch to control</p>
     </div>
   );
@@ -100,6 +113,7 @@ export function FlappyGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const [resetKey, setResetKey] = React.useState(0);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -116,17 +130,8 @@ export function FlappyGame({ isDarkMode }: { isDarkMode: boolean }) {
     let gameRunning = true;
 
     const handleClick = () => {
-      if (gameOver) {
-        setGameOver(false);
-        setScore(0);
-        birdY = 250;
-        velocity = 0;
-        pipes = [];
-        frameCount = 0;
-        gameRunning = true;
-      } else {
-        velocity = -8;
-      }
+      if (!gameRunning) return;
+      velocity = -8;
     };
 
     const handleTouch = (e: TouchEvent) => {
@@ -189,14 +194,27 @@ export function FlappyGame({ isDarkMode }: { isDarkMode: boolean }) {
       canvas.removeEventListener("click", handleClick);
       canvas.removeEventListener("touchstart", handleTouch);
     };
-  }, [isDarkMode, gameOver]);
+  }, [isDarkMode, resetKey]);
+
+  const restart = () => {
+    setScore(0);
+    setGameOver(false);
+    setResetKey((prev) => prev + 1);
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Flappy Bird</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
-      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
-      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over! Click to restart</p>}
+      <canvas ref={canvasRef} className="block rounded-lg border-2 select-none" style={getArcadeCanvasStyle(isDarkMode, 400)} />
+      {gameOver && (
+        <>
+          <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>
+          <button onClick={restart} className={getControlButtonClass(isDarkMode)}>
+            Play Again
+          </button>
+        </>
+      )}
       <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Click or tap to flap</p>
     </div>
   );
@@ -351,6 +369,7 @@ export function TetrisGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const [resetKey, setResetKey] = React.useState(0);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -443,6 +462,9 @@ export function TetrisGame({ isDarkMode }: { isDarkMode: boolean }) {
     };
 
     const handleKey = (e: KeyboardEvent) => {
+      if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp"].includes(e.key)) {
+        e.preventDefault();
+      }
       if (e.key === "ArrowLeft") move("left");
       if (e.key === "ArrowRight") move("right");
       if (e.key === "ArrowDown") move("down");
@@ -501,14 +523,27 @@ export function TetrisGame({ isDarkMode }: { isDarkMode: boolean }) {
       window.removeEventListener("keydown", handleKey);
       canvas.removeEventListener("touchstart", handleTouch);
     };
-  }, [isDarkMode, gameOver]);
+  }, [isDarkMode, resetKey]);
+
+  const restart = () => {
+    setScore(0);
+    setGameOver(false);
+    setResetKey((prev) => prev + 1);
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Tetris</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
-      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
-      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>}
+      <canvas ref={canvasRef} className="block rounded-lg border-2 select-none" style={getArcadeCanvasStyle(isDarkMode, 300)} />
+      {gameOver && (
+        <>
+          <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>
+          <button onClick={restart} className={getControlButtonClass(isDarkMode)}>
+            Play Again
+          </button>
+        </>
+      )}
       <p className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
         Keyboard: Arrow keys | Touch: Tap sides to move, top to rotate
       </p>
@@ -521,6 +556,7 @@ export function BreakoutGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const [resetKey, setResetKey] = React.useState(0);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -533,6 +569,7 @@ export function BreakoutGame({ isDarkMode }: { isDarkMode: boolean }) {
 
     let ballX = 240, ballY = 400, ballDX = 4, ballDY = -4;
     let paddleX = 200;
+    let gameRunning = true;
     const paddleW = 80, paddleH = 10;
 
     const bricks: { x: number; y: number; status: number }[] = [];
@@ -557,12 +594,14 @@ export function BreakoutGame({ isDarkMode }: { isDarkMode: boolean }) {
     canvas.addEventListener("touchmove", handleTouchMove);
 
     const gameLoop = setInterval(() => {
+      if (!gameRunning) return;
       ballX += ballDX;
       ballY += ballDY;
 
       if (ballX <= 0 || ballX >= canvas.width) ballDX *= -1;
       if (ballY <= 0) ballDY *= -1;
       if (ballY >= canvas.height) {
+        gameRunning = false;
         setGameOver(true);
         return;
       }
@@ -600,14 +639,27 @@ export function BreakoutGame({ isDarkMode }: { isDarkMode: boolean }) {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [isDarkMode, gameOver]);
+  }, [isDarkMode, resetKey]);
+
+  const restart = () => {
+    setScore(0);
+    setGameOver(false);
+    setResetKey((prev) => prev + 1);
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Breakout</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
-      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
-      {gameOver && <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>}
+      <canvas ref={canvasRef} className="block rounded-lg border-2 select-none" style={getArcadeCanvasStyle(isDarkMode, 480)} />
+      {gameOver && (
+        <>
+          <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over!</p>
+          <button onClick={restart} className={getControlButtonClass(isDarkMode)}>
+            Play Again
+          </button>
+        </>
+      )}
       <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Move mouse or touch to control paddle</p>
     </div>
   );
@@ -685,6 +737,7 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const [resetKey, setResetKey] = React.useState(0);
   const gameStateRef = React.useRef({
     playerX: 180,
     bullets: [] as { x: number; y: number }[],
@@ -751,7 +804,6 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
       const state = gameStateRef.current;
       
       if (!state.gameRunning) {
-        animationId = requestAnimationFrame(gameLoop);
         return;
       }
 
@@ -824,20 +876,23 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
       canvas.removeEventListener("touchstart", handleTouch);
       cancelAnimationFrame(animationId);
     };
-  }, [isDarkMode, gameOver]);
+  }, [isDarkMode, resetKey]);
+
+  const restart = () => {
+    setScore(0);
+    setGameOver(false);
+    setResetKey((prev) => prev + 1);
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Space Invaders</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
-      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      <canvas ref={canvasRef} className="block rounded-lg border-2 select-none" style={getArcadeCanvasStyle(isDarkMode, 400)} />
       {gameOver && (
         <>
           <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Game Over! Final Score: {score}</p>
-          <button 
-            onClick={() => { setScore(0); setGameOver(false); }}
-            className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
-          >
+          <button onClick={restart} className={getControlButtonClass(isDarkMode)}>
             Play Again
           </button>
         </>
@@ -988,95 +1043,129 @@ export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
+  const [resetKey, setResetKey] = React.useState(0);
+  const controlsRef = React.useRef<{ left: () => void; right: () => void }>({
+    left: () => {},
+    right: () => {},
+  });
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const controls = controlsRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     canvas.width = 400;
     canvas.height = 600;
 
-    let carX = 175;
-    let carY = 500;
-    let obstacles: { x: number; y: number; lane: number }[] = [];
+    const carY = 500;
+    const lanes = [80, 160, 240, 320];
+    let playerLane = 1;
+    let obstacles: { lane: number; y: number }[] = [];
     let speed = 3;
     let roadOffset = 0;
     let animationId: number;
     let localScore = 0;
-
-    const lanes = [50, 150, 250, 350];
+    let gameRunning = true;
 
     const addObstacle = () => {
       const lane = Math.floor(Math.random() * 4);
-      obstacles.push({ x: lanes[lane], y: -50, lane });
+      obstacles.push({ lane, y: -80 });
     };
 
     let obstacleTimer = 0;
+    const moveCar = (direction: -1 | 1) => {
+      if (!gameRunning) return;
+      playerLane = Math.max(0, Math.min(lanes.length - 1, playerLane + direction));
+    };
+
+    controls.left = () => moveCar(-1);
+    controls.right = () => moveCar(1);
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft" && carX > 50) carX -= 100;
-      if (e.key === "ArrowRight" && carX < 350) carX += 100;
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        moveCar(-1);
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        moveCar(1);
+      }
     };
 
     const handleTouch = (e: TouchEvent) => {
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const touchX = e.touches[0].clientX - rect.left;
-      if (touchX < canvas.width / 2 && carX > 50) carX -= 100;
-      if (touchX > canvas.width / 2 && carX < 350) carX += 100;
+      if (touchX < canvas.width / 2) moveCar(-1);
+      if (touchX > canvas.width / 2) moveCar(1);
     };
 
     const gameLoop = () => {
-      if (gameOver) return;
+      if (!gameRunning) return;
 
       roadOffset = (roadOffset + speed) % 40;
 
-      ctx.fillStyle = isDarkMode ? "#1e293b" : "#94a3b8";
+      ctx.fillStyle = isDarkMode ? "#0f172a" : "#dbeafe";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = isDarkMode ? "#1e293b" : "#94a3b8";
+      ctx.fillRect(40, 0, 320, canvas.height);
 
       // Draw road lanes
-      ctx.strokeStyle = isDarkMode ? "#475569" : "#cbd5e1";
-      ctx.lineWidth = 4;
-      for (let i = 0; i < canvas.height; i += 40) {
+      ctx.strokeStyle = isDarkMode ? "#64748b" : "#e2e8f0";
+      ctx.lineWidth = 5;
+      ctx.setLineDash([22, 18]);
+      for (let lane = 1; lane < lanes.length; lane++) {
         ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, i + roadOffset);
-        ctx.lineTo(canvas.width / 2, i + roadOffset + 20);
+        ctx.moveTo(40 + lane * 80, -40 + roadOffset);
+        ctx.lineTo(40 + lane * 80, canvas.height);
         ctx.stroke();
       }
+      ctx.setLineDash([]);
 
-      // Draw car
-      ctx.fillStyle = isDarkMode ? "#10b981" : "#3b82f6";
-      ctx.fillRect(carX - 20, carY, 40, 60);
+      const carX = lanes[playerLane];
+      ctx.fillStyle = isDarkMode ? "#10b981" : "#2563eb";
+      ctx.fillRect(carX - 22, carY, 44, 72);
+      ctx.fillStyle = isDarkMode ? "#a7f3d0" : "#93c5fd";
+      ctx.fillRect(carX - 12, carY + 10, 24, 18);
+      ctx.fillStyle = isDarkMode ? "#0f172a" : "#1e293b";
+      ctx.fillRect(carX - 20, carY + 14, 6, 14);
+      ctx.fillRect(carX + 14, carY + 14, 6, 14);
 
       // Draw obstacles
-      obstacles.forEach((obs, i) => {
+      obstacles = obstacles.filter((obs) => {
         obs.y += speed;
+        const obstacleX = lanes[obs.lane];
         ctx.fillStyle = "#ef4444";
-        ctx.fillRect(obs.x - 20, obs.y, 40, 60);
+        ctx.fillRect(obstacleX - 22, obs.y, 44, 72);
+        ctx.fillStyle = "#fecaca";
+        ctx.fillRect(obstacleX - 12, obs.y + 10, 24, 18);
 
         // Collision detection
         if (
-          obs.y + 60 > carY &&
-          obs.y < carY + 60 &&
-          Math.abs(obs.x - carX) < 40
+          obs.lane === playerLane &&
+          obs.y + 72 > carY &&
+          obs.y < carY + 72
         ) {
+          gameRunning = false;
           setGameOver(true);
+          return false;
         }
 
         // Remove passed obstacles and increase score
         if (obs.y > canvas.height) {
-          obstacles.splice(i, 1);
           localScore++;
           setScore(localScore);
           if (localScore % 10 === 0 && speed < 8) speed += 0.3;
+          return false;
         }
+        return true;
       });
 
       // Add new obstacles
       obstacleTimer++;
-      if (obstacleTimer > 60 / speed) {
+      if (obstacleTimer > Math.max(24, 75 - speed * 6)) {
         addObstacle();
         obstacleTimer = 0;
       }
@@ -1092,26 +1181,39 @@ export function RaceGame({ isDarkMode }: { isDarkMode: boolean }) {
       window.removeEventListener("keydown", handleKey);
       canvas.removeEventListener("touchstart", handleTouch);
       cancelAnimationFrame(animationId);
+      controls.left = () => {};
+      controls.right = () => {};
     };
-  }, [isDarkMode, gameOver]);
+  }, [isDarkMode, resetKey]);
+
+  const restart = () => {
+    setScore(0);
+    setGameOver(false);
+    setResetKey((prev) => prev + 1);
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <h2 className={`text-2xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>Race Game</h2>
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Score: {score}</div>
-      <canvas ref={canvasRef} className="rounded-lg border-2" style={{ borderColor: isDarkMode ? "#10b981" : "#3b82f6" }} />
+      <canvas ref={canvasRef} className="block rounded-lg border-2 select-none" style={getArcadeCanvasStyle(isDarkMode, 400)} />
+      <div className="flex gap-3">
+        <button onClick={() => controlsRef.current.left()} className={getControlButtonClass(isDarkMode)}>
+          Left
+        </button>
+        <button onClick={() => controlsRef.current.right()} className={getControlButtonClass(isDarkMode)}>
+          Right
+        </button>
+      </div>
       {gameOver && (
         <>
           <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Crashed! Final Score: {score}</p>
-          <button 
-            onClick={() => { setScore(0); setGameOver(false); }}
-            className={`px-6 py-2 rounded-lg font-semibold ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"} text-white`}
-          >
+          <button onClick={restart} className={getControlButtonClass(isDarkMode)}>
             Play Again
           </button>
         </>
       )}
-      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys or tap left/right to dodge</p>
+      <p className={`text-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>Arrow keys, taps, or buttons to change lanes and dodge traffic.</p>
     </div>
   );
 }
