@@ -77,6 +77,14 @@ export default function Home() {
     `你好，我是${firstName}。`,
   ];
 
+  const getTypeDelay = (text: string, index: number, base: number) => {
+    const nextChar = text[index] ?? "";
+    if (/[.!?]/.test(nextChar)) return base + 120;
+    if (/[,\u3001]/.test(nextChar)) return base + 70;
+    if (/\s/.test(nextChar)) return Math.max(base - 6, 18);
+    return base + ((index % 3) - 1) * 6;
+  };
+
   const handleCardTilt = (e: React.MouseEvent<HTMLElement>, id: string) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
@@ -114,15 +122,18 @@ export default function Home() {
 
     if (greetingPhase === "typing") {
       if (displayedText.length < currentGreeting.length) {
-        timeout = setTimeout(() => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)), 40);
+        timeout = setTimeout(
+          () => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)),
+          getTypeDelay(currentGreeting, displayedText.length, 32)
+        );
       } else {
-        timeout = setTimeout(() => setGreetingPhase("pausing"), 600);
+        timeout = setTimeout(() => setGreetingPhase("pausing"), 850);
       }
     } else if (greetingPhase === "pausing") {
-      timeout = setTimeout(() => setGreetingPhase("erasing"), 100);
+      timeout = setTimeout(() => setGreetingPhase("erasing"), 90);
     } else {
       if (displayedText.length > 0) {
-        timeout = setTimeout(() => setDisplayedText(displayedText.slice(0, -1)), 10);
+        timeout = setTimeout(() => setDisplayedText(displayedText.slice(0, -1)), 16);
       } else {
         setGreetingIndex((prev) => (prev + 1) % greetings.length);
         setGreetingPhase("typing");
@@ -139,15 +150,18 @@ export default function Home() {
 
     if (rolePhase === "typing") {
       if (roleText.length < currentRole.length) {
-        timeout = setTimeout(() => setRoleText(currentRole.slice(0, roleText.length + 1)), 35);
+        timeout = setTimeout(
+          () => setRoleText(currentRole.slice(0, roleText.length + 1)),
+          getTypeDelay(currentRole, roleText.length, 28)
+        );
       } else {
-        timeout = setTimeout(() => setRolePhase("pausing"), 1200);
+        timeout = setTimeout(() => setRolePhase("pausing"), 950);
       }
     } else if (rolePhase === "pausing") {
-      timeout = setTimeout(() => setRolePhase("erasing"), 200);
+      timeout = setTimeout(() => setRolePhase("erasing"), 110);
     } else if (rolePhase === "erasing") {
       if (roleText.length > 0) {
-        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 18);
+        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 14);
       } else {
         setRoleIndex((prev) => (prev + 1) % roles.length);
         setRolePhase("typing");
