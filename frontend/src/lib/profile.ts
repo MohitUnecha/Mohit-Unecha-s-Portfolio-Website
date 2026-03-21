@@ -62,6 +62,17 @@ export const profile = {
     ]
   },
   {
+    role: "Intern",
+    company: "PayPal Career Academy Program",
+    location: "Remote",
+    timeline: "Feb 2026 – Present",
+    highlights: [
+      "Participating in PayPal's Career Academy Program internship with exposure to fintech, product thinking, and professional development",
+      "Building experience in cross-functional collaboration, analytical problem solving, and business-focused communication within a remote setting",
+      "Strengthening readiness for fast-paced product and technology roles through mentorship, workshops, and hands-on learning"
+    ]
+  },
+  {
     role: "Technology Lead",
     company: "Samaya Global",
     location: "Edison, NJ (Remote)",

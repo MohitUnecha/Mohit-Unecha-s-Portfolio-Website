@@ -57,6 +57,8 @@ export default function Home() {
   const roles = [
     "Software Engineer",
     "Product Manager",
+    "Consultant",
+    "Business Analyst",
     "F1 Enthusiast",
     "Builder & Creator",
     "CS + Econ @ Rutgers",
