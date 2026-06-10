@@ -111,6 +111,51 @@ export default function Home() {
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const [cmdSearch, setCmdSearch] = useState("");
   const cmdInputRef = useRef<HTMLInputElement>(null);
+  const [showIntro, setShowIntro] = useState(false);
+  const [introLights, setIntroLights] = useState(0);
+  const [lightsOut, setLightsOut] = useState(false);
+  const [introFading, setIntroFading] = useState(false);
+  const [recruiterOpen, setRecruiterOpen] = useState(false);
+  const [redmondTime, setRedmondTime] = useState("");
+  const introTimersRef = useRef<NodeJS.Timeout[]>([]);
+
+  const skipIntro = () => {
+    introTimersRef.current.forEach(clearTimeout);
+    setIntroFading(true);
+    if (typeof window !== "undefined") window.sessionStorage.setItem("introSeen", "1");
+    setTimeout(() => setShowIntro(false), 500);
+  };
+
+  // F1 race-start intro — once per session
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.sessionStorage.getItem("introSeen")) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setShowIntro(true);
+    const timers: NodeJS.Timeout[] = [];
+    for (let i = 1; i <= 5; i++) {
+      timers.push(setTimeout(() => setIntroLights(i), 320 * i));
+    }
+    timers.push(setTimeout(() => setLightsOut(true), 320 * 5 + 650));
+    timers.push(setTimeout(() => setIntroFading(true), 320 * 5 + 1000));
+    timers.push(setTimeout(() => {
+      setShowIntro(false);
+      window.sessionStorage.setItem("introSeen", "1");
+    }, 320 * 5 + 1600));
+    introTimersRef.current = timers;
+    return () => timers.forEach(clearTimeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Live Redmond clock for hero chip
+  useEffect(() => {
+    const update = () => setRedmondTime(
+      new Date().toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" })
+    );
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, []);
 
   const roles = [
     "SWE/PM Intern @ Microsoft",
@@ -140,6 +185,23 @@ export default function Home() {
     const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
     const y = ((e.clientY - rect.top) / rect.height - 0.5) * -16;
     setTiltCard({ id, x, y });
+    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+  };
+
+  const handleSpotlight = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+  };
+
+  const spotColor = (dark: boolean) => (dark ? "rgba(52,211,153,0.16)" : "rgba(59,130,246,0.14)");
+
+  const copyEmail = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(profile.email);
+      pushToast("Copied", profile.email, "green");
+    }
   };
 
   const strengthsToShow = showAllStrengths ? profile.strengths : profile.strengths.slice(0, 4);
@@ -252,6 +314,7 @@ export default function Home() {
       }
       if (e.key === 'Escape') {
         setCmdPaletteOpen(false);
+        setRecruiterOpen(false);
       }
     };
     window.addEventListener('keydown', handleCmdK);
@@ -455,12 +518,56 @@ export default function Home() {
         }} />
       )}
 
-      {/* Scroll progress bar */}
+      {/* F1 race-start intro */}
+      {showIntro && (
+        <div
+          className={`fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500 ${
+            introFading ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+          onClick={skipIntro}
+        >
+          <div className="flex gap-3 md:gap-5">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className={`h-10 w-10 rounded-full border-2 transition-all duration-150 md:h-14 md:w-14 ${
+                  introLights > i && !lightsOut
+                    ? "border-red-400 bg-red-500 shadow-[0_0_35px_rgba(239,68,68,0.85)]"
+                    : "border-slate-700 bg-slate-900"
+                }`}
+              />
+            ))}
+          </div>
+          <p className={`mt-10 font-mono text-[11px] uppercase tracking-[0.5em] transition-colors duration-300 ${
+            lightsOut ? "text-emerald-300" : "text-slate-500"
+          }`}>
+            {lightsOut ? "Lights out and away we go" : "Starting grid"}
+          </p>
+          <p className="mt-4 text-[10px] tracking-widest text-slate-600">tap to skip</p>
+        </div>
+      )}
+
+      {/* Scroll progress bar with F1 car */}
       <div className="pointer-events-none fixed top-0 left-0 right-0 z-[70] h-[3px]">
         <div
           className={`h-full ${isDarkMode ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' : 'bg-gradient-to-r from-sky-400 to-blue-500'}`}
           style={{ width: `${scrollProgress}%`, transition: 'width 0.15s ease-out' }}
         />
+        {scrollProgress > 0 && (
+          <span
+            className="absolute -top-[11px] text-base leading-none"
+            style={{
+              left: `calc(${scrollProgress}% - 14px)`,
+              transition: 'left 0.15s ease-out',
+              transform: 'scaleX(-1)',
+              filter: isDarkMode
+                ? 'drop-shadow(0 0 6px rgba(52,211,153,0.9))'
+                : 'drop-shadow(0 0 6px rgba(59,130,246,0.8))',
+            }}
+          >
+            🏎️
+          </span>
+        )}
       </div>
 
       {/* Cursor Tracker Glow — hidden on touch/mobile */}
@@ -537,6 +644,17 @@ export default function Home() {
             </a>
             <button
               type="button"
+              onClick={() => setRecruiterOpen(true)}
+              className={`rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 hover:scale-105 md:text-xs ${
+                isDarkMode
+                  ? "border-amber-300/50 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+                  : "border-amber-500/60 bg-amber-50 text-amber-700 hover:bg-amber-100"
+              }`}
+            >
+              ⚡ <span className="hidden sm:inline">For Recruiters</span><span className="sm:hidden">Hire</span>
+            </button>
+            <button
+              type="button"
               onClick={() => { setCmdPaletteOpen(true); setCmdSearch(""); }}
               className={`hidden md:flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] transition-all duration-200 ${
                 isDarkMode
@@ -611,19 +729,45 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress * 2.5, transition: "opacity 0.3s ease-out" }}>
-            <div
-              className={`mb-8 h-32 w-32 overflow-hidden rounded-full border-4 shadow-2xl animate-float sm:h-40 sm:w-40 md:h-48 md:w-48 ${
-                isDarkMode ? "border-emerald-400/40 shadow-emerald-500/20" : "border-blue-600/40 shadow-blue-500/20"
-              }`}
-              style={{ transition: "all 0.3s ease-out" }}
-            >
-
-              <img
-                src={profile.photoUrl}
-                alt={`${profile.name} headshot`}
-                className="h-full w-full object-cover"
-                style={{ filter: "none" }}
-              />
+            <div className="relative mb-8 animate-float">
+              {/* Orbiting tech badges */}
+              <div
+                className={`pointer-events-none absolute -inset-8 rounded-full border border-dashed animate-spin-slow ${
+                  isDarkMode ? "border-emerald-300/30" : "border-blue-400/40"
+                }`}
+              >
+                {[
+                  { icon: "🐍", pos: "-top-4 left-1/2 -translate-x-1/2" },
+                  { icon: "⚛️", pos: "top-1/2 -right-4 -translate-y-1/2" },
+                  { icon: "🤖", pos: "-bottom-4 left-1/2 -translate-x-1/2" },
+                  { icon: "📈", pos: "top-1/2 -left-4 -translate-y-1/2" },
+                ].map((badge) => (
+                  <span key={badge.icon} className={`absolute ${badge.pos}`}>
+                    <span
+                      className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm shadow-lg backdrop-blur-sm animate-spin-reverse-slow ${
+                        isDarkMode
+                          ? "border-emerald-300/30 bg-slate-900/85"
+                          : "border-blue-300/60 bg-white/90"
+                      }`}
+                    >
+                      {badge.icon}
+                    </span>
+                  </span>
+                ))}
+              </div>
+              <div
+                className={`h-32 w-32 overflow-hidden rounded-full border-4 shadow-2xl sm:h-40 sm:w-40 md:h-48 md:w-48 ${
+                  isDarkMode ? "border-emerald-400/40 shadow-emerald-500/20" : "border-blue-600/40 shadow-blue-500/20"
+                }`}
+                style={{ transition: "all 0.3s ease-out" }}
+              >
+                <img
+                  src={profile.photoUrl}
+                  alt={`${profile.name} headshot`}
+                  className="h-full w-full object-cover"
+                  style={{ filter: "none" }}
+                />
+              </div>
             </div>
             <h1 className={`font-display mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-gradient-text ${isDarkMode ? "bg-gradient-to-r from-emerald-300 via-cyan-200 to-emerald-400" : "bg-gradient-to-r from-sky-400 via-blue-300 to-sky-500"}`} style={{ backgroundSize: '200% 200%', transition: "all 0.3s ease-out" }}>
               {displayedText}
@@ -640,7 +784,7 @@ export default function Home() {
             {/* Quick info chips */}
             <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
               {[
-                { icon: "📍", text: "Redmond, WA" },
+                { icon: "📍", text: `Redmond, WA${redmondTime ? ` · ${redmondTime} PT` : ""}` },
                 { icon: "💼", text: "Microsoft 365 Core" },
                 { icon: "🎓", text: "Rutgers CS + Econ '28" },
               ].map((chip) => (
@@ -692,6 +836,20 @@ export default function Home() {
                 <span className="relative z-10 flex items-center gap-2">
                   <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                   Meet Mohit
+                </span>
+                <span className={`absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setRecruiterOpen(true)}
+                className={`group relative overflow-hidden rounded-full border px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 hover:scale-105 ${
+                  isDarkMode
+                    ? "border-amber-300/60 bg-amber-400/15 text-amber-100 hover:bg-amber-400/25 hover:shadow-lg hover:shadow-amber-500/20"
+                    : "border-amber-500 bg-amber-100 text-amber-700 hover:bg-amber-200 hover:shadow-lg hover:shadow-amber-500/20"
+                }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  ⚡ Recruiter Snapshot
                 </span>
                 <span className={`absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full`} />
               </button>
@@ -782,7 +940,9 @@ export default function Home() {
             {profile.stats.map((stat) => (
               <div
                 key={stat.label}
-                className={`rounded-2xl border p-5 text-center transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+                onMouseMove={handleSpotlight}
+                className={`spotlight-card rounded-2xl border p-5 text-center transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+                style={{ "--spot-color": spotColor(isDarkMode) } as React.CSSProperties}
               >
                 <p className={`text-3xl font-bold tracking-tight md:text-4xl ${
                   isDarkMode
@@ -922,7 +1082,7 @@ export default function Home() {
               return (
               <article
                 key={project.name}
-                className={`group interactive rounded-2xl border p-6 flex flex-col ${cardClass} ${cardHoverClass} ${isFeatured ? "md:col-span-2" : ""}`}
+                className={`group interactive spotlight-card rounded-2xl border p-6 flex flex-col ${cardClass} ${cardHoverClass} ${isFeatured ? "md:col-span-2" : ""}`}
                 onMouseMove={(e) => handleCardTilt(e, project.name)}
                 onMouseLeave={() => setTiltCard(null)}
                 style={{
@@ -934,7 +1094,8 @@ export default function Home() {
                     ? isDarkMode ? '0 25px 50px rgba(52,211,153,0.2), 0 0 0 1px rgba(52,211,153,0.15)' : '0 25px 50px rgba(59,130,246,0.15), 0 0 0 1px rgba(59,130,246,0.1)'
                     : 'none',
                   cursor: 'pointer',
-                }}
+                  "--spot-color": spotColor(isDarkMode),
+                } as React.CSSProperties}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3
@@ -1119,7 +1280,9 @@ export default function Home() {
             {profile.programs.map((program) => (
               <div
                 key={`${program.org}-${program.name}`}
-                className={`group rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+                onMouseMove={handleSpotlight}
+                className={`group spotlight-card rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+                style={{ "--spot-color": spotColor(isDarkMode) } as React.CSSProperties}
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className={`text-base font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
@@ -1155,7 +1318,9 @@ export default function Home() {
             {profile.volunteering.map((vol) => (
               <div
                 key={`${vol.org}-${vol.role}`}
-                className={`rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+                onMouseMove={handleSpotlight}
+                className={`spotlight-card rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+                style={{ "--spot-color": spotColor(isDarkMode) } as React.CSSProperties}
               >
                 <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-full ${
                   isDarkMode ? "bg-emerald-500/15 text-emerald-300" : "bg-blue-100 text-blue-600"
@@ -1606,6 +1771,164 @@ export default function Home() {
         </div>
       )}
 
+      {/* Recruiter Snapshot */}
+      {recruiterOpen && (
+        <div
+          className="fixed inset-0 z-[115] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+          onClick={() => setRecruiterOpen(false)}
+        >
+          <div
+            className={`relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border-2 shadow-2xl ${
+              isDarkMode
+                ? "border-amber-300/30 bg-slate-950 shadow-amber-500/10"
+                : "border-amber-400/40 bg-white shadow-amber-500/10"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header band */}
+            <div className={`relative overflow-hidden px-6 pb-6 pt-7 md:px-8 ${
+              isDarkMode ? "bg-gradient-to-br from-emerald-500/15 via-transparent to-amber-400/10" : "bg-gradient-to-br from-blue-100 via-transparent to-amber-50"
+            }`}>
+              <button
+                onClick={() => setRecruiterOpen(false)}
+                className={`absolute right-5 top-5 text-2xl font-bold transition hover:rotate-90 hover:scale-110 ${
+                  isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-900"
+                }`}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.4em] ${isDarkMode ? "text-amber-300" : "text-amber-600"}`}>
+                ⚡ The 10-Second Snapshot
+              </p>
+              <div className="flex items-center gap-4">
+                <img
+                  src={profile.photoUrl}
+                  alt={profile.name}
+                  className={`h-16 w-16 rounded-full border-2 object-cover md:h-20 md:w-20 ${
+                    isDarkMode ? "border-emerald-400/50" : "border-blue-500/50"
+                  }`}
+                />
+                <div>
+                  <h2 className={`font-display text-2xl font-bold md:text-3xl ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                    {profile.name}
+                  </h2>
+                  <p className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+                    SWE/PM Intern @ Microsoft · CS + Econ @ Rutgers &apos;28
+                  </p>
+                  <p className={`mt-1 text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                    📍 NYC Metro / Redmond, WA · {profile.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-6 md:px-8">
+              {/* Key stats */}
+              <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  { v: "3.9", l: "GPA · Dean's List ×3" },
+                  { v: "2×", l: "Hackathon wins" },
+                  { v: "10+", l: "Selective programs" },
+                  { v: "1,050+", l: "Volunteer hours" },
+                ].map((s) => (
+                  <div
+                    key={s.l}
+                    className={`rounded-xl border p-3 text-center ${
+                      isDarkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <p className={`font-display text-xl font-bold ${isDarkMode ? "text-emerald-300" : "text-blue-600"}`}>{s.v}</p>
+                    <p className={`mt-0.5 text-[10px] leading-tight ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>{s.l}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Why hire */}
+              <p className={`mb-3 text-[10px] font-bold uppercase tracking-[0.3em] ${isDarkMode ? "text-emerald-300/80" : "text-blue-600/80"}`}>
+                Why you should talk to me
+              </p>
+              <ul className={`mb-6 space-y-2.5 text-sm leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                {[
+                  <span key="ms"><strong>Shipping AI at Microsoft right now</strong> — leading a 2-intern team building Headroom Copilot on M365 Core: natural-language telemetry querying, 30–50% faster insights.</span>,
+                  <span key="ai"><strong>AI Fellow @ Cornell Tech</strong> (Break Through Tech, 5,000+ applicants) + PayPal Career Academy + Vanguard North Star Fellow.</span>,
+                  <span key="hack"><strong>2× hackathon winner</strong> — Barclays Data Hackathon (AI stock predictor) and SignalForge datathon, both built in 48 hours.</span>,
+                  <span key="lead"><strong>Leads with empathy</strong> — Tech Lead at nonprofit Samaya Global, 1,050+ volunteer hours, 250+ students mentored.</span>,
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-amber-300" : "bg-amber-500"}`} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Program strip */}
+              <div className={`mb-6 flex flex-wrap gap-1.5 text-[10px] font-semibold ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                {["Microsoft", "Goldman Sachs", "Capital One", "BCG", "Bain", "Oracle", "PayPal", "Vanguard", "Cornell Tech", "EY", "BNY Mellon"].map((org) => (
+                  <span
+                    key={org}
+                    className={`rounded-full border px-2.5 py-1 ${isDarkMode ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}
+                  >
+                    {org}
+                  </span>
+                ))}
+              </div>
+
+              {/* CTAs */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <button
+                  type="button"
+                  onClick={copyEmail}
+                  className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-all duration-200 hover:scale-[1.03] ${
+                    isDarkMode
+                      ? "border-emerald-300/50 bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30"
+                      : "border-blue-400 bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
+                >
+                  📋 Copy Email
+                </button>
+                <a
+                  href={`https://${profile.linkedIn}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`rounded-xl border px-3 py-2.5 text-center text-xs font-bold transition-all duration-200 hover:scale-[1.03] ${
+                    isDarkMode ? "border-white/15 bg-white/5 text-slate-200 hover:bg-white/10" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  💼 LinkedIn
+                </a>
+                <a
+                  href={`https://${profile.github}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`rounded-xl border px-3 py-2.5 text-center text-xs font-bold transition-all duration-200 hover:scale-[1.03] ${
+                    isDarkMode ? "border-white/15 bg-white/5 text-slate-200 hover:bg-white/10" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  💻 GitHub
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecruiterOpen(false);
+                    document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-all duration-200 hover:scale-[1.03] ${
+                    isDarkMode ? "border-white/15 bg-white/5 text-slate-200 hover:bg-white/10" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  ✉️ Message Me
+                </button>
+              </div>
+
+              <p className={`mt-5 text-center text-[10px] italic ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+                Designed for busy recruiters — the full story is one scroll away. 🏎️
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Command Palette (Cmd+K) */}
       {cmdPaletteOpen && (
         <div
@@ -1645,6 +1968,7 @@ export default function Home() {
                       { keywords: ['program', 'fellowship', 'goldman', 'capital one', 'bcg', 'paypal', 'vanguard', 'cornell'], action: () => document.querySelector('#programs')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['volunteer', 'impact', 'community', 'hands of hope', 'nonprofit'], action: () => document.querySelector('#volunteering')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['stats', 'numbers', 'metrics'], action: () => document.querySelector('#impact')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['recruiter', 'snapshot', 'hire', 'resume', 'cv'], action: () => setRecruiterOpen(true) },
                       { keywords: ['github', 'contrib', 'activity', 'heatmap'], action: () => document.querySelector('#github-activity')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['game', 'play', 'arcade', 'fun'], action: () => setShowGameSelector(true) },
                       { keywords: ['dark', 'light', 'theme', 'mode'], action: () => setIsDarkMode((prev) => !prev) },
@@ -1668,6 +1992,7 @@ export default function Home() {
             </div>
             <div className={`max-h-[50vh] overflow-y-auto px-2 py-2`}>
               {[
+                { icon: '⚡', label: 'Recruiter Snapshot', desc: 'The 10-second hiring brief', keywords: ['recruiter', 'snapshot', 'hire', 'resume', 'cv'] },
                 { icon: '👤', label: 'About Me', desc: 'Bio & strengths', keywords: ['about', 'bio', 'summary', 'who'] },
                 { icon: '💼', label: 'Experience', desc: 'Work history & roles', keywords: ['experience', 'work', 'jobs', 'career', 'microsoft'] },
                 { icon: '🚀', label: 'Projects', desc: 'What I\'ve built', keywords: ['project', 'build', 'f1', 'every lap'] },
@@ -1696,7 +2021,8 @@ export default function Home() {
                     }`}
                     onClick={() => {
                       const q = item.label.toLowerCase();
-                      if (q.includes('theme') || q.includes('toggle')) setIsDarkMode((prev) => !prev);
+                      if (q.includes('recruiter')) setRecruiterOpen(true);
+                      else if (q.includes('theme') || q.includes('toggle')) setIsDarkMode((prev) => !prev);
                       else if (q.includes('games')) setShowGameSelector(true);
                       else if (q.includes('voice')) playVoiceIntro();
                       else if (q.includes('linkedin')) window.open(`https://${profile.linkedIn}`, '_blank');

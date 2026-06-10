@@ -172,9 +172,9 @@ body {
 .spotlight-card::before {
   content: '';
   position: absolute;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, transparent 70%);
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, var(--spot-color, rgba(52, 211, 153, 0.15)) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
@@ -252,7 +252,11 @@ body {
 }
 
 .animate-spin-slow {
-  animation: spin-slow 14s linear infinite;
+  animation: spin-slow 18s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spin-slow 18s linear infinite reverse;
 }
 
 /* Text selection */
