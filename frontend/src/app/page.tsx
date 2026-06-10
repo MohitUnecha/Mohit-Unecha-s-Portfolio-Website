@@ -112,19 +112,7 @@ export default function Home() {
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const [cmdSearch, setCmdSearch] = useState("");
   const cmdInputRef = useRef<HTMLInputElement>(null);
-  const [showIntro, setShowIntro] = useState(false);
-  const [introLights, setIntroLights] = useState(0);
-  const [lightsOut, setLightsOut] = useState(false);
-  const [introFading, setIntroFading] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
-  const introTimersRef = useRef<NodeJS.Timeout[]>([]);
-
-  const skipIntro = () => {
-    introTimersRef.current.forEach(clearTimeout);
-    setIntroFading(true);
-    if (typeof window !== "undefined") window.sessionStorage.setItem("introSeen", "1");
-    setTimeout(() => setShowIntro(false), 500);
-  };
 
   // Lock page scroll while the recruiter snapshot is open
   useEffect(() => {
@@ -134,27 +122,6 @@ export default function Home() {
       document.body.style.overflow = "";
     };
   }, [recruiterOpen]);
-
-  // F1 race-start intro — once per session
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.sessionStorage.getItem("introSeen")) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    setShowIntro(true);
-    const timers: NodeJS.Timeout[] = [];
-    for (let i = 1; i <= 5; i++) {
-      timers.push(setTimeout(() => setIntroLights(i), 320 * i));
-    }
-    timers.push(setTimeout(() => setLightsOut(true), 320 * 5 + 650));
-    timers.push(setTimeout(() => setIntroFading(true), 320 * 5 + 1000));
-    timers.push(setTimeout(() => {
-      setShowIntro(false);
-      window.sessionStorage.setItem("introSeen", "1");
-    }, 320 * 5 + 1600));
-    introTimersRef.current = timers;
-    return () => timers.forEach(clearTimeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
 
   const roles = [
@@ -517,35 +484,6 @@ export default function Home() {
             ? "radial-gradient(circle at 18% 12%, rgba(16,185,129,0.2), transparent 34%), radial-gradient(circle at 82% 86%, rgba(34,211,238,0.15), transparent 36%)"
             : "radial-gradient(circle at 18% 12%, rgba(59,130,246,0.18), transparent 34%), radial-gradient(circle at 82% 86%, rgba(14,165,233,0.15), transparent 36%)",
         }} />
-      )}
-
-      {/* F1 race-start intro */}
-      {showIntro && (
-        <div
-          className={`native-cursor fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500 ${
-            introFading ? "pointer-events-none opacity-0" : "opacity-100"
-          }`}
-          onClick={skipIntro}
-        >
-          <div className="flex gap-3 md:gap-5">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className={`h-10 w-10 rounded-full border-2 transition-all duration-150 md:h-14 md:w-14 ${
-                  introLights > i && !lightsOut
-                    ? "border-red-400 bg-red-500 shadow-[0_0_35px_rgba(239,68,68,0.85)]"
-                    : "border-slate-700 bg-slate-900"
-                }`}
-              />
-            ))}
-          </div>
-          <p className={`mt-10 font-mono text-[11px] uppercase tracking-[0.5em] transition-colors duration-300 ${
-            lightsOut ? "text-emerald-300" : "text-slate-500"
-          }`}>
-            {lightsOut ? "Lights out and away we go" : "Starting grid"}
-          </p>
-          <p className="mt-4 text-[10px] tracking-widest text-slate-600">tap to skip</p>
-        </div>
       )}
 
       {/* Scroll progress bar with F1 car */}
