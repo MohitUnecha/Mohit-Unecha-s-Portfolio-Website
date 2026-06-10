@@ -730,45 +730,18 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress * 2.5, transition: "opacity 0.3s ease-out" }}>
-            <div className="relative mb-8 animate-float">
-              {/* Orbiting tech badges — desktop only to keep mobile clean */}
-              <div
-                className={`pointer-events-none absolute -inset-8 hidden rounded-full border border-dashed animate-spin-slow sm:block ${
-                  isDarkMode ? "border-emerald-300/30" : "border-blue-400/40"
-                }`}
-              >
-                {[
-                  { icon: "🐍", pos: "-top-4 left-1/2 -translate-x-1/2" },
-                  { icon: "⚛️", pos: "top-1/2 -right-4 -translate-y-1/2" },
-                  { icon: "🤖", pos: "-bottom-4 left-1/2 -translate-x-1/2" },
-                  { icon: "📈", pos: "top-1/2 -left-4 -translate-y-1/2" },
-                ].map((badge) => (
-                  <span key={badge.icon} className={`absolute ${badge.pos}`}>
-                    <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm shadow-lg backdrop-blur-sm animate-spin-reverse-slow ${
-                        isDarkMode
-                          ? "border-emerald-300/30 bg-slate-900/85"
-                          : "border-blue-300/60 bg-white/90"
-                      }`}
-                    >
-                      {badge.icon}
-                    </span>
-                  </span>
-                ))}
-              </div>
-              <div
-                className={`h-32 w-32 overflow-hidden rounded-full border-4 shadow-2xl sm:h-40 sm:w-40 md:h-48 md:w-48 ${
-                  isDarkMode ? "border-emerald-400/40 shadow-emerald-500/20" : "border-blue-600/40 shadow-blue-500/20"
-                }`}
-                style={{ transition: "all 0.3s ease-out" }}
-              >
-                <img
-                  src={profile.photoUrl}
-                  alt={`${profile.name} headshot`}
-                  className="h-full w-full object-cover"
-                  style={{ filter: "none" }}
-                />
-              </div>
+            <div
+              className={`mb-8 h-32 w-32 overflow-hidden rounded-full border-4 shadow-2xl animate-float sm:h-40 sm:w-40 md:h-48 md:w-48 ${
+                isDarkMode ? "border-emerald-400/40 shadow-emerald-500/20" : "border-blue-600/40 shadow-blue-500/20"
+              }`}
+              style={{ transition: "all 0.3s ease-out" }}
+            >
+              <img
+                src={profile.photoUrl}
+                alt={`${profile.name} headshot`}
+                className="h-full w-full object-cover"
+                style={{ filter: "none" }}
+              />
             </div>
             <h1 className={`font-display mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-gradient-text ${isDarkMode ? "bg-gradient-to-r from-emerald-300 via-cyan-200 to-emerald-400" : "bg-gradient-to-r from-sky-400 via-blue-300 to-sky-500"}`} style={{ backgroundSize: '200% 200%', transition: "all 0.3s ease-out" }}>
               {displayedText}

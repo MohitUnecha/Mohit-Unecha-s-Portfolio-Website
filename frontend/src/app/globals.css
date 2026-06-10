@@ -300,20 +300,6 @@ body {
   animation-play-state: paused;
 }
 
-/* Slow spin for decorative rings */
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 18s linear infinite;
-}
-
-.animate-spin-reverse-slow {
-  animation: spin-slow 18s linear infinite reverse;
-}
-
 /* Text selection */
 ::selection {
   background: rgba(52, 211, 153, 0.35);
