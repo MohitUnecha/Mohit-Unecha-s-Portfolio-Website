@@ -37,6 +37,42 @@ function CountUp({ end, decimals = 0, suffix = "", start }: { end: number; decim
   return <>{formatted}{suffix}</>;
 }
 
+function SectionTitle({ eyebrow, title, sub, isDarkMode }: { eyebrow: string; title: string; sub?: string; isDarkMode: boolean }) {
+  return (
+    <div className="mb-14 text-center">
+      <p className={`mb-3 text-[11px] font-bold uppercase tracking-[0.4em] ${isDarkMode ? "text-emerald-300/80" : "text-blue-600/80"}`}>
+        {eyebrow}
+      </p>
+      <h2 className={`font-display text-3xl font-bold tracking-tight md:text-4xl ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+        {title}
+      </h2>
+      <div className={`mx-auto mt-5 h-[3px] w-16 rounded-full bg-gradient-to-r ${isDarkMode ? "from-emerald-400 to-cyan-400" : "from-sky-400 to-blue-600"}`} />
+      {sub && (
+        <p className={`mx-auto mt-5 max-w-2xl text-base leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+          {sub}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function TimelineLabel({ t, isDarkMode }: { t: string; isDarkMode: boolean }) {
+  const isCurrent = t.includes("Present");
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {t}
+      {isCurrent && (
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wider ${
+          isDarkMode ? "bg-emerald-400/15 text-emerald-300" : "bg-blue-100 text-blue-700"
+        }`}>
+          <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+          NOW
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -557,7 +593,23 @@ export default function Home() {
             filter: "grayscale(100%)",
           }}
         />
-        
+
+        {/* Aurora blobs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="aurora-blob left-[10%] top-[15%] h-72 w-72"
+            style={{ background: isDarkMode ? "rgba(16,185,129,0.45)" : "rgba(59,130,246,0.3)" }}
+          />
+          <div
+            className="aurora-blob bottom-[10%] right-[6%] h-96 w-96"
+            style={{ background: isDarkMode ? "rgba(34,211,238,0.35)" : "rgba(14,165,233,0.28)", animationDelay: "4s" }}
+          />
+          <div
+            className="aurora-blob left-[55%] top-[55%] h-64 w-64"
+            style={{ background: isDarkMode ? "rgba(167,139,250,0.28)" : "rgba(99,102,241,0.22)", animationDelay: "8s" }}
+          />
+        </div>
+
         <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress * 2.5, transition: "opacity 0.3s ease-out" }}>
             <div
               className={`mb-8 h-32 w-32 overflow-hidden rounded-full border-4 shadow-2xl animate-float sm:h-40 sm:w-40 md:h-48 md:w-48 ${
@@ -573,7 +625,7 @@ export default function Home() {
                 style={{ filter: "none" }}
               />
             </div>
-            <h1 className={`mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-gradient-text ${isDarkMode ? "bg-gradient-to-r from-emerald-300 via-cyan-200 to-emerald-400" : "bg-gradient-to-r from-sky-400 via-blue-300 to-sky-500"}`} style={{ backgroundSize: '200% 200%', transition: "all 0.3s ease-out" }}>
+            <h1 className={`font-display mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-gradient-text ${isDarkMode ? "bg-gradient-to-r from-emerald-300 via-cyan-200 to-emerald-400" : "bg-gradient-to-r from-sky-400 via-blue-300 to-sky-500"}`} style={{ backgroundSize: '200% 200%', transition: "all 0.3s ease-out" }}>
               {displayedText}
               <span className="animate-pulse">|</span>
             </h1>
@@ -585,6 +637,26 @@ export default function Home() {
               <span className={`${roleColorClass} font-semibold`}>{roleText}</span>
               <span className="animate-pulse opacity-70">|</span>
             </p>
+            {/* Quick info chips */}
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+              {[
+                { icon: "📍", text: "Redmond, WA" },
+                { icon: "💼", text: "Microsoft 365 Core" },
+                { icon: "🎓", text: "Rutgers CS + Econ '28" },
+              ].map((chip) => (
+                <span
+                  key={chip.text}
+                  className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                    isDarkMode
+                      ? "border-white/15 bg-white/5 text-slate-200"
+                      : "border-slate-300/80 bg-white/70 text-slate-700"
+                  }`}
+                >
+                  <span>{chip.icon}</span>
+                  {chip.text}
+                </span>
+              ))}
+            </div>
             {/* Open to opportunities badge */}
             <div className={`mb-6 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 ${
               isDarkMode
@@ -671,9 +743,7 @@ export default function Home() {
             transform: visibleSections.has('about') ? 'translateY(0)' : 'translateY(20px)',
             transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
           }}>
-          <h2 className={`mb-12 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            About Me
-          </h2>
+          <SectionTitle eyebrow="01 · About" title="Building with purpose" isDarkMode={isDarkMode} />
           <div className={`mx-auto max-w-3xl space-y-6 text-lg leading-relaxed ${bodyTextClass}`}>
             {profile.summary.map((item) => (
               <p key={item}>{item}</p>
@@ -707,9 +777,7 @@ export default function Home() {
           transform: visibleSections.has('impact') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <h2 className={`mb-12 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            By the Numbers
-          </h2>
+          <SectionTitle eyebrow="02 · Impact" title="By the numbers" isDarkMode={isDarkMode} />
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
             {profile.stats.map((stat) => (
               <div
@@ -731,18 +799,22 @@ export default function Home() {
         </section>
 
         <section id="experience" className="py-24">
-          <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}
+          <div
             style={{
               opacity: visibleSections.has('experience') ? 1 : 0,
               transform: visibleSections.has('experience') ? 'translateY(0)' : 'translateY(20px)',
               transition: 'all 0.6s ease-out'
             }}
           >
-            Experience
-          </h2>
+            <SectionTitle eyebrow="03 · Experience" title="Where I've been building" isDarkMode={isDarkMode} />
+          </div>
           <div className="relative mx-auto max-w-5xl">
             {/* Center timeline line */}
-            <div className={`absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 hidden md:block ${isDarkMode ? "bg-white/15" : "bg-slate-300"}`} />
+            <div className={`absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 hidden md:block bg-gradient-to-b ${
+              isDarkMode
+                ? "from-emerald-400/70 via-cyan-400/40 to-transparent"
+                : "from-blue-500/60 via-sky-400/40 to-transparent"
+            }`} />
             
             {profile.experience.map((item, index) => {
               const isLeft = index % 2 === 0;
@@ -759,15 +831,22 @@ export default function Home() {
                   }}
                 >
                   {/* Timeline dot - desktop */}
-                  <div className={`absolute left-1/2 top-6 z-10 hidden h-4 w-4 -translate-x-1/2 rounded-full border-2 md:block ${
-                    isDarkMode ? "border-emerald-400 bg-slate-950" : "border-blue-500 bg-slate-50"
-                  }`} />
+                  <div
+                    className={`absolute left-1/2 top-6 z-10 hidden h-4 w-4 -translate-x-1/2 rounded-full border-2 md:block ${
+                      isDarkMode ? "border-emerald-400 bg-slate-950" : "border-blue-500 bg-slate-50"
+                    }`}
+                    style={{
+                      boxShadow: isDarkMode
+                        ? "0 0 14px rgba(52,211,153,0.7)"
+                        : "0 0 14px rgba(59,130,246,0.6)",
+                    }}
+                  />
                   
                   {/* Mobile: stacked layout */}
                   <div className="md:hidden">
                     <article className={`rounded-2xl border p-6 transition-all duration-300 ${cardClass} ${cardHoverClass}`}>
                       <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
-                        {item.timeline}
+                        <TimelineLabel t={item.timeline} isDarkMode={isDarkMode} />
                       </p>
                       <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
                         {item.role}
@@ -788,7 +867,7 @@ export default function Home() {
                       <>
                         <article className={`rounded-2xl border p-6 transition-all duration-300 text-right ${cardClass} ${cardHoverClass}`}>
                           <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
-                            {item.timeline}
+                            <TimelineLabel t={item.timeline} isDarkMode={isDarkMode} />
                           </p>
                           <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
                             {item.role}
@@ -808,7 +887,7 @@ export default function Home() {
                         <div />
                         <article className={`rounded-2xl border p-6 transition-all duration-300 ${cardClass} ${cardHoverClass}`}>
                           <p className={`mb-2 text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
-                            {item.timeline}
+                            <TimelineLabel t={item.timeline} isDarkMode={isDarkMode} />
                           </p>
                           <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
                             {item.role}
@@ -835,16 +914,15 @@ export default function Home() {
           transform: visibleSections.has('projects') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            Projects
-          </h2>
+          <SectionTitle eyebrow="04 · Projects" title="Things I've shipped" isDarkMode={isDarkMode} />
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {profile.projects.map((project) => {
+            {profile.projects.map((project, projectIndex) => {
               const isExpanded = expandedProject === project.name;
+              const isFeatured = projectIndex === 0;
               return (
               <article
                 key={project.name}
-                className={`group interactive rounded-2xl border p-6 flex flex-col ${cardClass} ${cardHoverClass}`}
+                className={`group interactive rounded-2xl border p-6 flex flex-col ${cardClass} ${cardHoverClass} ${isFeatured ? "md:col-span-2" : ""}`}
                 onMouseMove={(e) => handleCardTilt(e, project.name)}
                 onMouseLeave={() => setTiltCard(null)}
                 style={{
@@ -858,11 +936,22 @@ export default function Home() {
                   cursor: 'pointer',
                 }}
               >
-                <h3
-                  className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"} ${projectHoverClass}`}
-                >
-                  {project.name}
-                </h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3
+                    className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"} ${projectHoverClass}`}
+                  >
+                    {project.name}
+                  </h3>
+                  {isFeatured && (
+                    <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                      isDarkMode
+                        ? "border-amber-300/40 bg-amber-400/10 text-amber-300"
+                        : "border-amber-400/60 bg-amber-50 text-amber-600"
+                    }`}>
+                      ★ Flagship
+                    </span>
+                  )}
+                </div>
                 <p className={`mt-3 text-sm leading-relaxed ${bodyTextClass}`}>
                   {project.summary}
                 </p>
@@ -965,10 +1054,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-24">
-          <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            Education
-          </h2>
+        <section id="education" className="py-24" style={{
+          opacity: visibleSections.has('education') ? 1 : 0,
+          transform: visibleSections.has('education') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <SectionTitle eyebrow="05 · Education" title="Foundations" isDarkMode={isDarkMode} />
           <div className="mx-auto max-w-4xl space-y-8">
             {profile.education.map((school) => (
               <article
@@ -1018,12 +1109,12 @@ export default function Home() {
           transform: visibleSections.has('programs') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <h2 className={`mb-4 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            Programs & Fellowships
-          </h2>
-          <p className={`mx-auto mb-12 max-w-2xl text-center text-base ${bodyTextClass}`}>
-            Selected for {profile.programs.length}+ competitive early-career programs across tech, finance, and consulting.
-          </p>
+          <SectionTitle
+            eyebrow="06 · Programs"
+            title="Programs & fellowships"
+            sub={`Selected for ${profile.programs.length}+ competitive early-career programs across tech, finance, and consulting.`}
+            isDarkMode={isDarkMode}
+          />
           <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {profile.programs.map((program) => (
               <div
@@ -1054,12 +1145,12 @@ export default function Home() {
           transform: visibleSections.has('volunteering') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <h2 className={`mb-4 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            Volunteering & Impact
-          </h2>
-          <p className={`mx-auto mb-12 max-w-2xl text-center text-base ${bodyTextClass}`}>
-            Community service isn&apos;t a side project — it&apos;s the core of how I lead with empathy.
-          </p>
+          <SectionTitle
+            eyebrow="07 · Community"
+            title="Volunteering & impact"
+            sub="Community service isn't a side project — it's the core of how I lead with empathy."
+            isDarkMode={isDarkMode}
+          />
           <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
             {profile.volunteering.map((vol) => (
               <div
@@ -1082,10 +1173,39 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16">
-          <h2 className={`mb-12 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            Skills
-          </h2>
+        <section id="skills" className="py-16" style={{
+          opacity: visibleSections.has('skills') ? 1 : 0,
+          transform: visibleSections.has('skills') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <SectionTitle eyebrow="08 · Skills" title="My toolkit" isDarkMode={isDarkMode} />
+
+          {/* Infinite skills marquee */}
+          <div
+            className="relative mb-12 overflow-hidden py-1"
+            style={{
+              maskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+              WebkitMaskImage: "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+            }}
+          >
+            <div className="marquee-track items-center gap-3 pr-3">
+              {(() => {
+                const allSkills = [...profile.skills.engineering, ...profile.skills.product, ...profile.skills.tools];
+                return [...allSkills, ...allSkills].map((skill, i) => (
+                  <span
+                    key={`${skill}-${i}`}
+                    className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium ${
+                      isDarkMode
+                        ? "border-emerald-300/20 bg-emerald-500/5 text-slate-200"
+                        : "border-blue-300/50 bg-blue-50/80 text-slate-700"
+                    }`}
+                  >
+                    {skill}
+                  </span>
+                ));
+              })()}
+            </div>
+          </div>
           <div className="mx-auto max-w-4xl space-y-8">
             <div>
               <p className={`mb-4 text-xs font-semibold uppercase tracking-wider ${accentTextClass}`}>
@@ -1221,11 +1341,13 @@ export default function Home() {
         */}
 
         {/* GitHub Activity Heatmap */}
-        <section className="py-16">
-          <h2 className={`mb-3 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            GitHub Activity
-          </h2>
-          <p className={`mb-8 text-center text-xs ${sectionLabelClass}`}>
+        <section id="github-activity" className="py-16" style={{
+          opacity: visibleSections.has('github-activity') ? 1 : 0,
+          transform: visibleSections.has('github-activity') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <SectionTitle eyebrow="09 · Open Source" title="Always shipping" isDarkMode={isDarkMode} />
+          <p className={`-mt-8 mb-8 text-center text-xs ${sectionLabelClass}`}>
             Last 52 Weeks •{" "}
             <a href="https://github.com/MohitUnecha" target="_blank" rel="noopener noreferrer" className={`underline decoration-dotted ${accentTextClass}`}>
               @MohitUnecha
@@ -1263,12 +1385,12 @@ export default function Home() {
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
           <div className="mx-auto max-w-2xl px-2 sm:px-4 md:px-8">
-            <h2 className={`mb-8 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-              Get In Touch
-            </h2>
-            <p className={`mx-auto mb-12 text-center text-lg ${bodyTextClass}`}>
-              Let's connect! I'd love to collaborate, chat about opportunities, or mentor together.
-            </p>
+            <SectionTitle
+              eyebrow="10 · Contact"
+              title="Let's build something together"
+              sub="I'd love to collaborate, chat about opportunities, or mentor together."
+              isDarkMode={isDarkMode}
+            />
 
             <form
               onSubmit={async (e) => {
@@ -1695,33 +1817,134 @@ export default function Home() {
         ))}
       </div>
 
-      <footer className={`py-8 text-center text-sm ${bodyTextClass}`}>
-        <p>
-          © 2026 Mohit Unecha. All rights reserved. • Want to play a{" "}
-          <span
-            className={`cursor-pointer font-semibold underline decoration-dotted ${accentTextClass} hover:opacity-70`}
-            onClick={() => setShowGameSelector(true)}
-          >
-            game
-          </span>
-          ?
-        </p>
-        {visitorCount !== null && (
-          <p className={`mt-2 text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
-            <span className={`font-semibold ${accentTextClass}`}>{visitorCount.toLocaleString()}</span> visitors and counting
-          </p>
-        )}
-        <p className="mt-2">
-          Contact: {" "}
-          <a
-            href="mailto:contact@mohitunecha.com"
-            className={`font-semibold underline decoration-dotted transition ${accentTextClass} hover:opacity-70`}
-          >
-            contact@mohitunecha.com
-          </a>
-        </p>
-        <p className="mt-4 text-xs opacity-20 select-none tracking-widest" title="You know what to do 😉">↑↑↓↓←→←→BA</p>
+      <footer className={`relative border-t ${isDarkMode ? "border-white/10" : "border-slate-200"}`}>
+        <div className="mx-auto w-full max-w-5xl px-6 py-14 md:px-8">
+          <div className="grid gap-10 text-center sm:text-left md:grid-cols-3">
+            {/* Brand */}
+            <div>
+              <p className={`font-display text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                Mohit Unecha
+              </p>
+              <p className={`mt-2 text-sm leading-relaxed ${bodyTextClass}`}>
+                Building at the intersection of software, product, and impact. Currently shipping AI at Microsoft.
+              </p>
+              <div className="mt-4 flex justify-center gap-3 sm:justify-start">
+                <a
+                  href={`https://${profile.linkedIn}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 ${
+                    isDarkMode ? "border-white/15 bg-white/5 hover:border-emerald-400/50" : "border-slate-300 bg-white hover:border-blue-400"
+                  }`}
+                >
+                  <img src="/LinkedinLogo.png" alt="LinkedIn" className="h-4 w-4" style={{ filter: isDarkMode ? "brightness(2.5)" : "none" }} />
+                </a>
+                <a
+                  href={`https://${profile.github}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 ${
+                    isDarkMode ? "border-white/15 bg-white/5 hover:border-emerald-400/50" : "border-slate-300 bg-white hover:border-blue-400"
+                  }`}
+                >
+                  <img src="/Githublogo.png" alt="GitHub" className="h-4 w-4" style={{ filter: isDarkMode ? "brightness(2.8)" : "none" }} />
+                </a>
+                <a
+                  href="mailto:contact@mohitunecha.com"
+                  aria-label="Email"
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 ${
+                    isDarkMode ? "border-white/15 bg-white/5 text-slate-300 hover:border-emerald-400/50" : "border-slate-300 bg-white text-slate-600 hover:border-blue-400"
+                  }`}
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Explore */}
+            <div>
+              <p className={`text-xs font-bold uppercase tracking-[0.25em] ${sectionLabelClass}`}>Explore</p>
+              <ul className={`mt-3 space-y-2 text-sm ${bodyTextClass}`}>
+                {[
+                  { label: "About", href: "#about" },
+                  { label: "Experience", href: "#experience" },
+                  { label: "Projects", href: "#projects" },
+                  { label: "Programs & Fellowships", href: "#programs" },
+                  { label: "Volunteering", href: "#volunteering" },
+                  { label: "Contact", href: "#contact" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} className={`transition ${accentHoverTextClass}`}>
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Fun stuff */}
+            <div>
+              <p className={`text-xs font-bold uppercase tracking-[0.25em] ${sectionLabelClass}`}>Off the Clock</p>
+              <ul className={`mt-3 space-y-2 text-sm ${bodyTextClass}`}>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setShowGameSelector(true)}
+                    className={`font-semibold underline decoration-dotted transition ${accentTextClass} hover:opacity-70`}
+                  >
+                    🎮 Play the arcade (14 games)
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={playVoiceIntro}
+                    className={`transition ${accentHoverTextClass}`}
+                  >
+                    🎤 Hear my voice intro
+                  </button>
+                </li>
+                <li>
+                  <span className={sectionLabelClass}>⌘K opens the command palette</span>
+                </li>
+                {visitorCount !== null && (
+                  <li className={sectionLabelClass}>
+                    <span className={`font-semibold ${accentTextClass}`}>{visitorCount.toLocaleString()}</span> visitors and counting
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+
+          <div className={`mt-12 flex flex-col items-center justify-between gap-3 border-t pt-6 text-xs sm:flex-row ${
+            isDarkMode ? "border-white/10 text-slate-500" : "border-slate-200 text-slate-400"
+          }`}>
+            <p>© 2026 Mohit Unecha. Designed & built with Next.js, Tailwind, and ❤️</p>
+            <p className="select-none tracking-widest opacity-30" title="You know what to do 😉">↑↑↓↓←→←→BA</p>
+          </div>
+        </div>
       </footer>
+
+      {isHeaderVisible && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          className={`fixed bottom-20 left-6 z-40 flex items-center justify-center rounded-full p-3 transition-all duration-500 ${
+            isDarkMode
+              ? "border border-emerald-400/30 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20 hover:shadow-lg hover:shadow-emerald-500/20"
+              : "border border-blue-400/30 bg-blue-400/10 text-blue-600 hover:bg-blue-400/20 hover:shadow-lg hover:shadow-blue-500/20"
+          }`}
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+      )}
 
       {isHeaderVisible && (
         <button
