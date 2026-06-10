@@ -74,7 +74,7 @@ export const profile = {
   ],
   stats: [
     { value: 1050, suffix: "+", label: "Volunteer Hours", sub: "Lead Volunteer at Hands of Hope Food Pantry" },
-    { value: 250, suffix: "+", label: "Students Mentored", sub: "Coding & chess at Alpha Minds Academy" },
+    { value: 250, suffix: "+", label: "Students Mentored", sub: "Coding & chess — Alpha Minds Academy & varsity chess" },
     { value: 2, suffix: "×", label: "Hackathon Wins", sub: "Barclays Data Hackathon & SignalForge Datathon" },
     { value: 400, suffix: "+", label: "Hours Automated", sub: "Workflow automation at Kumon & Samaya Global" },
     { value: 10, suffix: "+", label: "Selective Programs", sub: "Microsoft, Goldman Sachs, Capital One, BCG & more" },

@@ -39,6 +39,13 @@ const initialMessages: Message[] = [
   },
 ];
 
+const suggestedPrompts = [
+  "What's he building at Microsoft? 🚀",
+  "Why should a recruiter talk to Mohit?",
+  "Tell me about the F1 platform 🏎️",
+  "What's his product experience?",
+];
+
 export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boolean }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -279,6 +286,25 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
     window.speechSynthesis.speak(utterance);
   };
 
+  // Speak any text on demand — works outside call mode too
+  const speakText = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const spokenText = text
+      .replace(/Unecha's/gi, "oo-NEH-chah's")
+      .replace(/Unecha/gi, "oo-NEH-chah")
+      .replace(/Mohit's/g, "Mo-hit's")
+      .replace(/Mohit/g, "Mo-hit");
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(spokenText);
+    utterance.rate = 1.01;
+    utterance.pitch = 1;
+    const preferredVoice = window.speechSynthesis
+      .getVoices()
+      .find((voice) => /Samantha|Google US English|en-US/i.test(voice.name));
+    if (preferredVoice) utterance.voice = preferredVoice;
+    window.speechSynthesis.speak(utterance);
+  };
+
   const startCall = () => {
     if (!recognitionRef.current || isLoadingRef.current) return;
     setIsOpen(true);
@@ -434,7 +460,11 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
 
           <div className="relative flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`relative flex h-12 w-12 items-center justify-center rounded-full border text-lg font-bold ${isDarkMode ? "border-emerald-300/30 bg-emerald-500/10 text-emerald-100" : "border-blue-300/40 bg-blue-500/10 text-blue-700"}`}>
+              <div className={`relative flex h-12 w-12 items-center justify-center rounded-full border text-lg font-bold shadow-lg ${
+                isDarkMode
+                  ? "border-emerald-300/40 bg-gradient-to-br from-emerald-500/30 to-cyan-500/30 text-emerald-100 shadow-emerald-500/20"
+                  : "border-blue-300/50 bg-gradient-to-br from-blue-500/25 to-sky-400/25 text-blue-700 shadow-blue-500/20"
+              }`}>
                 J
                 {isCallActive && (
                   <>
@@ -444,11 +474,15 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
                 )}
               </div>
               <div>
-                <h3 className={`text-base font-semibold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                <h3 className={`flex items-center gap-2 text-base font-semibold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
                   {profile.agentName}
+                  <span className="relative flex h-2 w-2">
+                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                    <span className={`relative inline-flex h-2 w-2 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                  </span>
                 </h3>
                 <p className={`text-xs ${isDarkMode ? "text-slate-300" : "text-slate-500"}`}>
-                  {isCallActive ? "Voice call active" : "AI career assistant (beta)"}
+                  {isCallActive ? "Voice call active" : "AI career copilot · voice + text"}
                 </p>
               </div>
             </div>
@@ -502,8 +536,39 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
                 style={{ animation: `slide-up-fade 0.3s ease-out ${index * 0.05}s both` }}
               >
                 {message.content}
+                {message.role === "assistant" && (
+                  <button
+                    type="button"
+                    onClick={() => speakText(message.content)}
+                    className={`mt-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider opacity-50 transition hover:opacity-100 ${
+                      isDarkMode ? "text-emerald-300" : "text-blue-600"
+                    }`}
+                    title="Hear this out loud"
+                  >
+                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                    Listen
+                  </button>
+                )}
               </div>
             ))}
+            {messages.length <= 1 && !isLoading && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {suggestedPrompts.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => void sendPrompt(prompt)}
+                    className={`rounded-full border px-3 py-1.5 text-xs transition-all duration-200 hover:scale-105 ${
+                      isDarkMode
+                        ? "border-emerald-300/30 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/20"
+                        : "border-blue-300/50 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    }`}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            )}
             {isLoading && (
               <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${isDarkMode ? "bg-white/10 border border-white/5" : "bg-slate-100 border border-slate-200/50"}`}>
                 <div className="flex gap-1.5">
@@ -653,18 +718,19 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
       <button
         type="button"
         onClick={toggleChatPanel}
-        className={`pointer-events-auto flex items-center gap-3 rounded-full border px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg transition duration-300 ${
+        className={`group pointer-events-auto relative flex items-center gap-3 overflow-hidden rounded-full border px-4 py-3 text-sm font-semibold text-slate-900 shadow-xl transition-all duration-300 hover:scale-105 ${
           isDarkMode
-            ? "border-emerald-300/20 bg-emerald-400/90 hover:bg-emerald-300"
-            : "border-blue-300/30 bg-blue-400/90 hover:bg-blue-300"
+            ? "border-emerald-300/30 bg-gradient-to-r from-emerald-400 to-cyan-400 shadow-emerald-500/40 hover:shadow-emerald-500/60"
+            : "border-blue-300/40 bg-gradient-to-r from-blue-400 to-sky-400 shadow-blue-500/40 hover:shadow-blue-500/60"
         }`}
       >
         <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white">
           {profile.agentName.charAt(0)}
-          {isCallActive && <span className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full ${isDarkMode ? "bg-emerald-300" : "bg-blue-300"}`} />}
+          <span className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full ${isCallActive ? "animate-pulse" : ""} ${isDarkMode ? "bg-emerald-300" : "bg-blue-200"}`} />
         </span>
-        <span className="hidden sm:inline">Chat with {profile.agentName}</span>
-        <span className="sm:hidden">Chat</span>
+        <span className="hidden sm:inline">{isOpen ? "Close" : `Chat with ${profile.agentName}`}</span>
+        <span className="sm:hidden">{isOpen ? "Close" : "Chat"}</span>
+        <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
       </button>
     </div>
   );

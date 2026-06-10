@@ -75,6 +75,7 @@ function TimelineLabel({ t, isDarkMode }: { t: string; isDarkMode: boolean }) {
 
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
+  const [showAllExperience, setShowAllExperience] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
@@ -158,13 +159,14 @@ export default function Home() {
   }, []);
 
   const roles = [
-    "SWE/PM Intern @ Microsoft",
-    "Software Engineer",
     "Product Manager",
+    "Product Strategist",
+    "Consultant",
+    "Software Engineer",
+    "PM/SWE Intern @ Microsoft",
     "AI Fellow @ Cornell Tech",
     "F1 Enthusiast",
     "Builder & Creator",
-    "CS + Econ @ Rutgers",
   ];
   const firstName = profile.name.split(" ")[0];
   const greetings = [
@@ -217,7 +219,7 @@ export default function Home() {
   const playVoiceIntro = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's a software engineering and product management intern at Microsoft, building an AI copilot on the Microsoft 365 Core team. He's also an AI fellow with Break Through Tech at Cornell Tech, leads technology at a nonprofit supporting women and children, and has volunteered over one thousand hours as a lead volunteer at Hands of Hope. When he's not coding or mentoring, you'll find him analyzing formula one race data or exploring the intersection of tech and social impact. Feel free to explore his work — or chat with Jarvis to learn more!";
+    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's a product manager, strategist, and software engineer — currently a product management and software engineering intern at Microsoft, leading a team building an AI copilot on the Microsoft 365 Core team. He's also an AI fellow with Break Through Tech at Cornell Tech, a consultant at Rutgers Consulting Group, and leads technology at a nonprofit supporting women and children, with over one thousand volunteer hours at Hands of Hope. When he's not building or mentoring, you'll find him analyzing formula one race data. Feel free to explore his work — or chat with Jarvis to learn more!";
     const utterance = new SpeechSynthesisUtterance(introText);
     utterance.rate = 0.95;
     utterance.pitch = 1;
@@ -781,25 +783,27 @@ export default function Home() {
               <span className={`${roleColorClass} font-semibold`}>{roleText}</span>
               <span className="animate-pulse opacity-70">|</span>
             </p>
-            {/* Quick info chips */}
-            <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
-              {[
-                { icon: "📍", text: `Redmond, WA${redmondTime ? ` · ${redmondTime} PT` : ""}` },
-                { icon: "💼", text: "Microsoft 365 Core" },
-                { icon: "🎓", text: "Rutgers CS + Econ '28" },
-              ].map((chip) => (
-                <span
-                  key={chip.text}
-                  className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                    isDarkMode
-                      ? "border-white/15 bg-white/5 text-slate-200"
-                      : "border-slate-300/80 bg-white/70 text-slate-700"
-                  }`}
-                >
-                  <span>{chip.icon}</span>
-                  {chip.text}
+            {/* HUD status strip — F1 timing tower style */}
+            <div className="mb-6 px-2">
+              <div className={`inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-2xl border px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur-md sm:text-[11px] ${
+                isDarkMode
+                  ? "border-emerald-300/25 bg-slate-950/60 text-slate-300 shadow-lg shadow-emerald-500/10"
+                  : "border-blue-300/60 bg-white/75 text-slate-600 shadow-lg shadow-blue-500/10"
+              }`}>
+                <span className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                    <span className={`relative inline-flex h-2 w-2 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                  </span>
+                  <span className={`font-bold ${isDarkMode ? "text-emerald-300" : "text-blue-600"}`}>Live</span>
                 </span>
-              ))}
+                <span className="opacity-30">▮</span>
+                <span>Redmond WA{redmondTime ? ` · ${redmondTime} PT` : ""}</span>
+                <span className="opacity-30">▮</span>
+                <span>M365 Core @ Microsoft</span>
+                <span className="hidden opacity-30 sm:inline">▮</span>
+                <span className="hidden sm:inline">Rutgers &apos;28</span>
+              </div>
             </div>
             {/* Open to opportunities badge */}
             <div className={`mb-6 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 ${
@@ -976,7 +980,7 @@ export default function Home() {
                 : "from-blue-500/60 via-sky-400/40 to-transparent"
             }`} />
             
-            {profile.experience.map((item, index) => {
+            {(showAllExperience ? profile.experience : profile.experience.slice(0, 4)).map((item, index) => {
               const isLeft = index % 2 === 0;
               return (
                 <div
@@ -1067,6 +1071,31 @@ export default function Home() {
               );
             })}
           </div>
+          {profile.experience.length > 4 && (
+            <div className="mt-12 flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  if (showAllExperience) {
+                    document.querySelector('#experience')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setShowAllExperience((prev) => !prev);
+                }}
+                className={`group flex items-center gap-2 rounded-full border px-6 py-2.5 text-xs font-semibold uppercase tracking-widest transition-all duration-300 hover:scale-105 ${buttonClass}`}
+              >
+                {showAllExperience ? "Show less" : `Show all ${profile.experience.length} roles`}
+                <svg
+                  className={`h-3.5 w-3.5 transition-transform duration-300 ${showAllExperience ? "rotate-180" : "group-hover:translate-y-0.5"}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </section>
 
         <section id="projects" className="py-24" style={{
