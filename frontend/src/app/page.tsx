@@ -1847,7 +1847,7 @@ export default function Home() {
               </p>
               <ul className={`mb-6 space-y-2.5 text-sm leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
                 {[
-                  <span key="ms"><strong>Shipping AI at Microsoft right now</strong> — leading a 2-intern team building Headroom Copilot on M365 Core: natural-language telemetry querying, 30–50% faster insights.</span>,
+                  <span key="ms"><strong>Shipping AI at Microsoft right now</strong> — leading a team building Headroom Copilot on M365 Core: natural-language telemetry querying, targeting 30–50% faster insights.</span>,
                   <span key="ai"><strong>AI Fellow @ Cornell Tech</strong> (Break Through Tech, 5,000+ applicants) + PayPal Career Academy + Vanguard North Star Fellow.</span>,
                   <span key="hack"><strong>2× hackathon winner</strong> — Barclays Data Hackathon (AI stock predictor) and SignalForge datathon, both built in 48 hours.</span>,
                   <span key="lead"><strong>Leads with empathy</strong> — Tech Lead at nonprofit Samaya Global, 1,050+ volunteer hours, 250+ students mentored.</span>,

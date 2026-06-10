@@ -88,9 +88,9 @@ export const profile = {
     timeline: "May 2026 – Present",
     highlights: [
       "Working on Microsoft Secure Score within Microsoft 365 Core, splitting the internship across product management and software development",
-      "Leading a 2-intern team to define and ship Headroom Copilot — an AI-powered product enabling natural-language querying over telemetry data, cutting time to headroom insights by 30–50%",
-      "Driving end-to-end product strategy from problem identification to validation, centralizing data workflows into a snapshot-based platform that roughly doubled analysis efficiency",
-      "Partnering with engineers, PMs, and stakeholders to iterate on product design and UX, delivering a scalable, secure solution that accelerates decision-making"
+      "Leading a team to define and ship Headroom Copilot — an AI-powered product enabling natural-language querying over telemetry data",
+      "Aiming to cut time to headroom insights by 30–50% and roughly double analysis efficiency",
+      "Further details under NDA 🤐"
     ]
   },
   {
@@ -511,9 +511,9 @@ export const profile = {
       {
         product: "Headroom Copilot — Microsoft 365 Core",
         role: "SWE/PM Intern",
-        problem: "Engineers needed faster access to headroom insights buried in telemetry data, requiring repetitive manual queries.",
-        approach: "Led a 2-intern team through problem identification, validation, and iteration; centralized data workflows into a snapshot-based platform with natural-language querying.",
-        outcome: "Cut time to headroom insights by 30–50% and roughly doubled analysis efficiency for the team.",
+        problem: "Engineers needed faster access to headroom insights buried in telemetry data.",
+        approach: "Led a team from problem identification through validation and iteration to ship an AI-powered natural-language querying product. Further details under NDA.",
+        outcome: "Aiming to cut time to headroom insights by 30–50% and roughly double analysis efficiency.",
       },
       {
         product: "Every Lap — F1 Analytics",
