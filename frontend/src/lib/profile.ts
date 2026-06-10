@@ -24,10 +24,32 @@ export type EducationItem = {
   gpa?: string;
 };
 
+export type StatItem = {
+  value: number;
+  suffix?: string;
+  decimals?: number;
+  label: string;
+  sub: string;
+};
+
+export type ProgramItem = {
+  name: string;
+  org: string;
+  year: string;
+  detail: string;
+};
+
+export type VolunteeringItem = {
+  role: string;
+  org: string;
+  timeline: string;
+  detail: string;
+};
+
 export const profile = {
   name: "Mohit Unecha",
-  headline: "Aspiring Software Engineer & Product Manager",
-  location: "Based in [City, State]",
+  headline: "SWE/PM Intern @ Microsoft | CS & Economics @ Rutgers",
+  location: "New York City Metropolitan Area",
   heroBackgroundImage: "/pexels-adrian-falcon-1778067-3359250.jpg",
   photoUrl: "/mohit.jpg",
   agentName: "Jarvis",
@@ -36,8 +58,9 @@ export const profile = {
   linkedIn: "linkedin.com/in/mohitunecha",
   github: "github.com/MohitUnecha",
   summary: [
-    "I am a mission-driven builder at the intersection of software, product, and business, focused on creating user-centered products that solve real problems at scale. I thrive in fast-paced, collaborative environments where I can blend technical execution with strategic thinking to deliver measurable impact. With experience spanning AI/ML, consulting, automation, and product development, I aim to build technology that is both innovative and meaningful.",
-    "Outside of work, I enjoy traveling, hiking, golfing, and go-karting, which fuel my curiosity, competitiveness, and appreciation for new perspectives.",
+    "I'm a Computer Science & Economics student at Rutgers (Data Science minor, 3.9 GPA) currently in Redmond as an Explore SWE/PM Intern at Microsoft, building AI-powered tooling on the Microsoft 365 Core team. My mission is simple: leverage technology, data, and empathy to build products that genuinely improve people's lives.",
+    "I live at the intersection of software, product, and finance — from shipping an AI copilot at Microsoft, to leading the technology roadmap at a global nonprofit, to winning hackathons with ML-driven fintech tools. I'm a Break Through Tech AI Fellow at Cornell Tech and an alum of selective programs at Goldman Sachs, Capital One, BCG, Bain, Oracle, PayPal, and Vanguard.",
+    "Beyond work, you'll find me watching F1, exploring new cuisines, mountain biking, and chasing bucket-list adventures — Kilimanjaro, Everest Base Camp, and the Camino de Santiago are all on the list.",
   ],
   strengths: [
     "Product discovery and user-centered design",
@@ -49,39 +72,81 @@ export const profile = {
     "Clear technical communication and storytelling",
     "AI/ML and data analytics integration",
   ],
+  stats: [
+    { value: 1050, suffix: "+", label: "Volunteer Hours", sub: "Lead Volunteer at Hands of Hope Food Pantry" },
+    { value: 250, suffix: "+", label: "Students Mentored", sub: "Coding & chess at Alpha Minds Academy" },
+    { value: 2, suffix: "×", label: "Hackathon Wins", sub: "Barclays Data Hackathon & SignalForge Datathon" },
+    { value: 400, suffix: "+", label: "Hours Automated", sub: "Workflow automation at Kumon & Samaya Global" },
+    { value: 10, suffix: "+", label: "Selective Programs", sub: "Microsoft, Goldman Sachs, Capital One, BCG & more" },
+    { value: 3.9, decimals: 1, label: "GPA at Rutgers", sub: "Dean's List × 3 — CS & Economics" },
+  ] as StatItem[],
   experience: [
   {
-    role: "Incoming Product & Software Engineer",
+    role: "Explore Intern — SWE & Product Management",
     company: "Microsoft",
     location: "Redmond, WA",
-    timeline: "May 2026",
+    timeline: "May 2026 – Present",
     highlights: [
-      "Selected to work on the core Microsoft 365 suite, contributing to products used by 10M+ users globally",
-      "Will collaborate with product, design, and engineering teams to define requirements, build scalable features, and ship production-ready software within a cloud-first ecosystem",
-      "Expected to balance technical execution with product strategy, aligning user needs with business impact"
+      "Working on Microsoft Secure Score within Microsoft 365 Core, splitting the internship across product management and software development",
+      "Leading a 2-intern team to define and ship Headroom Copilot — an AI-powered product enabling natural-language querying over telemetry data, cutting time to headroom insights by 30–50%",
+      "Driving end-to-end product strategy from problem identification to validation, centralizing data workflows into a snapshot-based platform that roughly doubled analysis efficiency",
+      "Partnering with engineers, PMs, and stakeholders to iterate on product design and UX, delivering a scalable, secure solution that accelerates decision-making"
     ]
   },
   {
-    role: "PayPal Career Academy Program",
+    role: "Machine Learning / AI Fellow",
+    company: "Break Through Tech @ Cornell Tech",
+    location: "Remote",
+    timeline: "Mar 2026 – Present",
+    highlights: [
+      "Selected from 5,000+ applicants for the Break Through Tech AI Program at Cornell Tech",
+      "Completing a 12-month program of technical AI/ML coursework, hands-on experiential learning, and industry mentorship",
+      "Building applied machine learning skills through real-world projects and career development with industry partners"
+    ]
+  },
+  {
+    role: "Career Academy Extern",
     company: "PayPal",
     location: "Remote",
     timeline: "Feb 2026 – Present",
     highlights: [
-      "Selected for PayPal's Career Academy Program internship, gaining exposure to fintech, product thinking, and professional development",
-      "Building experience in cross-functional collaboration, analytical problem solving, and business-focused communication within a remote environment",
-      "Strengthening readiness for fast-paced product and technology roles through mentorship, workshops, and hands-on learning"
+      "Selected for PayPal's Career Academy Program — a year-long fintech immersion built around mentorship, workshops, and hands-on learning",
+      "Developing product thinking, business-focused communication, and cross-functional collaboration alongside PayPal professionals"
     ]
   },
   {
-    role: "Business Consulting Analyst",
+    role: "Technology Lead",
+    company: "Samaya Global",
+    location: "Edison, NJ (Remote)",
+    timeline: "Jan 2025 – Present",
+    highlights: [
+      "Leading end-to-end development of an internal ticketing system for a nonprofit uplifting women and children through education, care, and community empowerment",
+      "Managing a small team of developers, setting the technical roadmap, and partnering with operations to turn program needs into scalable tools across sites in the US, India, and beyond",
+      "Designed and launched samayaglobal.org — the organization's public home for events, ticketing, donations, and volunteer sign-ups",
+      "Saved 100+ hours of manual operational work, improving response times, reducing errors, and freeing staff for direct community impact"
+    ]
+  },
+  {
+    role: "Project Manager",
     company: "Rutgers Consulting Group (RCG)",
     location: "New Brunswick, NJ",
     timeline: "Sep 2025 – Present",
     highlights: [
-      "Built data-driven go-to-market models using market sizing, competitor benchmarking, and financial analysis to inform strategy for multiple client engagements",
-      "Developed dashboards and analytical models evaluating 3+ business scenarios to quantify revenue potential, risk, and scalability",
-      "Synthesized qualitative and quantitative insights into structured frameworks and slide-ready deliverables for stakeholders",
+      "Developed the full business plan for a client product launch — detailed financial modeling, competitive ecosystem mapping, and go-to-market strategy",
+      "Supported a launch that generated nearly $100K in revenue within its first week",
+      "Built dashboards and analytical models evaluating 3+ business scenarios to quantify revenue potential, risk, and scalability",
       "Partnered with a 4-person consulting team to define problem statements, test hypotheses, and deliver client-ready recommendations"
+    ]
+  },
+  {
+    role: "Hackathon Winner & AI/ML Developer",
+    company: "Rutgers University (Barclays Data Hackathon)",
+    location: "New Jersey",
+    timeline: "Nov 2025",
+    highlights: [
+      "Led a team to 1st place by designing and building an AI Stock Predictor using a Retrieval-Augmented Transformer (RAT) model",
+      "Integrated real-time market data, financial news, and sentiment analysis to generate data-backed trading signals",
+      "Built a functional prototype within 48 hours, demonstrating technical execution, teamwork, and rapid iteration under pressure"
     ]
   },
   {
@@ -96,49 +161,14 @@ export const profile = {
     ]
   },
   {
-    role: "Expedition EY Intern",
-    company: "Ernst & Young",
-    location: "New York, NY",
-    timeline: "Mar 2025 – May 2025",
+    role: "Jr. Data Research Intern",
+    company: "Right Angle Solutions",
+    location: "New Brunswick, NJ",
+    timeline: "Jun 2024 – Present",
     highlights: [
-      "Completed Expedition EY, a structured virtual consulting experience focused on technology-enabled business transformation",
-      "Gained a practical understanding of what consulting entails, including problem structuring, stakeholder management, and solution delivery",
-      "Worked through real-world case scenarios involving client discovery, data analysis, and strategic recommendations",
-      "Learned how consultants balance technical insights with business strategy to create measurable client impact"
-    ]
-  },
-  {
-    role: "Hackathon Winner & AI/ML Developer",
-    company: "Rutgers University (Barclays Data Hackathon)",
-    location: "New Jersey",
-    timeline: "Mar 2025",
-    highlights: [
-      "Led a team to 1st place by designing and building an AI Stock Predictor using a Retrieval-Augmented Transformer (RAT) model",
-      "Integrated real-time market data, financial news, and sentiment analysis to generate data-backed trading signals",
-      "Built a functional prototype within 48 hours, demonstrating technical execution, teamwork, and rapid iteration under pressure"
-    ]
-  },
-  {
-    role: "Technology Lead",
-    company: "Samaya Global",
-    location: "Edison, NJ (Remote)",
-    timeline: "Jan 2025 – Present",
-    highlights: [
-      "Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children through education, care, and community empowerment",
-      "Managing a small team of developers, setting the technical roadmap, and collaborating with operations to turn program needs into scalable tools",
-      "Saved over 100 hours of manual operational work by streamlining workflows across sites in the US, India, and beyond",
-      "Improving response times, reducing errors, and enabling staff to spend more time on direct community impact"
-    ]
-  },
-  {
-    role: "2025 Possibilities Summit",
-    company: "Goldman Sachs",
-    location: "New York, NY",
-    timeline: "Jan 2025 – Jan 2026",
-    highlights: [
-      "Completed training in Operations, Risk, and Controllers, gaining technical exposure to financial controls, risk frameworks, and compliance processes",
-      "Engaged in case-based workshops on data-driven decision making, emerging technologies, and cross-functional collaboration",
-      "Networked with industry professionals and developed professional communication and problem-solving skills"
+      "Analyzed 15,000+ rows of tri-state charter, private, and public school data using SQL, Excel, and Power BI",
+      "Identified key demographic and enrollment trends that informed strategy and messaging for a successful campaign launch",
+      "Designed data visualizations and reports to communicate insights clearly to non-technical stakeholders"
     ]
   },
   {
@@ -153,17 +183,6 @@ export const profile = {
     ]
   },
   {
-    role: "Jr. Data Research Intern",
-    company: "Right Angle Solution",
-    location: "New Brunswick, NJ",
-    timeline: "Jun 2024 – Present",
-    highlights: [
-      "Analyzed 15,000+ rows of tri-state charter, private, and public school data using SQL, Excel, and Power BI",
-      "Identified key demographic and enrollment trends that informed strategy and messaging for a successful campaign launch",
-      "Designed data visualizations and reports to communicate insights clearly to non-technical stakeholders"
-    ]
-  },
-  {
     role: "Automation Administrator",
     company: "Kumon",
     location: "Edison, NJ",
@@ -175,6 +194,88 @@ export const profile = {
     ]
   }
 ] as ExperienceItem[],
+  programs: [
+    {
+      name: "Break Through Tech AI Fellowship",
+      org: "Cornell Tech",
+      year: "2026",
+      detail: "Selected from 5,000+ applicants for a 12-month applied AI/ML program with coursework, projects, and mentorship.",
+    },
+    {
+      name: "North Star Fellowship",
+      org: "Vanguard",
+      year: "2026",
+      detail: "2026 Fellow in Vanguard's selective early-talent community at the intersection of tech, product, and finance.",
+    },
+    {
+      name: "Career Academy Program",
+      org: "PayPal",
+      year: "2026",
+      detail: "Year-long fintech immersion — mentorship, workshops, and hands-on product learning.",
+    },
+    {
+      name: "Engineering Possibilities Summit",
+      org: "Goldman Sachs",
+      year: "2025",
+      detail: "Year-long engineering program — selected from 10,000+ applicants; training across Operations, Risk, and Controllers.",
+    },
+    {
+      name: "Launchpad: Legacy & Leadership",
+      org: "Capital One",
+      year: "2025",
+      detail: "1 of 100 students chosen from 1,200+ applicants for a 5-day immersive program and case competition at HQ.",
+    },
+    {
+      name: "BCG Launch",
+      org: "Boston Consulting Group",
+      year: "2025",
+      detail: "Selective consulting discovery program covering casework, problem structuring, and client strategy.",
+    },
+    {
+      name: "Oracle Reach",
+      org: "Oracle",
+      year: "2025",
+      detail: "Early-talent technology program exploring cloud, enterprise software, and tech careers.",
+    },
+    {
+      name: "Consulting Kickstart",
+      org: "Bain & Company",
+      year: "2025",
+      detail: "Intensive introduction to consulting frameworks, case interviews, and structured problem solving.",
+    },
+    {
+      name: "Expedition EY",
+      org: "Ernst & Young",
+      year: "2025",
+      detail: "Structured consulting experience focused on technology-enabled business transformation.",
+    },
+    {
+      name: "Freshman Jumpstart",
+      org: "BNY Mellon",
+      year: "2025",
+      detail: "Early-insight program in finance and technology with industry mentorship.",
+    },
+  ] as ProgramItem[],
+  volunteering: [
+    {
+      role: "Lead Volunteer",
+      org: "Hands of Hope Food Pantry",
+      timeline: "Jun 2020 – Present",
+      detail: "1,050+ hours serving the people of Middlesex County — leading volunteer teams, food distribution, and community health fairs.",
+    },
+    {
+      role: "Explorer",
+      org: "Edison Police Department",
+      timeline: "Oct 2022 – Jun 2024",
+      detail: "Supported community programs and learned day-to-day public safety operations alongside officers.",
+    },
+    {
+      role: "Technology Lead (Pro Bono)",
+      org: "Samaya Global",
+      timeline: "Jan 2025 – Present",
+      detail: "Donating engineering leadership to a nonprofit uplifting women and children — building the tools that power its operations.",
+    },
+  ] as VolunteeringItem[],
   projects: [
     {
       name: "Every Lap — F1 Analytics",
@@ -329,36 +430,42 @@ export const profile = {
   education: [
     {
       school: "Rutgers University",
-      degree: "B.A. Computer Science & Economics (Dual Major)",
-      timeline: "Sep 2024 – Dec 2028 (Expected)",
-      gpa: "3.89",
+      degree: "B.A. Computer Science & Economics (Dual Major), Minor in Data Science",
+      timeline: "Jun 2024 – May 2028 (Expected)",
+      gpa: "3.9",
       details: [
-        "Dean's List Scholar for academic excellence",
-        "Active in tech communities: Data Hackathon winner, Business Information Technology Society",
-        "Interdisciplinary focus positioning for roles at intersection of tech and business strategy",
+        "Dean's List × 3 for academic excellence",
+        "Active in ColorStack, Rutgers Consulting Group, and Men of Character",
+        "1st place — Barclays Data Hackathon; datathon winner with SignalForge",
+        "Interdisciplinary focus positioning for roles at the intersection of tech, product, and business strategy",
       ],
     },
     {
       school: "John P Stevens High School",
-      degree: "High School Diploma",
+      degree: "High School Diploma — Computer Science & Business Management",
       timeline: "2020 – 2024",
       details: [
         "Strong foundation in STEM with honors in Computer Science and Mathematics",
-        "Early passion for technology and innovation",
-        "In various National Honor Societies and was the Vice President of the Spanish Honor Society"
+        "Inducted member of Mu Alpha Theta (Math Honor Society), tutoring students in math",
+        "Member of various National Honor Societies and Vice President of the Spanish Honor Society",
       ],
     },
   ] as EducationItem[],
   skills: {
-    product: ["Hackathon Innovation", "AI/ML Strategy", "Fintech Thinking", "MVP Development", "Cross-functional Leadership"],
-    engineering: ["Python", "Node.js", "TypeScript", "React", "Streamlit", "Machine Learning", "NLP", "APIs"],
-    tools: ["Gemini API", "ElevenLabs", "Snowflake", "Power BI", "Canvas LMS", "Google Drive API", "Git", "Jupyter"],
+    product: ["Product Strategy", "PRDs & Roadmapping", "Go-to-Market Planning", "Financial Modeling", "Cross-functional Leadership", "AI/ML Strategy", "MVP Development"],
+    engineering: ["Python", "TypeScript", "React / Next.js", "Node.js", "SQL", "Java", "C++", "R", "Machine Learning", "NLP"],
+    tools: ["Power BI", "Snowflake", "Streamlit", "Gemini API", "Groq", "ElevenLabs", "Git", "Jupyter", "Excel", "Canvas LMS"],
   },
   certifications: [
-    "Power BI Essential Training – LinkedIn Learning (Data Modeling & Visualization)",
-    "Dean's List Scholar – Rutgers University",
-    "Goldman Sachs Engineering Possibilities Summit – Selected from 10,000+ applicants",
-    "BNY Mellon Freshman Jumpstart Program – 2025",
+    "Harvard CS50P — Programming with Python",
+    "Google Cloud — Generative AI, Intro to Large Language Models, Responsible AI",
+    "BCG Launch Intern — Boston Consulting Group (Jun 2025)",
+    "Oracle Reach Intern — Oracle (May 2025)",
+    "Capital One Launchpad: Legacy & Leadership — 1 of 100 from 1,200+ applicants",
+    "Goldman Sachs Engineering Possibilities Summit — Selected from 10,000+ applicants",
+    "Bain & Company Consulting Kickstart Program",
+    "BNY Mellon Freshman Jumpstart Program",
+    "Power BI Essential Training — Data Modeling & Visualization",
   ],
   pmSpecSheet: {
     vision: "I build products at the intersection of engineering and strategy — translating user pain into shipped solutions that move metrics. My approach combines hands-on technical execution with rigorous discovery, data-driven prioritization, and cross-functional alignment.",
@@ -402,6 +509,13 @@ export const profile = {
     ],
     caseStudies: [
       {
+        product: "Headroom Copilot — Microsoft 365 Core",
+        role: "SWE/PM Intern",
+        problem: "Engineers needed faster access to headroom insights buried in telemetry data, requiring repetitive manual queries.",
+        approach: "Led a 2-intern team through problem identification, validation, and iteration; centralized data workflows into a snapshot-based platform with natural-language querying.",
+        outcome: "Cut time to headroom insights by 30–50% and roughly doubled analysis efficiency for the team.",
+      },
+      {
         product: "Every Lap — F1 Analytics",
         role: "Solo Builder & PM",
         problem: "F1 fans lacked a unified platform to explore historical race data, predictions, and telemetry in one place.",
@@ -414,13 +528,6 @@ export const profile = {
         problem: "Datathon judges needed a tool to verify company failures and understand root causes through data, not just narratives.",
         approach: "Rapid prototyping with Streamlit, multi-LLM reasoning for robustness, designed judge-facing UX with export capabilities.",
         outcome: "Datathon winner. Delivered failure verification, digital twin simulation, NLP forensics, and polished report export in 48 hours.",
-      },
-      {
-        product: "Basement at 6:17 — Murder Mystery",
-        role: "Solo Builder & Game Designer",
-        problem: "Running in-person murder mystery games required manual coordination for 13+ players with no real-time host dashboard.",
-        approach: "Designed token-based auth for host/player separation, built real-time clue reveal system, integrated Twilio for phone notifications.",
-        outcome: "Deployed game engine supporting 13+ concurrent players with host admin panel, vote weighting, and round reset on Vercel.",
       },
     ],
   },

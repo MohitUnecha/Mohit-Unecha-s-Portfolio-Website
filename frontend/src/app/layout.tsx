@@ -14,9 +14,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mohit Unecha Portfolio Website",
+  metadataBase: new URL("https://mohitunecha.com"),
+  title: "Mohit Unecha — SWE/PM Intern @ Microsoft | CS & Econ @ Rutgers",
   description:
-    "Personal portfolio for a software engineer and product manager candidate.",
+    "Software engineer & product manager building AI-powered products. SWE/PM Intern at Microsoft (M365 Core), Break Through Tech AI Fellow at Cornell Tech, hackathon winner, and nonprofit technology lead.",
+  keywords: [
+    "Mohit Unecha",
+    "Software Engineer",
+    "Product Manager",
+    "Microsoft Intern",
+    "Rutgers University",
+    "AI/ML",
+    "Portfolio",
+  ],
+  openGraph: {
+    title: "Mohit Unecha — SWE/PM Intern @ Microsoft",
+    description:
+      "Software engineer & product manager building AI-powered products at Microsoft, with a passion for fintech, F1 analytics, and tech for social impact.",
+    url: "https://mohitunecha.com",
+    siteName: "Mohit Unecha Portfolio",
+    images: [{ url: "/mohit.jpg" }],
+    type: "website",
+  },
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",

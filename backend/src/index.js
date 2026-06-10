@@ -131,8 +131,11 @@ app.post("/api/chat", async (req, res) => {
 Mohit is a mission-driven, high-achieving builder who blends technology, business, and impact. His personal mission: "To lead with empathy and leave a lasting impact on society." He leads with empathy by being kind, understanding, and mindful of others, helping break down barriers and making people feel less alone. His biggest non-tech accomplishment is being a genuinely kind person and striving to stay that way every day.
 
 **CAREER PATH & AMBITIONS:**
-- Incoming Product & Software Engineer Intern at Microsoft (starting May 2026, Redmond) working on Microsoft 365 Core. He's excited to work with industry professionals and learn directly from his PM and managers during the internship.
-- PayPal Career Academy Program at PayPal (Feb 2026 – Present, Remote): Building exposure to fintech, product thinking, business-focused communication, and cross-functional collaboration through mentorship, workshops, and hands-on learning.
+- CURRENTLY a Product & Software Engineer (Explore) Intern at Microsoft (May 2026 – Present, Redmond) working on Microsoft Secure Score within Microsoft 365 Core. He's leading a 2-intern team to define and ship Headroom Copilot — an AI-powered product enabling natural-language querying over telemetry data, cutting time to headroom insights by 30-50% and roughly doubling analysis efficiency.
+- Machine Learning/AI Fellow with Break Through Tech at Cornell Tech (Mar 2026 – Present): Selected from 5,000+ applicants for a 12-month applied AI/ML program with coursework, hands-on projects, and mentorship.
+- PayPal Career Academy Program (Feb 2026 – Present, Remote): Year-long fintech immersion building product thinking, business-focused communication, and cross-functional collaboration through mentorship and workshops.
+- Vanguard North Star 2026 Fellow: Selected for Vanguard's early-talent community at the intersection of tech, product, and finance.
+- Capital One Launchpad: Legacy & Leadership (2025): 1 of 100 students selected from 1,200+ applicants for a 5-day immersive program and case competition at Capital One HQ, in partnership with HACU and TMCF.
 - Technology Lead at Samaya Global (Jan 2025 – Present): Leading end-to-end development of an internal ticketing system for a nonprofit focused on uplifting women and children. Manages a small team of developers, sets the technical roadmap, and collaborates with operations. Saved 100+ hours of manual operational work, improving response times and reducing errors across sites in the US, India, and beyond.
 - Dream Role (5-10 years): Become a business owner using AI and technology to help clients achieve their goals, while continuing community service (like his current role as head volunteer at Hands of Hope)
 - Values impact over company name - as long as he's contributing meaningfully, supporting teammates, and meeting client expectations, he feels fulfilled
@@ -140,8 +143,9 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 - Biggest Career Achievement: Making his parents proud and consistently working hard toward building a successful and meaningful future
 
 **EDUCATION:**
-- Rutgers University: CS + Economics dual major (GPA: 3.89, Dean's List, expected May 2027)
-- Currently preparing with new technologies before his May 2026 Microsoft internship
+- Rutgers University: CS + Economics dual major with a Data Science minor (GPA: 3.9, Dean's List x3, expected May 2028)
+- Active in ColorStack, Rutgers Consulting Group, and Men of Character
+- Certifications: Harvard CS50P, Google Cloud Gen AI / Intro to LLMs / Responsible AI, BCG Launch, Bain Consulting Kickstart, Oracle Reach
 
 **CURRENT PROJECTS (MOST PROUD OF):**
 1. Every Lap — F1 Analytics: Full-stack F1 intelligence platform with 25 years of race data (2000-2026). Uses ensemble ML models (XGBoost + LightGBM + CatBoost) achieving 85% podium hit rate. Features interactive 60 FPS Canvas-based race replay with tyre compounds, pit events, safety cars. 40+ engineered features, SHAP explainability, PostgreSQL + DuckDB + Parquet architecture. Built with FastAPI backend and Next.js frontend.
@@ -154,10 +158,12 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 8. Samaya Nonprofit Website: Full-stack ticketing and management system for Samaya Global, a nonprofit supporting women and children. Built with React frontend and Node.js backend with real-time updates. Features include volunteer coordination, admin dashboards, operations tracking across multiple locations in US and India. Directly saves 100+ operational hours per cycle.
 
 **WORK EXPERIENCE:**
-- Microsoft: Incoming Product & Software Engineer (May 2026)
-- Samaya Global: Technology Lead (Jan 2025 – Present) - Leading dev team building internal ticketing system for nonprofit, saved 100+ hours of manual work
-- Rutgers Consulting Group: Business Consulting Analyst (Sep 2025 – Present) - Data-driven go-to-market models, dashboards, client recommendations
-- Rutgers/Barclays Hackathon: 1st Place AI/ML Developer (Mar 2025) - Built AI Stock Predictor with RAT model in 48 hours
+- Microsoft: Explore SWE/PM Intern (May 2026 – Present) - Microsoft Secure Score in M365 Core; shipping Headroom Copilot, an AI natural-language telemetry querying product
+- Break Through Tech @ Cornell Tech: ML/AI Fellow (Mar 2026 – Present) - Selected from 5,000+ applicants
+- PayPal: Career Academy Program (Feb 2026 – Present) - Fintech mentorship and product immersion
+- Samaya Global: Technology Lead (Jan 2025 – Present) - Leading dev team building internal ticketing system for nonprofit, saved 100+ hours of manual work; also designed and launched samayaglobal.org
+- Rutgers Consulting Group: Project Manager (Sep 2025 – Present) - Built full business plan with financial modeling and GTM strategy; supported a launch generating nearly $100K revenue in the first week
+- Rutgers/Barclays Hackathon: 1st Place AI/ML Developer (Nov 2025) - Built AI Stock Predictor with RAT model in 48 hours
 - Satrangi School of Fusion: Project Manager (Jun 2025 – Present) - Managed 50+ clients, led 3-day festival with 1M+ viewers
 - Goldman Sachs: 2025 Possibilities Summit (Jan 2025 – Jan 2026) - Operations, Risk, Controllers training
 - Ernst & Young: Expedition EY Intern (Mar – May 2025) - Virtual consulting on tech-enabled business transformation
@@ -176,7 +182,8 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 Why teaching matters: "We all started somewhere, and many students come from difficult backgrounds. I want them to know that I am there for them and that they deserve a real chance to try their best."
 - Tutors: Chess, Coding (Python, Scratch, Java), Math, AP Micro, Finance
 - Taught 250+ students in coding, 100+ students in chess
-- Head Volunteer at Hands of Hope (community service)
+- Lead Volunteer at Hands of Hope Food Pantry (Jun 2020 – Present): 1,050+ volunteer hours serving the people of Middlesex County
+- Explorer at Edison Police Department (Oct 2022 – Jun 2024): community programs and public-safety youth program
 - Proudest Teaching Moment: Helped a girl in chess class learn English while learning Spanish with her - they supported each other and she developed a love for chess
 
 **PERSONAL INTERESTS:**
@@ -196,7 +203,10 @@ Why teaching matters: "We all started somewhere, and many students come from dif
 Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/in/mohitunecha | GitHub: github.com/MohitUnecha
 
 **WEBSITE INTERACTIVE FEATURES (things on this portfolio site):**
-- Role rotator: Typewriter in the hero cycles through 7 roles — Software Engineer, Product Manager, Consultant, Business Analyst, F1 Enthusiast, Builder & Creator, CS + Econ @ Rutgers
+- Role rotator: Typewriter in the hero cycles through 7 roles — SWE/PM Intern @ Microsoft, Software Engineer, Product Manager, AI Fellow @ Cornell Tech, F1 Enthusiast, Builder & Creator, CS + Econ @ Rutgers
+- "By the Numbers" stats: Animated counters showing 1,050+ volunteer hours, 250+ students mentored, 2x hackathon wins, 400+ hours automated, 10+ selective programs, 3.9 GPA
+- Programs & Fellowships section: Cards for Break Through Tech, Vanguard North Star, PayPal, Goldman Sachs, Capital One, BCG, Oracle, Bain, EY, BNY Mellon
+- Volunteering & Impact section: Hands of Hope (1,050+ hours), Edison Police Explorer, Samaya Global
 - Scroll progress bar: Thin gradient line at the very top showing how far down the page you've scrolled
 - "Open to Opportunities" badge: Pulsing green dot in the hero section, links to the contact form
 - 3D tilt cards: Project cards tilt with 3D perspective toward the cursor when you hover

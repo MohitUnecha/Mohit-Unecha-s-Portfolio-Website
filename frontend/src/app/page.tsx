@@ -15,12 +15,35 @@ type ToastItem = {
   tone: "green" | "blue";
 };
 
+function CountUp({ end, decimals = 0, suffix = "", start }: { end: number; decimals?: number; suffix?: string; start: boolean }) {
+  const [val, setVal] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+    let raf: number;
+    const duration = 1800;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min((now - t0) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(end * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [start, end]);
+
+  const formatted = val.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return <>{formatted}{suffix}</>;
+}
+
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [displayedText, setDisplayedText] = useState("");
@@ -54,10 +77,10 @@ export default function Home() {
   const cmdInputRef = useRef<HTMLInputElement>(null);
 
   const roles = [
+    "SWE/PM Intern @ Microsoft",
     "Software Engineer",
     "Product Manager",
-    "Consultant",
-    "Business Analyst",
+    "AI Fellow @ Cornell Tech",
     "F1 Enthusiast",
     "Builder & Creator",
     "CS + Econ @ Rutgers",
@@ -75,30 +98,6 @@ export default function Home() {
     `안녕, 나는 ${firstName}.`,
     `你好，我是${firstName}。`,
   ];
-  const arcadeGames = [
-    { id: "snake", emoji: "🐍", title: "Snake", desc: "Classic snake game" },
-    { id: "pong", emoji: "🏓", title: "Pong", desc: "Arcade tennis" },
-    { id: "tetris", emoji: "🟦", title: "Tetris", desc: "Block stacking" },
-    { id: "flappy", emoji: "🐦", title: "Flappy Bird", desc: "Tap to fly" },
-    { id: "2048", emoji: "🔢", title: "2048", desc: "Merge tiles" },
-    { id: "breakout", emoji: "🧱", title: "Breakout", desc: "Brick breaker" },
-    { id: "memory", emoji: "🧠", title: "Memory", desc: "Match pairs" },
-    { id: "invaders", emoji: "👾", title: "Space Invaders", desc: "Shoot aliens" },
-    { id: "simon", emoji: "🎵", title: "Simon Says", desc: "Repeat sequence" },
-    { id: "tictactoe", emoji: "❌", title: "Tic Tac Toe", desc: "Get 3 in a row" },
-    { id: "race", emoji: "🏎️", title: "Race", desc: "Dodge obstacles" },
-    { id: "whack", emoji: "🦫", title: "Whack-a-Mole", desc: "Hit the moles" },
-    { id: "wordle", emoji: "📝", title: "Wordle", desc: "Guess the word" },
-    { id: "zip", emoji: "🧩", title: "Zip", desc: "Connect the dots" },
-  ];
-
-  const getTypeDelay = (text: string, index: number, base: number) => {
-    const nextChar = text[index] ?? "";
-    if (/[.!?]/.test(nextChar)) return base + 120;
-    if (/[,\u3001]/.test(nextChar)) return base + 70;
-    if (/\s/.test(nextChar)) return Math.max(base - 6, 18);
-    return base + ((index % 3) - 1) * 6;
-  };
 
   const handleCardTilt = (e: React.MouseEvent<HTMLElement>, id: string) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -120,7 +119,7 @@ export default function Home() {
   const playVoiceIntro = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's an aspiring product manager and software engineer headed to Microsoft in May 2026, where he'll work on products used by millions. He also participates in PayPal's Career Academy Program, leads tech at a nonprofit supporting women and children, has volunteered over 3000 hours as a lead volunteer at Hands of Hope, and is passionate about formula one and building intelligent AI solutions. When he's not coding or mentoring, you'll find him analyzing race data or exploring the intersection of tech and social impact. Feel free to explore his work — or chat with Jarvis to learn more!";
+    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's a software engineering and product management intern at Microsoft, building an AI copilot on the Microsoft 365 Core team. He's also an AI fellow with Break Through Tech at Cornell Tech, leads technology at a nonprofit supporting women and children, and has volunteered over one thousand hours as a lead volunteer at Hands of Hope. When he's not coding or mentoring, you'll find him analyzing formula one race data or exploring the intersection of tech and social impact. Feel free to explore his work — or chat with Jarvis to learn more!";
     const utterance = new SpeechSynthesisUtterance(introText);
     utterance.rate = 0.95;
     utterance.pitch = 1;
@@ -137,18 +136,15 @@ export default function Home() {
 
     if (greetingPhase === "typing") {
       if (displayedText.length < currentGreeting.length) {
-        timeout = setTimeout(
-          () => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)),
-          getTypeDelay(currentGreeting, displayedText.length, 32)
-        );
+        timeout = setTimeout(() => setDisplayedText(currentGreeting.slice(0, displayedText.length + 1)), 40);
       } else {
-        timeout = setTimeout(() => setGreetingPhase("pausing"), 850);
+        timeout = setTimeout(() => setGreetingPhase("pausing"), 600);
       }
     } else if (greetingPhase === "pausing") {
-      timeout = setTimeout(() => setGreetingPhase("erasing"), 90);
+      timeout = setTimeout(() => setGreetingPhase("erasing"), 100);
     } else {
       if (displayedText.length > 0) {
-        timeout = setTimeout(() => setDisplayedText(displayedText.slice(0, -1)), 16);
+        timeout = setTimeout(() => setDisplayedText(displayedText.slice(0, -1)), 10);
       } else {
         setGreetingIndex((prev) => (prev + 1) % greetings.length);
         setGreetingPhase("typing");
@@ -165,18 +161,15 @@ export default function Home() {
 
     if (rolePhase === "typing") {
       if (roleText.length < currentRole.length) {
-        timeout = setTimeout(
-          () => setRoleText(currentRole.slice(0, roleText.length + 1)),
-          getTypeDelay(currentRole, roleText.length, 28)
-        );
+        timeout = setTimeout(() => setRoleText(currentRole.slice(0, roleText.length + 1)), 35);
       } else {
-        timeout = setTimeout(() => setRolePhase("pausing"), 950);
+        timeout = setTimeout(() => setRolePhase("pausing"), 1200);
       }
     } else if (rolePhase === "pausing") {
-      timeout = setTimeout(() => setRolePhase("erasing"), 110);
+      timeout = setTimeout(() => setRolePhase("erasing"), 200);
     } else if (rolePhase === "erasing") {
       if (roleText.length > 0) {
-        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 14);
+        timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 18);
       } else {
         setRoleIndex((prev) => (prev + 1) % roles.length);
         setRolePhase("typing");
@@ -709,6 +702,34 @@ export default function Home() {
           )}
         </section>
 
+        <section id="impact" className="py-16" style={{
+          opacity: visibleSections.has('impact') ? 1 : 0,
+          transform: visibleSections.has('impact') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <h2 className={`mb-12 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
+            By the Numbers
+          </h2>
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+            {profile.stats.map((stat) => (
+              <div
+                key={stat.label}
+                className={`rounded-2xl border p-5 text-center transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+              >
+                <p className={`text-3xl font-bold tracking-tight md:text-4xl ${
+                  isDarkMode
+                    ? "bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent"
+                    : "bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent"
+                }`}>
+                  <CountUp end={stat.value} decimals={stat.decimals ?? 0} suffix={stat.suffix ?? ""} start={visibleSections.has('impact')} />
+                </p>
+                <p className={`mt-2 text-sm font-semibold ${subTextClass}`}>{stat.label}</p>
+                <p className={`mt-1 text-xs leading-relaxed ${sectionLabelClass}`}>{stat.sub}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section id="experience" className="py-24">
           <h2 className={`mb-16 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}
             style={{
@@ -988,6 +1009,75 @@ export default function Home() {
                   </ul>
                 )}
               </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="programs" className="py-24" style={{
+          opacity: visibleSections.has('programs') ? 1 : 0,
+          transform: visibleSections.has('programs') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <h2 className={`mb-4 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
+            Programs & Fellowships
+          </h2>
+          <p className={`mx-auto mb-12 max-w-2xl text-center text-base ${bodyTextClass}`}>
+            Selected for {profile.programs.length}+ competitive early-career programs across tech, finance, and consulting.
+          </p>
+          <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {profile.programs.map((program) => (
+              <div
+                key={`${program.org}-${program.name}`}
+                className={`group rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className={`text-base font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                    {program.org}
+                  </p>
+                  <span className={`flex-shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                    isDarkMode
+                      ? "border-emerald-300/30 bg-emerald-500/10 text-emerald-300"
+                      : "border-blue-300/50 bg-blue-50 text-blue-700"
+                  }`}>
+                    {program.year}
+                  </span>
+                </div>
+                <p className={`mt-1 text-sm font-medium ${accentTextClass}`}>{program.name}</p>
+                <p className={`mt-2 text-xs leading-relaxed ${bodyTextClass}`}>{program.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="volunteering" className="py-24" style={{
+          opacity: visibleSections.has('volunteering') ? 1 : 0,
+          transform: visibleSections.has('volunteering') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <h2 className={`mb-4 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
+            Volunteering & Impact
+          </h2>
+          <p className={`mx-auto mb-12 max-w-2xl text-center text-base ${bodyTextClass}`}>
+            Community service isn&apos;t a side project — it&apos;s the core of how I lead with empathy.
+          </p>
+          <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+            {profile.volunteering.map((vol) => (
+              <div
+                key={`${vol.org}-${vol.role}`}
+                className={`rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass}`}
+              >
+                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-full ${
+                  isDarkMode ? "bg-emerald-500/15 text-emerald-300" : "bg-blue-100 text-blue-600"
+                }`}>
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </div>
+                <h3 className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>{vol.role}</h3>
+                <p className={`text-sm font-medium ${accentTextClass}`}>{vol.org}</p>
+                <p className={`mt-1 text-xs uppercase tracking-wider ${sectionLabelClass}`}>{vol.timeline}</p>
+                <p className={`mt-3 text-sm leading-relaxed ${bodyTextClass}`}>{vol.detail}</p>
+              </div>
             ))}
           </div>
         </section>
@@ -1430,6 +1520,9 @@ export default function Home() {
                       { keywords: ['contact', 'email', 'reach', 'message', 'hire'], action: () => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['skill', 'tech', 'stack', 'python', 'react'], action: () => document.querySelector('#skills')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['education', 'rutgers', 'school', 'degree'], action: () => document.querySelector('#education')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['program', 'fellowship', 'goldman', 'capital one', 'bcg', 'paypal', 'vanguard', 'cornell'], action: () => document.querySelector('#programs')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['volunteer', 'impact', 'community', 'hands of hope', 'nonprofit'], action: () => document.querySelector('#volunteering')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['stats', 'numbers', 'metrics'], action: () => document.querySelector('#impact')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['github', 'contrib', 'activity', 'heatmap'], action: () => document.querySelector('#github-activity')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['game', 'play', 'arcade', 'fun'], action: () => setShowGameSelector(true) },
                       { keywords: ['dark', 'light', 'theme', 'mode'], action: () => setIsDarkMode((prev) => !prev) },
@@ -1459,6 +1552,8 @@ export default function Home() {
                 { icon: '📬', label: 'Contact', desc: 'Get in touch', keywords: ['contact', 'email', 'reach', 'message', 'hire'] },
                 { icon: '⚡', label: 'Skills', desc: 'Tech stack & tools', keywords: ['skill', 'tech', 'stack', 'python', 'react'] },
                 { icon: '🎓', label: 'Education', desc: 'Rutgers CS + Econ', keywords: ['education', 'rutgers', 'school', 'degree'] },
+                { icon: '🏆', label: 'Programs & Fellowships', desc: 'Goldman, Capital One, BCG & more', keywords: ['program', 'fellowship', 'goldman', 'capital one', 'bcg', 'paypal', 'vanguard', 'cornell'] },
+                { icon: '❤️', label: 'Volunteering & Impact', desc: '1,050+ hours of community service', keywords: ['volunteer', 'impact', 'community', 'hands of hope'] },
                 { icon: '🎮', label: 'Games Arcade', desc: 'Play 14 mini-games', keywords: ['game', 'play', 'arcade', 'fun'] },
                 { icon: '🎨', label: 'Toggle Theme', desc: 'Switch dark/light mode', keywords: ['dark', 'light', 'theme', 'mode'] },
                 { icon: '🎤', label: 'Voice Intro', desc: 'Hear Jarvis introduce Mohit', keywords: ['voice', 'intro', 'jarvis', 'call'] },
@@ -1485,7 +1580,7 @@ export default function Home() {
                       else if (q.includes('linkedin')) window.open(`https://${profile.linkedIn}`, '_blank');
                       else if (q.includes('top')) document.querySelector('#home')?.scrollIntoView({ behavior: 'smooth' });
                       else {
-                        const sectionMap: Record<string, string> = { 'About Me': '#about', 'Experience': '#experience', 'Projects': '#projects', 'Contact': '#contact', 'Skills': '#skills', 'Education': '#education' };
+                        const sectionMap: Record<string, string> = { 'About Me': '#about', 'Experience': '#experience', 'Projects': '#projects', 'Contact': '#contact', 'Skills': '#skills', 'Education': '#education', 'Programs & Fellowships': '#programs', 'Volunteering & Impact': '#volunteering' };
                         const anchor = sectionMap[item.label];
                         if (anchor) document.querySelector(anchor)?.scrollIntoView({ behavior: 'smooth' });
                       }
@@ -1680,11 +1775,11 @@ export default function Home() {
       {/* Game Selector Modal */}
       {showGameSelector && !selectedGame && (
         <div 
-          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/95 p-4 backdrop-blur-md"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md overflow-hidden"
           onClick={() => setShowGameSelector(false)}
         >
           <div 
-            className={`relative w-full max-w-6xl rounded-3xl border-2 p-5 shadow-2xl sm:p-8 ${
+            className={`relative rounded-3xl border-2 p-8 shadow-2xl max-w-5xl w-full mx-4 ${
               isDarkMode 
                 ? "border-emerald-400/40 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30" 
                 : "border-blue-400/40 bg-gradient-to-br from-white via-white to-blue-50"
@@ -1699,38 +1794,113 @@ export default function Home() {
             >
               ×
             </button>
-            <h2 className={`mb-2 text-center text-3xl font-bold ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
+            <h2 className={`mb-8 text-3xl font-bold text-center ${isDarkMode ? "text-emerald-400" : "text-blue-600"}`}>
               🎮 Choose Your Game
             </h2>
-            <p className={`mb-6 text-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-              Built to work with keyboard, mouse, and touch.
-            </p>
+            
+            {/* Carousel */}
+            <div className="relative">
+              {/* Navigation Arrows */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCarouselIndex(Math.max(0, carouselIndex - 1));
+                }}
+                disabled={carouselIndex === 0}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  carouselIndex === 0
+                    ? "opacity-30 cursor-not-allowed"
+                    : isDarkMode
+                    ? "bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/50"
+                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/50"
+                } text-white text-2xl font-bold`}
+              >
+                ‹
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCarouselIndex(Math.min(11, carouselIndex + 1));
+                }}
+                disabled={carouselIndex === 11}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  carouselIndex === 11
+                    ? "opacity-30 cursor-not-allowed"
+                    : isDarkMode
+                    ? "bg-emerald-500 hover:bg-emerald-400 shadow-lg shadow-emerald-500/50"
+                    : "bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-500/50"
+                } text-white text-2xl font-bold`}
+              >
+                ›
+              </button>
 
-            <div className="max-h-[70vh] overflow-y-auto pr-1">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {arcadeGames.map((game) => (
+              {/* Games Container */}
+              <div className="overflow-hidden px-2">
+                <div 
+                  className="flex transition-transform duration-500 ease-out gap-4"
+                  style={{ transform: `translateX(-${carouselIndex * (100 / 3)}%)` }}
+                >
+                  {[
+                    { id: 'snake', name: '🐍 Snake', desc: 'Classic snake game' },
+                    { id: 'pong', name: '🏓 Pong', desc: 'Arcade tennis' },
+                    { id: 'tetris', name: '🟦 Tetris', desc: 'Block stacking' },
+                    { id: 'flappy', name: '🐦 Flappy Bird', desc: 'Tap to fly' },
+                    { id: '2048', name: '🔢 2048', desc: 'Merge tiles' },
+                    { id: 'breakout', name: '🧱 Breakout', desc: 'Brick breaker' },
+                    { id: 'memory', name: '🧠 Memory', desc: 'Match pairs' },
+                    { id: 'invaders', name: '👾 Space Invaders', desc: 'Shoot aliens' },
+                    { id: 'simon', name: '🎵 Simon Says', desc: 'Repeat sequence' },
+                    { id: 'tictactoe', name: '❌ Tic Tac Toe', desc: 'Get 3 in a row' },
+                    { id: 'race', name: '🏎️ Race', desc: 'Dodge obstacles' },
+                    { id: 'whack', name: '🦫 Whack-a-Mole', desc: 'Hit the moles' },
+                    { id: 'wordle', name: '📝 Wordle', desc: 'Guess the word' },
+                    { id: 'zip', name: '🧩 Zip', desc: 'Connect the dots' },
+                  ].map((game) => (
+                    <button
+                      key={game.id}
+                      onClick={() => setSelectedGame(game.id)}
+                      className={`group relative p-4 sm:p-6 md:p-8 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 flex-shrink-0 w-[calc(100%-0.67rem)] sm:w-[calc(50%-0.67rem)] md:w-[calc(33.333%-0.67rem)] ${
+                        isDarkMode
+                          ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
+                          : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
+                      }`}
+                    >
+                      <div className={`text-5xl mb-4 transition-transform duration-300 group-hover:scale-110`}>
+                        {game.name.split(' ')[0]}
+                      </div>
+                      <div className={`font-bold text-lg mb-2 ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
+                        {game.name.substring(game.name.indexOf(' ') + 1)}
+                      </div>
+                      <div className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+                        {game.desc}
+                      </div>
+                      <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                        isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
+                      }`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dots Indicator */}
+              <div className="flex justify-center gap-2 mt-6">
+                {Array.from({ length: 12 }).map((_, i) => (
                   <button
-                    key={game.id}
-                    onClick={() => setSelectedGame(game.id)}
-                    className={`group relative rounded-2xl border-2 p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] sm:p-6 ${
-                      isDarkMode
-                        ? "border-emerald-400/30 bg-gradient-to-br from-slate-800/80 to-slate-900/80 hover:border-emerald-400/70 hover:shadow-xl hover:shadow-emerald-500/20"
-                        : "border-blue-400/30 bg-gradient-to-br from-blue-50/80 to-white/80 hover:border-blue-400/70 hover:shadow-xl hover:shadow-blue-500/20"
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCarouselIndex(i);
+                    }}
+                    className={`h-2 rounded-full transition-all ${
+                      i === carouselIndex
+                        ? isDarkMode
+                          ? "w-8 bg-emerald-400"
+                          : "w-8 bg-blue-600"
+                        : isDarkMode
+                        ? "w-2 bg-slate-600 hover:bg-slate-500"
+                        : "w-2 bg-slate-300 hover:bg-slate-400"
                     }`}
-                  >
-                    <div className="mb-4 text-5xl transition-transform duration-300 group-hover:scale-110">
-                      {game.emoji}
-                    </div>
-                    <div className={`mb-2 text-lg font-bold ${isDarkMode ? "text-emerald-300" : "text-blue-700"}`}>
-                      {game.title}
-                    </div>
-                    <div className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-                      {game.desc}
-                    </div>
-                    <div className={`pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
-                      isDarkMode ? "bg-emerald-500/5" : "bg-blue-500/5"
-                    }`} />
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -1741,11 +1911,11 @@ export default function Home() {
       {/* Selected Game Modal */}
       {showGameSelector && selectedGame && (
         <div 
-          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/90 p-4 backdrop-blur-sm"
+          className="snake-game-modal fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={() => { setSelectedGame(null); setShowGameSelector(false); }}
         >
           <div 
-            className={`relative max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl border p-4 shadow-2xl sm:p-8 ${
+            className={`relative rounded-2xl border p-8 shadow-2xl ${
               isDarkMode 
                 ? "border-emerald-400/30 bg-slate-900" 
                 : "border-blue-400/30 bg-white"
@@ -1786,28 +1956,16 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
   const [score, setScore] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
   const [gameKey, setGameKey] = React.useState(0);
-  const controlsRef = React.useRef<{
-    up: () => void;
-    down: () => void;
-    left: () => void;
-    right: () => void;
-  }>({
-    up: () => {},
-    down: () => {},
-    left: () => {},
-    right: () => {},
-  });
 
   const restartGame = () => {
     setScore(0);
     setGameOver(false);
-    setGameKey((prev) => prev + 1);
+    setGameKey(prev => prev + 1);
   };
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const controls = controlsRef.current;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -1817,57 +1975,24 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
     canvas.width = gridSize * tileCount;
     canvas.height = gridSize * tileCount;
 
-    const snake = [{ x: 10, y: 10 }];
+    let snake = [{ x: 10, y: 10 }];
     let food = { x: 15, y: 15 };
     let dx = 0;
     let dy = 0;
     let gameRunning = true;
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    const setDirection = (nextDx: number, nextDy: number) => {
-      if (!gameRunning) return;
-      if (nextDx !== 0 && dx === -nextDx) return;
-      if (nextDy !== 0 && dy === -nextDy) return;
-      dx = nextDx;
-      dy = nextDy;
-    };
-
-    controls.up = () => setDirection(0, -1);
-    controls.down = () => setDirection(0, 1);
-    controls.left = () => setDirection(-1, 0);
-    controls.right = () => setDirection(1, 0);
 
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
-      e.preventDefault();
-      if (e.key === "ArrowUp") setDirection(0, -1);
-      if (e.key === "ArrowDown") setDirection(0, 1);
-      if (e.key === "ArrowLeft") setDirection(-1, 0);
-      if (e.key === "ArrowRight") setDirection(1, 0);
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touch = e.changedTouches[0];
-      const dxTouch = touch.clientX - touchStartX;
-      const dyTouch = touch.clientY - touchStartY;
-      if (Math.abs(dxTouch) < 24 && Math.abs(dyTouch) < 24) return;
-      if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
-        setDirection(dxTouch > 0 ? 1 : -1, 0);
-      } else {
-        setDirection(0, dyTouch > 0 ? 1 : -1);
+      if (gameOver) {
+        restartGame();
+        return;
       }
+      if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -1; }
+      if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 1; }
+      if (e.key === "ArrowLeft" && dx === 0) { dx = -1; dy = 0; }
+      if (e.key === "ArrowRight" && dx === 0) { dx = 1; dy = 0; }
     };
 
     window.addEventListener("keydown", handleKeyPress);
-    canvas.addEventListener("touchstart", handleTouchStart);
-    canvas.addEventListener("touchend", handleTouchEnd);
 
     const gameLoop = setInterval(() => {
       if (!gameRunning) return;
@@ -1922,55 +2047,28 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
     return () => {
       clearInterval(gameLoop);
       window.removeEventListener("keydown", handleKeyPress);
-      canvas.removeEventListener("touchstart", handleTouchStart);
-      canvas.removeEventListener("touchend", handleTouchEnd);
-      controls.up = () => {};
-      controls.down = () => {};
-      controls.left = () => {};
-      controls.right = () => {};
     };
-  }, [isDarkMode, gameKey]);
+  }, [isDarkMode, gameOver, gameKey]);
 
   return (
-    <div className="flex w-full flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4">
       <div className={`text-lg font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
         Score: {score}
       </div>
       <canvas 
         ref={canvasRef}
-        className="block rounded-lg border-2 select-none"
+        className="rounded-lg border-2"
         style={{ 
-          borderColor: isDarkMode ? "#10b981" : "#3b82f6",
-          width: "100%",
-          maxWidth: "400px",
-          height: "auto",
-          touchAction: "none",
+          borderColor: isDarkMode ? "#10b981" : "#3b82f6"
         }}
       />
-      <div className="flex flex-wrap justify-center gap-2">
-        <button onClick={() => controlsRef.current.up()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
-          Up
-        </button>
-        <button onClick={() => controlsRef.current.left()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
-          Left
-        </button>
-        <button onClick={() => controlsRef.current.down()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
-          Down
-        </button>
-        <button onClick={() => controlsRef.current.right()} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
-          Right
-        </button>
-        <button onClick={restartGame} className={`rounded-lg px-4 py-2 font-semibold text-white transition ${isDarkMode ? "bg-emerald-500 hover:bg-emerald-600" : "bg-blue-500 hover:bg-blue-600"}`}>
-          Restart
-        </button>
-      </div>
       {gameOver && (
         <p className={`font-semibold ${isDarkMode ? "text-red-400" : "text-red-600"}`}>
-          Game Over! Tap restart to go again.
+          Game Over! Press any arrow key to restart.
         </p>
       )}
-      <p className={`text-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-        Use arrow keys, swipe, or the on-screen controls.
+      <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+        Use arrow keys to play
       </p>
     </div>
   );
