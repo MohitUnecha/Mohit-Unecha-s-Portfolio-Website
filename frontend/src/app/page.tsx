@@ -117,7 +117,6 @@ export default function Home() {
   const [lightsOut, setLightsOut] = useState(false);
   const [introFading, setIntroFading] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
-  const [redmondTime, setRedmondTime] = useState("");
   const introTimersRef = useRef<NodeJS.Timeout[]>([]);
 
   const skipIntro = () => {
@@ -148,15 +147,6 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Live Redmond clock for hero chip
-  useEffect(() => {
-    const update = () => setRedmondTime(
-      new Date().toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" })
-    );
-    update();
-    const id = setInterval(update, 30000);
-    return () => clearInterval(id);
-  }, []);
 
   const roles = [
     "Product Manager",
@@ -783,28 +773,6 @@ export default function Home() {
               <span className={`${roleColorClass} font-semibold`}>{roleText}</span>
               <span className="animate-pulse opacity-70">|</span>
             </p>
-            {/* HUD status strip — F1 timing tower style */}
-            <div className="mb-6 px-2">
-              <div className={`inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-2xl border px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur-md sm:text-[11px] ${
-                isDarkMode
-                  ? "border-emerald-300/25 bg-slate-950/60 text-slate-300 shadow-lg shadow-emerald-500/10"
-                  : "border-blue-300/60 bg-white/75 text-slate-600 shadow-lg shadow-blue-500/10"
-              }`}>
-                <span className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
-                    <span className={`relative inline-flex h-2 w-2 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
-                  </span>
-                  <span className={`font-bold ${isDarkMode ? "text-emerald-300" : "text-blue-600"}`}>Live</span>
-                </span>
-                <span className="opacity-30">▮</span>
-                <span>Redmond WA{redmondTime ? ` · ${redmondTime} PT` : ""}</span>
-                <span className="opacity-30">▮</span>
-                <span>M365 Core @ Microsoft</span>
-                <span className="hidden opacity-30 sm:inline">▮</span>
-                <span className="hidden sm:inline">Rutgers &apos;28</span>
-              </div>
-            </div>
             {/* Open to opportunities badge */}
             <div className={`mb-6 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 ${
               isDarkMode
