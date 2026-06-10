@@ -126,6 +126,15 @@ export default function Home() {
     setTimeout(() => setShowIntro(false), 500);
   };
 
+  // Lock page scroll while the recruiter snapshot is open
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = recruiterOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [recruiterOpen]);
+
   // F1 race-start intro — once per session
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -174,8 +183,8 @@ export default function Home() {
 
   const handleCardTilt = (e: React.MouseEvent<HTMLElement>, id: string) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -16;
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 7;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -7;
     setTiltCard({ id, x, y });
     e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
     e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
@@ -513,7 +522,7 @@ export default function Home() {
       {/* F1 race-start intro */}
       {showIntro && (
         <div
-          className={`fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500 ${
+          className={`native-cursor fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500 ${
             introFading ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           onClick={skipIntro}
@@ -574,16 +583,17 @@ export default function Home() {
         }}
       >
         <div
-          className={`rounded-full blur-2xl ${
+          className={`rounded-full blur-xl ${
             isDarkMode ? "bg-emerald-400" : "bg-blue-400"
           }`}
-          style={{ 
-            width: isOverInteractive ? "60px" : "30px",
-            height: isOverInteractive ? "60px" : "30px",
-            boxShadow: isDarkMode 
-              ? `0 0 ${isOverInteractive ? "80px" : "50px"} rgba(52, 211, 153, ${isOverInteractive ? 0.8 : 0.6})` 
-              : `0 0 ${isOverInteractive ? "80px" : "50px"} rgba(59, 130, 246, ${isOverInteractive ? 0.8 : 0.6})`,
-            transform: isClickingCursor ? "scale(1.4)" : "scale(1)",
+          style={{
+            width: isOverInteractive ? "40px" : "22px",
+            height: isOverInteractive ? "40px" : "22px",
+            opacity: 0.55,
+            boxShadow: isDarkMode
+              ? `0 0 ${isOverInteractive ? "44px" : "28px"} rgba(52, 211, 153, ${isOverInteractive ? 0.5 : 0.35})`
+              : `0 0 ${isOverInteractive ? "44px" : "28px"} rgba(59, 130, 246, ${isOverInteractive ? 0.5 : 0.35})`,
+            transform: isClickingCursor ? "scale(1.3)" : "scale(1)",
             transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         />
@@ -883,7 +893,7 @@ export default function Home() {
             {strengthsToShow.map((strength) => (
               <div
                 key={strength}
-                className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass} ${isDarkMode ? "glow-pulse-dark" : "glow-pulse-light"}`}
+                className={`rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-0.5 ${cardClass} ${cardHoverClass}`}
               >
                 <p className={`font-medium ${subTextClass}`}>{strength}</p>
               </div>
@@ -1084,8 +1094,8 @@ export default function Home() {
                 onMouseLeave={() => setTiltCard(null)}
                 style={{
                   transform: tiltCard?.id === project.name
-                    ? `perspective(800px) rotateX(${tiltCard.y}deg) rotateY(${tiltCard.x}deg) scale(1.03)`
-                    : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)',
+                    ? `perspective(900px) rotateX(${tiltCard.y}deg) rotateY(${tiltCard.x}deg) scale(1.015)`
+                    : 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)',
                   transition: tiltCard?.id === project.name ? 'none' : 'transform 0.4s ease-out, box-shadow 0.4s ease-out',
                   boxShadow: tiltCard?.id === project.name
                     ? isDarkMode ? '0 25px 50px rgba(52,211,153,0.2), 0 0 0 1px rgba(52,211,153,0.15)' : '0 25px 50px rgba(59,130,246,0.15), 0 0 0 1px rgba(59,130,246,0.1)'
@@ -1227,8 +1237,8 @@ export default function Home() {
                 onMouseLeave={() => setTiltCard(null)}
                 style={{
                   transform: tiltCard?.id === school.school
-                    ? `perspective(800px) rotateX(${tiltCard.y}deg) rotateY(${tiltCard.x}deg) scale(1.02)`
-                    : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)',
+                    ? `perspective(900px) rotateX(${tiltCard.y}deg) rotateY(${tiltCard.x}deg) scale(1.01)`
+                    : 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)',
                   transition: tiltCard?.id === school.school ? 'none' : 'transform 0.4s ease-out, box-shadow 0.4s ease-out',
                   boxShadow: tiltCard?.id === school.school
                     ? isDarkMode ? '0 25px 50px rgba(52,211,153,0.15), 0 0 0 1px rgba(52,211,153,0.1)' : '0 25px 50px rgba(59,130,246,0.1), 0 0 0 1px rgba(59,130,246,0.08)'
@@ -1723,7 +1733,7 @@ export default function Home() {
       {/* Easter Egg Modal */}
       {showEasterEgg && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          className="native-cursor backdrop-in fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
           onClick={() => setShowEasterEgg(false)}
         >
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -1771,11 +1781,11 @@ export default function Home() {
       {/* Recruiter Snapshot */}
       {recruiterOpen && (
         <div
-          className="fixed inset-0 z-[115] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+          className="native-cursor backdrop-in fixed inset-0 z-[115] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
           onClick={() => setRecruiterOpen(false)}
         >
           <div
-            className={`relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border-2 shadow-2xl ${
+            className={`modal-in relative max-h-[90vh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border-2 shadow-2xl ${
               isDarkMode
                 ? "border-amber-300/30 bg-slate-950 shadow-amber-500/10"
                 : "border-amber-400/40 bg-white shadow-amber-500/10"
@@ -1929,11 +1939,11 @@ export default function Home() {
       {/* Command Palette (Cmd+K) */}
       {cmdPaletteOpen && (
         <div
-          className="fixed inset-0 z-[110] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+          className="native-cursor backdrop-in fixed inset-0 z-[110] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
           onClick={() => setCmdPaletteOpen(false)}
         >
           <div
-            className={`w-[min(92vw,540px)] rounded-2xl border shadow-2xl overflow-hidden ${
+            className={`modal-in w-[min(92vw,540px)] rounded-2xl border shadow-2xl overflow-hidden ${
               isDarkMode
                 ? "border-emerald-300/20 bg-slate-950/98 shadow-emerald-500/10"
                 : "border-blue-300/40 bg-white/98 shadow-blue-500/10"
