@@ -554,11 +554,11 @@ export default function Home() {
           className={`h-full ${isDarkMode ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' : 'bg-gradient-to-r from-sky-400 to-blue-500'}`}
           style={{ width: `${scrollProgress}%`, transition: 'width 0.15s ease-out' }}
         />
-        {scrollProgress > 0 && (
+        {scrollProgress > 1 && (
           <span
-            className="absolute -top-[11px] text-base leading-none"
+            className="absolute top-[3px] text-sm leading-none md:text-base"
             style={{
-              left: `calc(${scrollProgress}% - 14px)`,
+              left: `calc(${scrollProgress}% - 16px)`,
               transition: 'left 0.15s ease-out',
               transform: 'scaleX(-1)',
               filter: isDarkMode
@@ -632,7 +632,7 @@ export default function Home() {
             <img src="/Logo.png" alt="Logo" className="h-8 w-auto md:h-10" />
           </a>
           <nav className={`flex items-center gap-3 text-xs font-medium md:gap-8 md:text-sm ${navTextClass}`}>
-            <a className={`transition ${accentHoverTextClass}`} href="#about">
+            <a className={`hidden transition sm:block ${accentHoverTextClass}`} href="#about">
               About
             </a>
             <a className={`transition ${accentHoverTextClass}`} href="#experience">
@@ -678,7 +678,6 @@ export default function Home() {
           backgroundImage: `url(${profile.heroBackgroundImage})`,
           backgroundSize: "cover",
           backgroundPosition: "43% center",
-          backgroundAttachment: "fixed",
         }}
       >
         {/* Color tint overlay */}
@@ -725,16 +724,16 @@ export default function Home() {
             style={{ background: isDarkMode ? "rgba(34,211,238,0.35)" : "rgba(14,165,233,0.28)", animationDelay: "4s" }}
           />
           <div
-            className="aurora-blob left-[55%] top-[55%] h-64 w-64"
+            className="aurora-blob left-[55%] top-[55%] hidden h-64 w-64 md:block"
             style={{ background: isDarkMode ? "rgba(167,139,250,0.28)" : "rgba(99,102,241,0.22)", animationDelay: "8s" }}
           />
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center" style={{ opacity: 1 - zoomProgress * 2.5, transition: "opacity 0.3s ease-out" }}>
             <div className="relative mb-8 animate-float">
-              {/* Orbiting tech badges */}
+              {/* Orbiting tech badges — desktop only to keep mobile clean */}
               <div
-                className={`pointer-events-none absolute -inset-8 rounded-full border border-dashed animate-spin-slow ${
+                className={`pointer-events-none absolute -inset-8 hidden rounded-full border border-dashed animate-spin-slow sm:block ${
                   isDarkMode ? "border-emerald-300/30" : "border-blue-400/40"
                 }`}
               >
