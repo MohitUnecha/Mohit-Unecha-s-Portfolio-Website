@@ -8,6 +8,31 @@ import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGa
 
 const KONAMI_CODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
+const ROLES = [
+  "Product Manager",
+  "Product Strategist",
+  "Consultant",
+  "Software Engineer",
+  "PM/SWE Intern @ Microsoft",
+  "AI Fellow @ Cornell Tech",
+  "F1 Enthusiast",
+  "Builder & Creator",
+];
+
+const FIRST_NAME = profile.name.split(" ")[0];
+const GREETINGS = [
+  `Hi, I'm ${FIRST_NAME}.`,
+  `Hola, soy ${FIRST_NAME}.`,
+  `Bonjour, je suis ${FIRST_NAME}.`,
+  `Ciao, sono ${FIRST_NAME}.`,
+  `Hallo, ich bin ${FIRST_NAME}.`,
+  `Olá, eu sou ${FIRST_NAME}.`,
+  `Namaste, main ${FIRST_NAME} hoon.`,
+  `こんにちは、${FIRST_NAME}です。`,
+  `안녕, 나는 ${FIRST_NAME}.`,
+  `你好，我是${FIRST_NAME}。`,
+];
+
 type ToastItem = {
   id: number;
   title: string;
@@ -16,10 +41,12 @@ type ToastItem = {
 };
 
 function CountUp({ end, decimals = 0, suffix = "", start }: { end: number; decimals?: number; suffix?: string; start: boolean }) {
-  const [val, setVal] = useState(0);
+  // Start at the real value so crawlers and pre-JS paints never show "0+"
+  const [val, setVal] = useState(end);
 
   useEffect(() => {
     if (!start) return;
+    setVal(0);
     let raf: number;
     const duration = 1800;
     const t0 = performance.now();
@@ -73,6 +100,147 @@ function TimelineLabel({ t, isDarkMode }: { t: string; isDarkMode: boolean }) {
   );
 }
 
+// Isolated so mousemove state updates re-render only this tiny component, not the whole page
+function CursorGlow({ isDarkMode }: { isDarkMode: boolean }) {
+  const [cursorX, setCursorX] = useState(0);
+  const [cursorY, setCursorY] = useState(0);
+  const [isMouseMoving, setIsMouseMoving] = useState(false);
+  const [isClickingCursor, setIsClickingCursor] = useState(false);
+  const [isOverInteractive, setIsOverInteractive] = useState(false);
+
+  useEffect(() => {
+    let mouseTimeout: NodeJS.Timeout;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setCursorX(e.clientX);
+      setCursorY(e.clientY);
+      setIsMouseMoving(true);
+
+      // Check if cursor is over interactive elements
+      const target = e.target as HTMLElement;
+      const isClickable = target?.closest('button') ||
+                          target?.closest('a') ||
+                          target?.closest('input') ||
+                          target?.closest('textarea') ||
+                          target?.classList?.contains('interactive');
+      setIsOverInteractive(!!isClickable);
+
+      clearTimeout(mouseTimeout);
+      mouseTimeout = setTimeout(() => {
+        setIsMouseMoving(false);
+      }, 3000);
+    };
+
+    const handleMouseDown = () => setIsClickingCursor(true);
+    const handleMouseUp = () => setIsClickingCursor(false);
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      clearTimeout(mouseTimeout);
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Cursor Tracker Glow — hidden on touch/mobile */}
+      <div
+        className="pointer-events-none fixed z-40 hidden md:block"
+        style={{
+          left: `${cursorX}px`,
+          top: `${cursorY}px`,
+          opacity: isMouseMoving ? 1 : 0,
+          transform: "translate(-50%, -50%)",
+          transition: "opacity 0.15s ease-out, width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
+      >
+        <div
+          className={`rounded-full blur-xl ${
+            isDarkMode ? "bg-emerald-400" : "bg-blue-400"
+          }`}
+          style={{
+            width: isOverInteractive ? "40px" : "22px",
+            height: isOverInteractive ? "40px" : "22px",
+            opacity: 0.55,
+            boxShadow: isDarkMode
+              ? `0 0 ${isOverInteractive ? "44px" : "28px"} rgba(52, 211, 153, ${isOverInteractive ? 0.5 : 0.35})`
+              : `0 0 ${isOverInteractive ? "44px" : "28px"} rgba(59, 130, 246, ${isOverInteractive ? 0.5 : 0.35})`,
+            transform: isClickingCursor ? "scale(1.3)" : "scale(1)",
+            transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}
+        />
+      </div>
+
+      {/* Cursor Inner Circle — hidden on touch/mobile */}
+      <div
+        className="pointer-events-none fixed z-40 hidden md:block"
+        style={{
+          left: `${cursorX}px`,
+          top: `${cursorY}px`,
+          opacity: isMouseMoving ? 1 : 0,
+          transform: "translate(-50%, -50%)",
+          transition: "opacity 0.3s ease-out",
+        }}
+      >
+        <div
+          className={`rounded-full border-2 ${
+            isDarkMode ? "border-emerald-300" : "border-blue-500"
+          }`}
+          style={{
+            width: isClickingCursor ? "20px" : "16px",
+            height: isClickingCursor ? "20px" : "16px",
+            transition: "width 0.2s ease-out, height 0.2s ease-out",
+          }}
+        />
+      </div>
+    </>
+  );
+}
+
+// Isolated so per-scroll progress updates don't re-render the whole page
+function ScrollProgressBar({ isDarkMode }: { isDarkMode: boolean }) {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) setScrollProgress(Math.round((window.scrollY / docHeight) * 100));
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="pointer-events-none fixed top-0 left-0 right-0 z-[70] h-[3px]">
+      <div
+        className={`h-full ${isDarkMode ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' : 'bg-gradient-to-r from-sky-400 to-blue-500'}`}
+        style={{ width: `${scrollProgress}%`, transition: 'width 0.15s ease-out' }}
+      />
+      {scrollProgress > 1 && (
+        <span
+          className="absolute top-[3px] text-sm leading-none md:text-base"
+          style={{
+            left: `calc(${scrollProgress}% - 16px)`,
+            transition: 'left 0.15s ease-out',
+            transform: 'scaleX(-1)',
+            filter: isDarkMode
+              ? 'drop-shadow(0 0 6px rgba(52,211,153,0.9))'
+              : 'drop-shadow(0 0 6px rgba(59,130,246,0.8))',
+          }}
+        >
+          🏎️
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [showAllStrengths, setShowAllStrengths] = useState(false);
   const [showAllExperience, setShowAllExperience] = useState(false);
@@ -87,18 +255,12 @@ export default function Home() {
   const [greetingIndex, setGreetingIndex] = useState(0);
   const [greetingPhase, setGreetingPhase] = useState<"typing" | "pausing" | "erasing">("typing");
   const [zoomProgress, setZoomProgress] = useState(0);
-  const [cursorX, setCursorX] = useState(0);
-  const [cursorY, setCursorY] = useState(0);
-  const [isMouseMoving, setIsMouseMoving] = useState(false);
-  const [isClickingCursor, setIsClickingCursor] = useState(false);
-  const [isOverInteractive, setIsOverInteractive] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const [roleText, setRoleText] = useState("");
   const [roleIndex, setRoleIndex] = useState(0);
   const [rolePhase, setRolePhase] = useState<"typing" | "pausing" | "erasing">("typing");
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [tiltCard, setTiltCard] = useState<{ id: string; x: number; y: number } | null>(null);
   const [githubContribs, setGithubContribs] = useState<{ date: string; level: number; count: number }[]>([]);
@@ -124,29 +286,9 @@ export default function Home() {
   }, [recruiterOpen]);
 
 
-  const roles = [
-    "Product Manager",
-    "Product Strategist",
-    "Consultant",
-    "Software Engineer",
-    "PM/SWE Intern @ Microsoft",
-    "AI Fellow @ Cornell Tech",
-    "F1 Enthusiast",
-    "Builder & Creator",
-  ];
-  const firstName = profile.name.split(" ")[0];
-  const greetings = [
-    `Hi, I'm ${firstName}.`,
-    `Hola, soy ${firstName}.`,
-    `Bonjour, je suis ${firstName}.`,
-    `Ciao, sono ${firstName}.`,
-    `Hallo, ich bin ${firstName}.`,
-    `Olá, eu sou ${firstName}.`,
-    `Namaste, main ${firstName} hoon.`,
-    `こんにちは、${firstName}です。`,
-    `안녕, 나는 ${firstName}.`,
-    `你好，我是${firstName}。`,
-  ];
+  // Stable module-level arrays keep the typewriter effects from re-arming on unrelated re-renders
+  const roles = ROLES;
+  const greetings = GREETINGS;
 
   const handleCardTilt = (e: React.MouseEvent<HTMLElement>, id: string) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -348,63 +490,17 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       setIsHeaderVisible(window.scrollY > window.innerHeight * 0.8);
-      
+
       // Calculate zoom progress based on scroll within the hero section
       const heroHeight = window.innerHeight;
       const scrollY = window.scrollY;
       const progress = Math.min(scrollY / heroHeight, 1);
       setZoomProgress(progress);
-
-      // Scroll progress bar
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight > 0) setScrollProgress(Math.round((window.scrollY / docHeight) * 100));
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Cursor tracker and interactive detection
-  useEffect(() => {
-    let mouseTimeout: NodeJS.Timeout;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorX(e.clientX);
-      setCursorY(e.clientY);
-      setIsMouseMoving(true);
-
-      // Check if cursor is over interactive elements
-      const target = e.target as HTMLElement;
-      const isClickable = target?.closest('button') || 
-                          target?.closest('a') || 
-                          target?.closest('input') ||
-                          target?.closest('textarea') ||
-                          target?.classList?.contains('interactive');
-      setIsOverInteractive(!!isClickable);
-
-      clearTimeout(mouseTimeout);
-      mouseTimeout = setTimeout(() => {
-        setIsMouseMoving(false);
-      }, 3000);
-    };
-
-    const handleMouseDown = () => {
-      setIsClickingCursor(true);
-    };
-
-    const handleMouseUp = () => {
-      setIsClickingCursor(false);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-      clearTimeout(mouseTimeout);
-    };
   }, []);
 
   // Section fade-in on scroll
@@ -487,78 +583,9 @@ export default function Home() {
       )}
 
       {/* Scroll progress bar with F1 car */}
-      <div className="pointer-events-none fixed top-0 left-0 right-0 z-[70] h-[3px]">
-        <div
-          className={`h-full ${isDarkMode ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' : 'bg-gradient-to-r from-sky-400 to-blue-500'}`}
-          style={{ width: `${scrollProgress}%`, transition: 'width 0.15s ease-out' }}
-        />
-        {scrollProgress > 1 && (
-          <span
-            className="absolute top-[3px] text-sm leading-none md:text-base"
-            style={{
-              left: `calc(${scrollProgress}% - 16px)`,
-              transition: 'left 0.15s ease-out',
-              transform: 'scaleX(-1)',
-              filter: isDarkMode
-                ? 'drop-shadow(0 0 6px rgba(52,211,153,0.9))'
-                : 'drop-shadow(0 0 6px rgba(59,130,246,0.8))',
-            }}
-          >
-            🏎️
-          </span>
-        )}
-      </div>
+      <ScrollProgressBar isDarkMode={isDarkMode} />
 
-      {/* Cursor Tracker Glow — hidden on touch/mobile */}
-      <div
-        className="pointer-events-none fixed z-40 hidden md:block"
-        style={{
-          left: `${cursorX}px`,
-          top: `${cursorY}px`,
-          opacity: isMouseMoving ? 1 : 0,
-          transform: "translate(-50%, -50%)",
-          transition: "opacity 0.15s ease-out, width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        }}
-      >
-        <div
-          className={`rounded-full blur-xl ${
-            isDarkMode ? "bg-emerald-400" : "bg-blue-400"
-          }`}
-          style={{
-            width: isOverInteractive ? "40px" : "22px",
-            height: isOverInteractive ? "40px" : "22px",
-            opacity: 0.55,
-            boxShadow: isDarkMode
-              ? `0 0 ${isOverInteractive ? "44px" : "28px"} rgba(52, 211, 153, ${isOverInteractive ? 0.5 : 0.35})`
-              : `0 0 ${isOverInteractive ? "44px" : "28px"} rgba(59, 130, 246, ${isOverInteractive ? 0.5 : 0.35})`,
-            transform: isClickingCursor ? "scale(1.3)" : "scale(1)",
-            transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          }}
-        />
-      </div>
-
-      {/* Cursor Inner Circle — hidden on touch/mobile */}
-      <div
-        className="pointer-events-none fixed z-40 hidden md:block"
-        style={{
-          left: `${cursorX}px`,
-          top: `${cursorY}px`,
-          opacity: isMouseMoving ? 1 : 0,
-          transform: "translate(-50%, -50%)",
-          transition: "opacity 0.3s ease-out",
-        }}
-      >
-        <div
-          className={`rounded-full border-2 ${
-            isDarkMode ? "border-emerald-300" : "border-blue-500"
-          }`}
-          style={{
-            width: isClickingCursor ? "20px" : "16px",
-            height: isClickingCursor ? "20px" : "16px",
-            transition: "width 0.2s ease-out, height 0.2s ease-out",
-          }}
-        />
-      </div>
+      <CursorGlow isDarkMode={isDarkMode} />
 
       <header
         className={`fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
@@ -2254,6 +2281,7 @@ export default function Home() {
           >
             <button
               onClick={() => setShowGameSelector(false)}
+              aria-label="Close game selector"
               className={`absolute right-6 top-6 text-3xl font-bold transition-all hover:scale-110 hover:rotate-90 z-10 ${
                 isDarkMode ? "text-emerald-400 hover:text-emerald-300" : "text-blue-600 hover:text-blue-700"
               }`}
@@ -2272,6 +2300,7 @@ export default function Home() {
                   e.stopPropagation();
                   setCarouselIndex(Math.max(0, carouselIndex - 1));
                 }}
+                aria-label="Previous games"
                 disabled={carouselIndex === 0}
                 className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
                   carouselIndex === 0
@@ -2288,6 +2317,7 @@ export default function Home() {
                   e.stopPropagation();
                   setCarouselIndex(Math.min(11, carouselIndex + 1));
                 }}
+                aria-label="Next games"
                 disabled={carouselIndex === 11}
                 className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
                   carouselIndex === 11
@@ -2357,6 +2387,7 @@ export default function Home() {
                       e.stopPropagation();
                       setCarouselIndex(i);
                     }}
+                    aria-label={`Go to games page ${i + 1}`}
                     className={`h-2 rounded-full transition-all ${
                       i === carouselIndex
                         ? isDarkMode
@@ -2390,6 +2421,7 @@ export default function Home() {
           >
             <button
               onClick={() => setSelectedGame(null)}
+              aria-label="Back to game selector"
               className={`absolute right-4 top-4 text-2xl font-bold transition hover:opacity-70 ${
                 isDarkMode ? "text-emerald-400" : "text-blue-600"
               }`}

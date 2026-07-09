@@ -58,11 +58,37 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
         <meta name="theme-color" content="#0f172a" />
+        {/* Hero background is a CSS image — preload so it doesn't wait for stylesheet parsing */}
+        <link
+          rel="preload"
+          as="image"
+          href="/pexels-adrian-falcon-1778067-3359250.jpg"
+        />
         <script
           src="https://www.google.com/recaptcha/api.js?render=explicit"
           async
           defer
         ></script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: "Mohit Unecha",
+              url: "https://mohitunecha.com",
+              image: "https://mohitunecha.com/mohit.jpg",
+              jobTitle: "SWE/PM Intern at Microsoft",
+              worksFor: { "@type": "Organization", name: "Microsoft" },
+              alumniOf: { "@type": "CollegeOrUniversity", name: "Rutgers University" },
+              email: "mailto:mohitkunecha@gmail.com",
+              sameAs: [
+                "https://linkedin.com/in/mohitunecha",
+                "https://github.com/MohitUnecha",
+              ],
+            }),
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
