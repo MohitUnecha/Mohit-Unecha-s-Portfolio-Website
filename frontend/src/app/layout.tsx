@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -13,16 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://mohitunecha.com"),
-  title: "Mohit Unecha — SWE/PM Intern @ Microsoft | CS & Econ @ Rutgers",
+  title: "Mohit Unecha — Software Engineer & Product Builder",
   description:
-    "Software engineer & product manager building AI-powered products. SWE/PM Intern at Microsoft (M365 Core), Break Through Tech AI Fellow at Cornell Tech, hackathon winner, and nonprofit technology lead.",
+    "CS & Economics student at Rutgers, SWE/PM intern at Microsoft, and Break Through Tech AI Fellow — building at the intersection of software, product, and finance.",
   keywords: [
     "Mohit Unecha",
     "Software Engineer",
@@ -33,11 +28,11 @@ export const metadata: Metadata = {
     "Portfolio",
   ],
   openGraph: {
-    title: "Mohit Unecha — SWE/PM Intern @ Microsoft",
+    title: "Mohit Unecha — Software Engineer & Product Builder",
     description:
-      "Software engineer & product manager building AI-powered products at Microsoft, with a passion for fintech, F1 analytics, and tech for social impact.",
+      "CS & Economics student at Rutgers, SWE/PM intern at Microsoft, and Break Through Tech AI Fellow — building at the intersection of software, product, and finance.",
     url: "https://mohitunecha.com",
-    siteName: "Mohit Unecha Portfolio",
+    siteName: "Mohit Unecha",
     images: [{ url: "/mohit.jpg" }],
     type: "website",
   },
@@ -55,17 +50,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <link rel="icon" href="/favicon.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
-        <meta name="theme-color" content="#0f172a" />
-        <script
-          src="https://www.google.com/recaptcha/api.js?render=explicit"
-          async
-          defer
-        ></script>
+        <meta name="theme-color" content="#09090b" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-zinc-950 font-sans text-zinc-400 antialiased`}
       >
         {children}
         <Analytics />
