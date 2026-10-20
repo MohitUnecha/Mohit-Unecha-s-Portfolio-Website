@@ -3,6 +3,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { profile } from "@/lib/profile";
 
+// Shown when the chat backend is unreachable or errors out
+const JARVIS_OFFLINE_LINES = [
+  "🔧 Jarvis is in the pit lane getting a fresh set of tyres (a.k.a. a software update). Back on track shortly! Meanwhile, the contact form below goes straight to Mohit.",
+  "⚡ Jarvis is mid-upgrade right now, recalibrating the arc reactor. Try again in a bit, or drop Mohit a note with the contact form below.",
+  "🛠️ Jarvis is busy updating his brain with Mohit's latest projects. Give him a minute, or reach Mohit directly through the contact form below.",
+];
+
 type Message = {
   role: "user" | "assistant";
   content: string;
@@ -35,12 +42,12 @@ type SpeechRecognitionCtorLike = new () => SpeechRecognitionLike;
 const initialMessages: Message[] = [
   {
     role: "assistant",
-    content: `Hey! I'm ${profile.agentName} — Mohit's AI sidekick. Ask me anything about him, his projects, or what he's working on. Or just say hi!`,
+    content: `Hey! I'm ${profile.agentName}, Mohit's AI sidekick. Ask me anything about him, his projects, or what he's working on. Or just say hi!`,
   },
 ];
 
 const suggestedPrompts = [
-  "What's he building at Microsoft? 🚀",
+  "What did he build at Microsoft? 🚀",
   "Why should a recruiter talk to Mohit?",
   "Tell me about the F1 platform 🏎️",
   "What's his product experience?",
@@ -397,8 +404,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
 
       const data = await response.json();
       const replyText =
-        data?.reply ||
-        "Thanks for reaching out! We’ll wire this to a trained model soon.";
+        data?.reply || JARVIS_OFFLINE_LINES[0];
 
       setMessages((prev) => [
         ...prev,
@@ -409,7 +415,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
       ]);
       speakReply(replyText);
     } catch {
-      const fallback = "Sorry, the chatbot is offline right now. Please try again later.";
+      const fallback = JARVIS_OFFLINE_LINES[Math.floor(Math.random() * JARVIS_OFFLINE_LINES.length)];
       setMessages((prev) => [
         ...prev,
         {
@@ -417,7 +423,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
           content: fallback,
         },
       ]);
-      speakReply(fallback);
+      speakReply(fallback.replace(/^\S+\s/, "")); // skip the emoji when speaking
     } finally {
       setIsLoading(false);
     }
@@ -680,7 +686,7 @@ export default function ChatbotPanel({ isDarkMode = true }: { isDarkMode?: boole
           </div>
 
           <div className={`mt-3 flex items-center justify-between text-[10px] ${isDarkMode ? "text-slate-300" : "text-slate-500"}`}>
-            <span>{isCallActive ? "Jarvis voice on (call mode)" : "Text mode — Jarvis won't speak"}</span>
+            <span>{isCallActive ? "Jarvis voice on (call mode)" : "Text mode: Jarvis won't speak"}</span>
           </div>
 
           {showDisclosure && (

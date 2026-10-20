@@ -30,7 +30,10 @@ const ALLOWED_ORIGINS = [
 
 // Groq API configuration (fast and free!)
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+// llama-3.3-70b-versatile was shut down by Groq on Aug 16, 2026. Try models in order;
+// override with GROQ_MODEL (comma-separated) in Vercel env if Groq retires these too.
+const GROQ_MODELS = (process.env.GROQ_MODEL || "openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.8-27b")
+  .split(",").map((m) => m.trim()).filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -120,7 +123,7 @@ app.post("/api/chat", async (req, res) => {
   if (!groqKeys.length) {
     console.error("GROQ_API_KEY is not configured");
     return res.status(500).json({
-      reply: "AI service not configured. Please contact the site owner.",
+      reply: "🔧 Jarvis is in the pit lane getting a software update. Back on track shortly! Meanwhile, the contact form below goes straight to Mohit.",
     });
   }
 
@@ -132,13 +135,13 @@ Mohit is a mission-driven, high-achieving builder who blends technology, busines
 
 **MICROSOFT — HARD LIMIT (NDA):**
 When talking about Mohit's Microsoft internship, share ONLY this approved summary and nothing more:
-"Mohit's currently interning at Microsoft as a Product & Software Engineer, where he's working on Microsoft Secure Score within Microsoft 365 Core. He's leading a team to define and ship Headroom Copilot, an AI-powered product that enables natural-language querying over telemetry data, aiming to cut time to headroom insights by 30-50% and roughly double analysis efficiency. Pretty cool, right? 🚀"
+"Mohit interned at Microsoft this past summer (May to Aug 2026) as a Product & Software Engineer, working on Microsoft Secure Score within Microsoft 365 Core. He led a team to define and build Headroom Copilot, an AI-powered product that enables natural-language querying over telemetry data, targeting a 30-50% cut in time to headroom insights and roughly double the analysis efficiency. Pretty cool, right? 🚀"
 If anyone asks for more specifics (architecture, internal tools, data, team details, unreleased features, how it works internally), politely decline with something like: "That's about all I can share — the rest is under NDA 🤐." Never invent or speculate about Microsoft internal details.
 
 **CAREER PATH & AMBITIONS:**
 - Career focus priority: Product Management & Product Strategy first, then Consulting, then Software Engineering — he's strongest at the intersection of all three
-- CURRENTLY a Product & Software Engineer (Explore) Intern at Microsoft (May 2026 – Present, Redmond) — see the MICROSOFT HARD LIMIT section above for exactly what to share.
-- Machine Learning/AI Fellow with Break Through Tech at Cornell Tech (Mar 2026 – Present): Selected from 5,000+ applicants for a 12-month applied AI/ML program with coursework, hands-on projects, and mentorship.
+- Product & Software Engineer (Explore) Intern at Microsoft (May 2026 – Aug 2026, Redmond), internship completed — see the MICROSOFT HARD LIMIT section above for exactly what to share.
+- Machine Learning/AI Fellow with Break Through Tech at Cornell Tech (Mar 2026 – Present): Selected from 5,000+ applicants for a 12-month applied AI/ML program with coursework, hands-on projects, and mentorship. His AI Studio challenge project is with Mastercard: online payment fraud detection on high-dimensional transaction data, where he owns the XGBoost baseline.
 - PayPal Career Academy Program (Feb 2026 – Present, Remote): Year-long fintech immersion building product thinking, business-focused communication, and cross-functional collaboration through mentorship and workshops.
 - Vanguard North Star 2026 Fellow: Selected for Vanguard's early-talent community at the intersection of tech, product, and finance.
 - Capital One Launchpad: Legacy & Leadership (2025): 1 of 100 students selected from 1,200+ applicants for a 5-day immersive program and case competition at Capital One HQ, in partnership with HACU and TMCF.
@@ -164,7 +167,7 @@ If anyone asks for more specifics (architecture, internal tools, data, team deta
 8. Samaya Nonprofit Website: Full-stack ticketing and management system for Samaya Global, a nonprofit supporting women and children. Built with React frontend and Node.js backend with real-time updates. Features include volunteer coordination, admin dashboards, operations tracking across multiple locations in US and India. Directly saves 100+ operational hours per cycle.
 
 **WORK EXPERIENCE:**
-- Microsoft: Explore SWE/PM Intern (May 2026 – Present) - Microsoft Secure Score in M365 Core; shipping Headroom Copilot, an AI natural-language telemetry querying product
+- Microsoft: Explore SWE/PM Intern (May 2026 – Aug 2026) - Microsoft Secure Score in M365 Core; led Headroom Copilot, an AI natural-language telemetry querying product
 - Break Through Tech @ Cornell Tech: ML/AI Fellow (Mar 2026 – Present) - Selected from 5,000+ applicants
 - PayPal: Career Academy Program (Feb 2026 – Present) - Fintech mentorship and product immersion
 - Samaya Global: Technology Lead (Jan 2025 – Present) - Leading dev team building internal ticketing system for nonprofit, saved 100+ hours of manual work; also designed and launched samayaglobal.org
@@ -209,7 +212,7 @@ Why teaching matters: "We all started somewhere, and many students come from dif
 Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/in/mohitunecha | GitHub: github.com/MohitUnecha
 
 **WEBSITE INTERACTIVE FEATURES (things on this portfolio site):**
-- Role rotator: Typewriter in the hero cycles through 7 roles — SWE/PM Intern @ Microsoft, Software Engineer, Product Manager, AI Fellow @ Cornell Tech, F1 Enthusiast, Builder & Creator, CS + Econ @ Rutgers
+- Role rotator: Typewriter in the hero cycles through 7 roles — Ex-SWE/PM Intern @ Microsoft, Software Engineer, Product Manager, AI Fellow @ Cornell Tech, F1 Enthusiast, Builder & Creator, CS + Econ @ Rutgers
 - "By the Numbers" stats: Animated counters showing 1,050+ volunteer hours, 250+ students mentored, 2x hackathon wins, 400+ hours automated, 10+ selective programs, 3.9 GPA
 - Programs & Fellowships section: Cards for Break Through Tech, Vanguard North Star, PayPal, Goldman Sachs, Capital One, BCG, Oracle, Bain, EY, BNY Mellon
 - Volunteering & Impact section: Hands of Hope (1,050+ hours), Edison Police Explorer, Samaya Global
@@ -232,7 +235,7 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
 - When asked about projects, mention the simplified version first and offer to go deeper on technical details
 - Direct users to the contact form for collaborations`;
 
-    console.log("Calling Groq API with model:", GROQ_MODEL);
+    console.log("Calling Groq API with models:", GROQ_MODELS.join(", "));
     
     const conversationMessages = safeHistory.length
       ? safeHistory
@@ -246,12 +249,18 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
     let response;
     let lastError;
 
-    for (const [index, apiKey] of groqKeys.entries()) {
+    const attempts = [];
+    for (const model of GROQ_MODELS) {
+      for (const apiKey of groqKeys) attempts.push({ model, apiKey });
+    }
+
+    for (const [index, { model, apiKey }] of attempts.entries()) {
       try {
+        const isReasoningModel = model.startsWith("openai/gpt-oss");
         response = await axios.post(
           GROQ_API_URL,
           {
-            model: GROQ_MODEL,
+            model,
             messages: [
               {
                 role: "system",
@@ -260,24 +269,29 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
               ...conversationMessages,
             ],
             temperature: 0.7,
-            max_tokens: 300,
+            // gpt-oss models spend part of the budget on reasoning tokens
+            max_tokens: isReasoningModel ? 1200 : 300,
+            ...(isReasoningModel ? { reasoning_effort: "low", include_reasoning: false } : {}),
           },
           {
             headers: {
               "Authorization": `Bearer ${apiKey}`,
               "Content-Type": "application/json",
             },
+            timeout: 20000,
           }
         );
         if (index > 0) {
-          console.log("Groq request succeeded with a fallback API key");
+          console.log(`Groq request succeeded on fallback attempt ${index} (model ${model})`);
         }
         break;
       } catch (error) {
         lastError = error;
         const status = error?.response?.status;
-        const canRetryWithNextKey = index < groqKeys.length - 1 && (status === 401 || status === 429 || status >= 500 || !status);
-        if (!canRetryWithNextKey) {
+        console.error(`Groq attempt ${index} failed (model ${model}):`, status, error?.response?.data?.error?.message || error?.message);
+        // 400/404 usually means the model is gone or a param is unsupported: move on to the next model/key
+        const canRetry = index < attempts.length - 1;
+        if (!canRetry) {
           throw error;
         }
       }
@@ -308,7 +322,7 @@ Email: mohitkunecha@gmail.com | Phone: (848) 248 6750 | LinkedIn: linkedin.com/i
     }
     
     return res.status(500).json({
-      reply: "I'm having trouble connecting right now. Please try again in a moment or use the contact form below!",
+      reply: "⚡ Jarvis is mid-upgrade right now, recalibrating the arc reactor. Try again in a bit, or drop Mohit a note with the contact form below.",
     });
   }
 });
@@ -352,19 +366,22 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       }
     }
 
+    // Escape user input before it goes into the HTML email body
+    const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
     // Send email to Mohit
     await transporter.sendMail({
       from: process.env.EMAIL_USER || "your-email@gmail.com",
       to: "mohitkunecha@gmail.com",
       replyTo: email,
-      subject: `Portfolio Contact: ${subject}`,
+      subject: `Portfolio Contact: ${String(subject).replace(/[\r\n]+/g, " ").slice(0, 150)}`,
       html: `
         <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Name:</strong> ${esc(name)}</p>
+        <p><strong>Email:</strong> ${esc(email)}</p>
+        <p><strong>Subject:</strong> ${esc(subject)}</p>
         <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, "<br>")}</p>
+        <p>${esc(message).replace(/\n/g, "<br>")}</p>
       `,
     });
 

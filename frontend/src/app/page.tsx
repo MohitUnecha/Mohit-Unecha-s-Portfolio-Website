@@ -6,6 +6,10 @@ import { useState, useEffect, useRef } from "react";
 import React from "react";
 import { PongGame, FlappyGame, Game2048, TetrisGame, BreakoutGame, MemoryMatchGame, SpaceInvadersGame, SimonSaysGame, TicTacToeGame, RaceGame, WhackAMoleGame, WordleGame, ZipGame } from "@/components/Games";
 
+type Grecaptcha = { execute: (siteKey: string | undefined, opts: { action: string }) => Promise<string> };
+const getRecaptcha = () =>
+  typeof window === "undefined" ? undefined : (window as unknown as { grecaptcha?: Grecaptcha }).grecaptcha;
+
 const KONAMI_CODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
 const ROLES = [
@@ -13,7 +17,7 @@ const ROLES = [
   "Product Strategist",
   "Consultant",
   "Software Engineer",
-  "PM/SWE Intern @ Microsoft",
+  "Ex-SWE/PM Intern @ Microsoft",
   "AI Fellow @ Cornell Tech",
   "F1 Enthusiast",
   "Builder & Creator",
@@ -46,7 +50,6 @@ function CountUp({ end, decimals = 0, suffix = "", start }: { end: number; decim
 
   useEffect(() => {
     if (!start) return;
-    setVal(0);
     let raf: number;
     const duration = 1800;
     const t0 = performance.now();
@@ -324,10 +327,10 @@ export default function Home() {
     }, 3600);
   };
 
-  const playVoiceIntro = () => {
+  const speakIntroFallback = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's a product manager, strategist, and software engineer — currently a product management and software engineering intern at Microsoft, leading a team building an AI copilot on the Microsoft 365 Core team. He's also an AI fellow with Break Through Tech at Cornell Tech, a consultant at Rutgers Consulting Group, and leads technology at a nonprofit supporting women and children, with over one thousand volunteer hours at Hands of Hope. When he's not building or mentoring, you'll find him analyzing formula one race data. Feel free to explore his work — or chat with Jarvis to learn more!";
+    const introText = "Hey there! Welcome to Mohit oo-NEH-chah's corner of the internet. He's a product manager, strategist, and software engineer who spent the summer as a product management and software engineering intern at Microsoft, leading a team building an AI copilot on the Microsoft 365 Core team. He's also an AI fellow with Break Through Tech at Cornell Tech, a consultant at Rutgers Consulting Group, and leads technology at a nonprofit supporting women and children, with over one thousand volunteer hours at Hands of Hope. When he's not building or mentoring, you'll find him analyzing formula one race data. Feel free to explore his work, or chat with Jarvis to learn more!";
     const utterance = new SpeechSynthesisUtterance(introText);
     utterance.rate = 0.95;
     utterance.pitch = 1;
@@ -335,7 +338,32 @@ export default function Home() {
     const preferredVoice = window.speechSynthesis.getVoices().find((v) => /Samantha|Google US English|en-US/i.test(v.name));
     if (preferredVoice) utterance.voice = preferredVoice;
     window.speechSynthesis.speak(utterance);
-    pushToast("Playing", "Meet Mohit — voice intro", "blue");
+  };
+
+  // Pre-recorded intro (ElevenLabs, "Jarvis" voice). Click again to stop.
+  const introAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playVoiceIntro = () => {
+    if (typeof window === "undefined") return;
+    window.speechSynthesis?.cancel();
+    if (!introAudioRef.current) {
+      introAudioRef.current = new Audio("/mohit-intro.mp3");
+      introAudioRef.current.preload = "auto";
+    }
+    const audio = introAudioRef.current;
+    if (!audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
+      pushToast("Stopped", "Voice intro paused", "blue");
+      return;
+    }
+    audio.currentTime = 0;
+    audio.play().then(
+      () => pushToast("Playing", "Meet Mohit: voice intro", "blue"),
+      () => {
+        speakIntroFallback();
+        pushToast("Playing", "Meet Mohit: voice intro", "blue");
+      }
+    );
   };
 
   useEffect(() => {
@@ -354,6 +382,7 @@ export default function Home() {
       if (displayedText.length > 0) {
         timeout = setTimeout(() => setDisplayedText(displayedText.slice(0, -1)), 10);
       } else {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional state-machine step
         setGreetingIndex((prev) => (prev + 1) % greetings.length);
         setGreetingPhase("typing");
       }
@@ -379,6 +408,7 @@ export default function Home() {
       if (roleText.length > 0) {
         timeout = setTimeout(() => setRoleText(roleText.slice(0, -1)), 18);
       } else {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional state-machine step
         setRoleIndex((prev) => (prev + 1) % roles.length);
         setRolePhase("typing");
       }
@@ -411,7 +441,6 @@ export default function Home() {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Cmd+K command palette shortcut
@@ -441,6 +470,7 @@ export default function Home() {
     if (typeof window === "undefined") return;
     const unlocked = window.localStorage.getItem("proModeUnlocked") === "1";
     if (unlocked) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional state-machine step
       setProModeUnlocked(true);
     }
   }, []);
@@ -466,6 +496,7 @@ export default function Home() {
     if (showEasterEgg && !easterEggToastShownRef.current) {
       easterEggToastShownRef.current = true;
       pushToast("Unlocked", "Konami secret discovered", "green");
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional state-machine step
       setProModeUnlocked(true);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("proModeUnlocked", "1");
@@ -476,8 +507,8 @@ export default function Home() {
   // Auto-refresh reCAPTCHA token every 12 minutes
   useEffect(() => {
     const refreshRecaptchaToken = () => {
-      if (typeof window !== "undefined" && (window as any).grecaptcha) {
-        (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {
+      if (typeof window !== "undefined" && getRecaptcha()) {
+        getRecaptcha()!.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {
           action: "refresh",
         });
       }
@@ -597,13 +628,13 @@ export default function Home() {
             <img src="/Logo.png" alt="Logo" className="h-8 w-auto md:h-10" />
           </a>
           <nav className={`flex items-center gap-3 text-xs font-medium md:gap-8 md:text-sm ${navTextClass}`}>
-            <a className={`hidden transition sm:block ${accentHoverTextClass}`} href="#about">
-              About
+            <a className={`transition ${accentHoverTextClass}`} href="#products">
+              Products
             </a>
             <a className={`transition ${accentHoverTextClass}`} href="#experience">
               Experience
             </a>
-            <a className={`transition ${accentHoverTextClass}`} href="#projects">
+            <a className={`hidden transition sm:block ${accentHoverTextClass}`} href="#projects">
               Projects
             </a>
             <a className={`transition ${accentHoverTextClass}`} href="#contact">
@@ -720,6 +751,12 @@ export default function Home() {
               <span className={`${roleColorClass} font-semibold`}>{roleText}</span>
               <span className="animate-pulse opacity-70">|</span>
             </p>
+            <p
+              className={`-mt-4 mb-8 max-w-xl px-4 text-sm font-medium leading-relaxed sm:text-base ${isDarkMode ? "text-slate-100" : "text-white"}`}
+              style={{ textShadow: "0 1px 14px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.8)" }}
+            >
+              I build AI products end to end: from the problem and the spec to the code and the launch.
+            </p>
             {/* Open to opportunities badge */}
             <div className={`mb-6 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 ${
               isDarkMode
@@ -743,6 +780,16 @@ export default function Home() {
             </div>
 
             <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+              <a
+                href="#products"
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 hover:scale-105 ${
+                  isDarkMode
+                    ? "bg-white text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-100"
+                    : "bg-white text-blue-700 shadow-lg shadow-blue-500/20 hover:bg-blue-50"
+                }`}
+              >
+                See my products →
+              </a>
               <button
                 type="button"
                 onClick={playVoiceIntro}
@@ -795,7 +842,8 @@ export default function Home() {
               </a>
             </div>
             <a
-              href="#about"
+              href="#products"
+              aria-label="Scroll to products"
               className={`mt-12 animate-bounce transition-all duration-300 ${accentHoverTextClass} ${sectionLabelClass}`}
               style={{ transition: "all 0.3s ease-out" }}
             >
@@ -815,46 +863,130 @@ export default function Home() {
         </section>
 
         <main className="mx-auto w-full max-w-5xl px-4 pb-32 sm:px-6 md:px-8">
-          <section id="about" className="py-24" style={{
-            opacity: visibleSections.has('about') ? 1 : 0,
-            transform: visibleSections.has('about') ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
-          }}>
-          <SectionTitle eyebrow="01 · About" title="Building with purpose" isDarkMode={isDarkMode} />
-          <div className={`mx-auto max-w-3xl space-y-6 text-lg leading-relaxed ${bodyTextClass}`}>
-            {profile.summary.map((item) => (
-              <p key={item}>{item}</p>
-            ))}
+        {/* Products: product case studies, problem → build → outcome */}
+        <section id="products" className="pt-24 pb-16" style={{
+          opacity: visibleSections.has('products') ? 1 : 0,
+          transform: visibleSections.has('products') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <SectionTitle
+            eyebrow="01 · Products"
+            title="Products I've built"
+            sub="Each one started with a real problem. Here's the problem, what I built, and what changed."
+            isDarkMode={isDarkMode}
+          />
+          <div className="grid gap-6 md:grid-cols-2">
+            {profile.pmSpecSheet.caseStudies.map((cs, i) => {
+              const linked = profile.projects.find((p) => p.name.startsWith(cs.product.split(":")[0].trim()));
+              const [productName, productContext] = cs.product.split(":").map((x) => x.trim());
+              return (
+                <article
+                  key={cs.product}
+                  onMouseMove={handleSpotlight}
+                  className={`spotlight-card group flex flex-col rounded-3xl border p-6 md:p-8 transition-all duration-300 hover:-translate-y-1 ${cardClass} ${cardHoverClass} ${i === 0 ? "md:col-span-2" : ""}`}
+                  style={{ "--spot-color": spotColor(isDarkMode) } as React.CSSProperties}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className={`text-[11px] font-semibold uppercase tracking-[0.25em] ${sectionLabelClass}`}>
+                        {productContext || "Product"}
+                      </p>
+                      <h3 className={`font-display mt-1 text-2xl font-bold tracking-tight md:text-3xl ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                        {productName}
+                      </h3>
+                    </div>
+                    <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${
+                      isDarkMode ? "border-emerald-300/30 bg-emerald-400/10 text-emerald-200" : "border-blue-300 bg-blue-50 text-blue-700"
+                    }`}>
+                      {cs.role}
+                    </span>
+                  </div>
+
+                  <div className={`mt-6 grid gap-5 ${i === 0 ? "md:grid-cols-3" : ""}`}>
+                    {[
+                      { label: "Problem", text: cs.problem },
+                      { label: "What I built", text: cs.approach },
+                    ].map((row) => (
+                      <div key={row.label}>
+                        <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${sectionLabelClass}`}>{row.label}</p>
+                        <p className={`mt-1.5 text-sm leading-relaxed ${bodyTextClass}`}>{row.text}</p>
+                      </div>
+                    ))}
+                    <div className={`rounded-2xl p-4 ${isDarkMode ? "bg-emerald-400/[0.07] ring-1 ring-emerald-300/20" : "bg-blue-50 ring-1 ring-blue-200"}`}>
+                      <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${accentTextClass}`}>Outcome</p>
+                      <p className={`mt-1.5 text-sm font-medium leading-relaxed ${isDarkMode ? "text-white" : "text-slate-900"}`}>{cs.outcome}</p>
+                    </div>
+                  </div>
+
+                  {(linked || i === 0) && (
+                    <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
+                      {linked?.stack.slice(0, 5).map((tech) => (
+                        <span key={tech} className={`rounded-full px-3 py-1 text-xs ${isDarkMode ? "bg-white/10 text-slate-300" : "bg-slate-100 text-slate-600"}`}>
+                          {tech}
+                        </span>
+                      ))}
+                      {!linked && (
+                        <span className={`rounded-full px-3 py-1 text-xs ${isDarkMode ? "bg-white/10 text-slate-300" : "bg-slate-100 text-slate-600"}`}>
+                          Details under NDA 🤐
+                        </span>
+                      )}
+                      {linked?.link && (
+                        <a
+                          href={linked.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`ml-auto inline-flex items-center gap-1.5 text-sm font-semibold transition ${accentTextClass} hover:underline`}
+                        >
+                          View code <span aria-hidden="true">→</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
           </div>
-          <div className="mx-auto mt-12 grid max-w-2xl gap-6 text-center md:grid-cols-2">
-            {strengthsToShow.map((strength) => (
+        </section>
+
+        {/* PM Spec Sheet */}
+        <section id="pm-spec" className="py-16" style={{
+          opacity: visibleSections.has('pm-spec') ? 1 : 0,
+          transform: visibleSections.has('pm-spec') ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}>
+          <SectionTitle eyebrow="02 · Process" title="How I build products" isDarkMode={isDarkMode} />
+          <p className={`mx-auto mb-16 max-w-3xl text-center text-lg leading-relaxed ${bodyTextClass}`}>
+            {profile.pmSpecSheet.vision}
+          </p>
+
+          <div className="mx-auto max-w-5xl grid gap-6 md:grid-cols-2">
+            {profile.pmSpecSheet.pillars.map((pillar) => (
               <div
-                key={strength}
-                className={`rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-0.5 ${cardClass} ${cardHoverClass}`}
+                key={pillar.title}
+                className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
               >
-                <p className={`font-medium ${subTextClass}`}>{strength}</p>
+                <h3 className={`mb-4 text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                  {pillar.title}
+                </h3>
+                <ul className={`space-y-2 ${bodyTextClass}`}>
+                  {pillar.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm leading-relaxed">
+                      <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-          {profile.strengths.length > 4 && (
-            <div className="mt-8 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setShowAllStrengths((prev) => !prev)}
-                className={`rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-widest transition ${accentBorderHoverClass} ${buttonClass} ${accentHoverTextClass}`}
-              >
-                {showAllStrengths ? "See less" : "See more"}
-              </button>
-            </div>
-          )}
-        </section>
 
+        </section>
         <section id="impact" className="py-16" style={{
           opacity: visibleSections.has('impact') ? 1 : 0,
           transform: visibleSections.has('impact') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <SectionTitle eyebrow="02 · Impact" title="By the numbers" isDarkMode={isDarkMode} />
+          <SectionTitle eyebrow="03 · Impact" title="By the numbers" isDarkMode={isDarkMode} />
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
             {profile.stats.map((stat) => (
               <div
@@ -876,7 +1008,6 @@ export default function Home() {
             ))}
           </div>
         </section>
-
         <section id="experience" className="py-24">
           <div
             style={{
@@ -885,7 +1016,7 @@ export default function Home() {
               transition: 'all 0.6s ease-out'
             }}
           >
-            <SectionTitle eyebrow="03 · Experience" title="Where I've been building" isDarkMode={isDarkMode} />
+            <SectionTitle eyebrow="04 · Experience" title="Where I've been building" isDarkMode={isDarkMode} />
           </div>
           <div className="relative mx-auto max-w-5xl">
             {/* Center timeline line */}
@@ -1012,17 +1143,17 @@ export default function Home() {
             </div>
           )}
         </section>
-
         <section id="projects" className="py-24" style={{
           opacity: visibleSections.has('projects') ? 1 : 0,
           transform: visibleSections.has('projects') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <SectionTitle eyebrow="04 · Projects" title="Things I've shipped" isDarkMode={isDarkMode} />
+          <SectionTitle eyebrow="05 · Projects" title="More things I've built" isDarkMode={isDarkMode} />
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {profile.projects.map((project, projectIndex) => {
               const isExpanded = expandedProject === project.name;
-              const isFeatured = projectIndex === 0;
+              // The flagship already leads the Products section above, so keep this grid even
+              const isFeatured = projectIndex < 0;
               return (
               <article
                 key={project.name}
@@ -1158,13 +1289,49 @@ export default function Home() {
             })}
           </div>
         </section>
+          <section id="about" className="py-24" style={{
+            opacity: visibleSections.has('about') ? 1 : 0,
+            transform: visibleSections.has('about') ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+          <SectionTitle eyebrow="06 · About" title="Building with purpose" isDarkMode={isDarkMode} />
+          <div className={`mx-auto max-w-3xl space-y-6 text-lg leading-relaxed ${bodyTextClass}`}>
+            {profile.summary.map((item) => (
+              <p key={item}>{item}</p>
+            ))}
+          </div>
+          <div className="mx-auto mt-12 grid max-w-2xl gap-6 text-center md:grid-cols-2">
+            {strengthsToShow.map((strength) => (
+              <div
+                key={strength}
+                className={`rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-0.5 ${cardClass} ${cardHoverClass}`}
+              >
+                <p className={`font-medium ${subTextClass}`}>{strength}</p>
+              </div>
+            ))}
+          </div>
+          {profile.strengths.length > 4 && (
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAllStrengths((prev) => !prev)}
+                className={`rounded-full border px-5 py-2 text-xs font-semibold uppercase tracking-widest transition ${accentBorderHoverClass} ${buttonClass} ${accentHoverTextClass}`}
+              >
+                {showAllStrengths ? "See less" : "See more"}
+              </button>
+            </div>
+          )}
+        </section>
+
+
+
 
         <section id="education" className="py-24" style={{
           opacity: visibleSections.has('education') ? 1 : 0,
           transform: visibleSections.has('education') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <SectionTitle eyebrow="05 · Education" title="Foundations" isDarkMode={isDarkMode} />
+          <SectionTitle eyebrow="07 · Education" title="Foundations" isDarkMode={isDarkMode} />
           <div className="mx-auto max-w-4xl space-y-8">
             {profile.education.map((school) => (
               <article
@@ -1215,7 +1382,7 @@ export default function Home() {
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
           <SectionTitle
-            eyebrow="06 · Programs"
+            eyebrow="08 · Programs"
             title="Programs & fellowships"
             sub={`Selected for ${profile.programs.length}+ competitive early-career programs across tech, finance, and consulting.`}
             isDarkMode={isDarkMode}
@@ -1253,9 +1420,9 @@ export default function Home() {
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
           <SectionTitle
-            eyebrow="07 · Community"
+            eyebrow="09 · Community"
             title="Volunteering & impact"
-            sub="Community service isn't a side project — it's the core of how I lead with empathy."
+            sub="Community service isn't a side project. It's the core of how I lead with empathy."
             isDarkMode={isDarkMode}
           />
           <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
@@ -1287,7 +1454,7 @@ export default function Home() {
           transform: visibleSections.has('skills') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <SectionTitle eyebrow="08 · Skills" title="My toolkit" isDarkMode={isDarkMode} />
+          <SectionTitle eyebrow="10 · Skills" title="My toolkit" isDarkMode={isDarkMode} />
 
           {/* Infinite skills marquee */}
           <div
@@ -1376,78 +1543,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* PM Spec Sheet — hidden for now, data preserved in profile.ts
-        <section id="pm-spec" className="py-24" style={{
-          opacity: visibleSections.has('pm-spec') ? 1 : 0,
-          transform: visibleSections.has('pm-spec') ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
-        }}>
-          <h2 className={`mb-6 text-center text-sm font-bold uppercase tracking-[0.3em] ${sectionLabelClass}`}>
-            Product Manager Spec Sheet
-          </h2>
-          <p className={`mx-auto mb-16 max-w-3xl text-center text-lg leading-relaxed ${bodyTextClass}`}>
-            {profile.pmSpecSheet.vision}
-          </p>
-
-          <div className="mx-auto max-w-5xl grid gap-6 md:grid-cols-2">
-            {profile.pmSpecSheet.pillars.map((pillar) => (
-              <div
-                key={pillar.title}
-                className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
-              >
-                <h3 className={`mb-4 text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
-                  {pillar.title}
-                </h3>
-                <ul className={`space-y-2 ${bodyTextClass}`}>
-                  {pillar.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm leading-relaxed">
-                      <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-emerald-400" : "bg-blue-500"}`} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mx-auto mt-16 max-w-5xl">
-            <h3 className={`mb-8 text-center text-xs font-semibold uppercase tracking-wider ${accentTextClass}`}>
-              Case Studies
-            </h3>
-            <div className="space-y-8">
-              {profile.pmSpecSheet.caseStudies.map((cs) => (
-                <div
-                  key={cs.product}
-                  className={`rounded-2xl border p-6 transition ${cardClass} ${cardHoverClass}`}
-                >
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
-                    <h4 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
-                      {cs.product}
-                    </h4>
-                    <span className={`text-xs font-medium uppercase tracking-wider ${accentTextClass}`}>
-                      {cs.role}
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <span className={`text-xs font-semibold uppercase tracking-wider ${sectionLabelClass}`}>Problem</span>
-                      <p className={`mt-1 text-sm leading-relaxed ${bodyTextClass}`}>{cs.problem}</p>
-                    </div>
-                    <div>
-                      <span className={`text-xs font-semibold uppercase tracking-wider ${sectionLabelClass}`}>Approach</span>
-                      <p className={`mt-1 text-sm leading-relaxed ${bodyTextClass}`}>{cs.approach}</p>
-                    </div>
-                    <div>
-                      <span className={`text-xs font-semibold uppercase tracking-wider ${sectionLabelClass}`}>Outcome</span>
-                      <p className={`mt-1 text-sm leading-relaxed ${accentTextClass} font-medium`}>{cs.outcome}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        */}
 
         {/* GitHub Activity Heatmap */}
         <section id="github-activity" className="py-16" style={{
@@ -1455,7 +1550,7 @@ export default function Home() {
           transform: visibleSections.has('github-activity') ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}>
-          <SectionTitle eyebrow="09 · Open Source" title="Always shipping" isDarkMode={isDarkMode} />
+          <SectionTitle eyebrow="11 · Open Source" title="Always shipping" isDarkMode={isDarkMode} />
           <p className={`-mt-8 mb-8 text-center text-xs ${sectionLabelClass}`}>
             Last 52 Weeks •{" "}
             <a href="https://github.com/MohitUnecha" target="_blank" rel="noopener noreferrer" className={`underline decoration-dotted ${accentTextClass}`}>
@@ -1495,7 +1590,7 @@ export default function Home() {
         }}>
           <div className="mx-auto max-w-2xl px-2 sm:px-4 md:px-8">
             <SectionTitle
-              eyebrow="10 · Contact"
+              eyebrow="12 · Contact"
               title="Let's build something together"
               sub="I'd love to collaborate, chat about opportunities, or mentor together."
               isDarkMode={isDarkMode}
@@ -1510,11 +1605,11 @@ export default function Home() {
                   let recaptchaToken = "";
                   if (
                     typeof window !== "undefined" &&
-                    (window as any).grecaptcha &&
+                    getRecaptcha() &&
                     process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY &&
                     process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY !== "your-recaptcha-site-key-here"
                   ) {
-                    recaptchaToken = await (window as any).grecaptcha.execute(
+                    recaptchaToken = await getRecaptcha()!.execute(
                       process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
                       { action: "submit" }
                     );
@@ -1704,7 +1799,7 @@ export default function Home() {
             <p className={`mb-2 text-sm md:text-base ${bodyTextClass}`}>
               Welcome to the inner circle. Mohit would be impressed.
             </p>
-            <p className={`mb-6 text-xs md:text-sm ${sectionLabelClass}`}>↑↑↓↓←→←→BA — classic.</p>
+            <p className={`mb-6 text-xs md:text-sm ${sectionLabelClass}`}>↑↑↓↓←→←→BA. Classic.</p>
             <button
               onClick={() => setShowEasterEgg(false)}
               className={`rounded-full px-7 py-2.5 text-sm font-semibold transition md:text-base ${buttonClass}`}
@@ -1758,7 +1853,7 @@ export default function Home() {
                     {profile.name}
                   </h2>
                   <p className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
-                    SWE/PM Intern @ Microsoft · CS + Econ @ Rutgers &apos;28
+                    Ex-SWE/PM Intern @ Microsoft · CS + Econ @ Rutgers &apos;28
                   </p>
                   <p className={`mt-1 text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
                     📍 NYC Metro / Redmond, WA · {profile.email}
@@ -1794,10 +1889,10 @@ export default function Home() {
               </p>
               <ul className={`mb-6 space-y-2.5 text-sm leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
                 {[
-                  <span key="ms"><strong>Shipping AI at Microsoft right now</strong> — leading a team building Headroom Copilot on M365 Core: natural-language telemetry querying, targeting 30–50% faster insights.</span>,
+                  <span key="ms"><strong>Built AI at Microsoft</strong>: led a team building Headroom Copilot on M365 Core, natural-language telemetry querying targeting 30–50% faster insights.</span>,
                   <span key="ai"><strong>AI Fellow @ Cornell Tech</strong> (Break Through Tech, 5,000+ applicants) + PayPal Career Academy + Vanguard North Star Fellow.</span>,
-                  <span key="hack"><strong>2× hackathon winner</strong> — Barclays Data Hackathon (AI stock predictor) and SignalForge datathon, both built in 48 hours.</span>,
-                  <span key="lead"><strong>Leads with empathy</strong> — Tech Lead at nonprofit Samaya Global, 1,050+ volunteer hours, 250+ students mentored.</span>,
+                  <span key="hack"><strong>2× hackathon winner</strong>: Barclays Data Hackathon (AI stock predictor) and SignalForge datathon, both built in 48 hours.</span>,
+                  <span key="lead"><strong>Leads with empathy</strong>: Tech Lead at nonprofit Samaya Global, 1,050+ volunteer hours, 250+ students mentored.</span>,
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${isDarkMode ? "bg-amber-300" : "bg-amber-500"}`} />
@@ -1866,7 +1961,7 @@ export default function Home() {
               </div>
 
               <p className={`mt-5 text-center text-[10px] italic ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
-                Designed for busy recruiters — the full story is one scroll away. 🏎️
+                Designed for busy recruiters. The full story is one scroll away. 🏎️
               </p>
             </div>
           </div>
@@ -1905,6 +2000,7 @@ export default function Home() {
                     const commands = [
                       { keywords: ['about', 'bio', 'summary', 'who'], action: () => document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['experience', 'work', 'jobs', 'career', 'microsoft'], action: () => document.querySelector('#experience')?.scrollIntoView({ behavior: 'smooth' }) },
+                      { keywords: ['product', 'case study', 'headroom', 'copilot'], action: () => document.querySelector('#products')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['project', 'build', 'f1', 'every lap', 'signalforge'], action: () => document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['contact', 'email', 'reach', 'message', 'hire'], action: () => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' }) },
                       { keywords: ['skill', 'tech', 'stack', 'python', 'react'], action: () => document.querySelector('#skills')?.scrollIntoView({ behavior: 'smooth' }) },
@@ -2096,7 +2192,7 @@ export default function Home() {
                 Mohit Unecha
               </p>
               <p className={`mt-2 text-sm leading-relaxed ${bodyTextClass}`}>
-                Building at the intersection of software, product, and impact. Currently shipping AI at Microsoft.
+                Building at the intersection of software, product, and impact. Building AI products that people actually use.
               </p>
               <div className="mt-4 flex justify-center gap-3 sm:justify-start">
                 <a
@@ -2140,8 +2236,9 @@ export default function Home() {
               <p className={`text-xs font-bold uppercase tracking-[0.25em] ${sectionLabelClass}`}>Explore</p>
               <ul className={`mt-3 space-y-2 text-sm ${bodyTextClass}`}>
                 {[
-                  { label: "About", href: "#about" },
+                  { label: "Products", href: "#products" },
                   { label: "Experience", href: "#experience" },
+                  { label: "About", href: "#about" },
                   { label: "Projects", href: "#projects" },
                   { label: "Programs & Fellowships", href: "#programs" },
                   { label: "Volunteering", href: "#volunteering" },
@@ -2473,7 +2570,7 @@ function SnakeGame({ isDarkMode }: { isDarkMode: boolean }) {
     canvas.width = gridSize * tileCount;
     canvas.height = gridSize * tileCount;
 
-    let snake = [{ x: 10, y: 10 }];
+    const snake = [{ x: 10, y: 10 }];
     let food = { x: 15, y: 15 };
     let dx = 0;
     let dy = 0;

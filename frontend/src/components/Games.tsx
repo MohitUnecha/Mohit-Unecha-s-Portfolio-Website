@@ -903,6 +903,8 @@ export function SpaceInvadersGame({ isDarkMode }: { isDarkMode: boolean }) {
 }
 
 // Simon Says Game
+const randomSimonColor = () => Math.floor(Math.random() * 4);
+
 export function SimonSaysGame({ isDarkMode }: { isDarkMode: boolean }) {
   const [sequence, setSequence] = React.useState<number[]>([]);
   const [playerSeq, setPlayerSeq] = React.useState<number[]>([]);
@@ -911,7 +913,6 @@ export function SimonSaysGame({ isDarkMode }: { isDarkMode: boolean }) {
   const [gameStarted, setGameStarted] = React.useState(false);
 
   const colors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b"];
-  const colorNames = ["Red", "Green", "Blue", "Yellow"];
 
   const playSequence = (seq: number[]) => {
     seq.forEach((color, i) => {
@@ -944,7 +945,7 @@ export function SimonSaysGame({ isDarkMode }: { isDarkMode: boolean }) {
 
     if (newPlayerSeq.length === sequence.length) {
       setScore(sequence.length);
-      const nextSeq = [...sequence, Math.floor(Math.random() * 4)];
+      const nextSeq = [...sequence, randomSimonColor()];
       setSequence(nextSeq);
       setPlayerSeq([]);
       setTimeout(() => playSequence(nextSeq), 1000);

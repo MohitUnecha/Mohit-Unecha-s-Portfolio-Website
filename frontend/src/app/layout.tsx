@@ -1,28 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "@fontsource-variable/space-grotesk";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://mohitunecha.com"),
-  title: "Mohit Unecha — SWE/PM Intern @ Microsoft | CS & Econ @ Rutgers",
+  title: "Mohit Unecha | Product-Minded Engineer | CS & Econ @ Rutgers",
   description:
-    "Software engineer & product manager building AI-powered products. SWE/PM Intern at Microsoft (M365 Core), Break Through Tech AI Fellow at Cornell Tech, hackathon winner, and nonprofit technology lead.",
+    "Software engineer & product manager building AI-powered products. Former SWE/PM Intern at Microsoft (M365 Core), Break Through Tech AI Fellow at Cornell Tech, hackathon winner, and nonprofit technology lead.",
   keywords: [
     "Mohit Unecha",
     "Software Engineer",
@@ -33,9 +20,9 @@ export const metadata: Metadata = {
     "Portfolio",
   ],
   openGraph: {
-    title: "Mohit Unecha — SWE/PM Intern @ Microsoft",
+    title: "Mohit Unecha | Product-Minded Engineer",
     description:
-      "Software engineer & product manager building AI-powered products at Microsoft, with a passion for fintech, F1 analytics, and tech for social impact.",
+      "Software engineer & product manager building AI-powered products, with a passion for fintech, F1 analytics, and tech for social impact.",
     url: "https://mohitunecha.com",
     siteName: "Mohit Unecha Portfolio",
     images: [{ url: "/mohit.jpg" }],
@@ -78,8 +65,7 @@ export default function RootLayout({
               name: "Mohit Unecha",
               url: "https://mohitunecha.com",
               image: "https://mohitunecha.com/mohit.jpg",
-              jobTitle: "SWE/PM Intern at Microsoft",
-              worksFor: { "@type": "Organization", name: "Microsoft" },
+              jobTitle: "Software Engineer & Product Manager",
               alumniOf: { "@type": "CollegeOrUniversity", name: "Rutgers University" },
               email: "mailto:mohitkunecha@gmail.com",
               sameAs: [
@@ -91,7 +77,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
+        className="antialiased"
       >
         {children}
         <Analytics />

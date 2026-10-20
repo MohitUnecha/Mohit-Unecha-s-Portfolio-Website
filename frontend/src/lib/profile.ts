@@ -48,7 +48,7 @@ export type VolunteeringItem = {
 
 export const profile = {
   name: "Mohit Unecha",
-  headline: "SWE/PM Intern @ Microsoft | CS & Economics @ Rutgers",
+  headline: "Product-minded engineer | Ex-Microsoft SWE/PM Intern | CS & Economics @ Rutgers",
   location: "New York City Metropolitan Area",
   heroBackgroundImage: "/pexels-adrian-falcon-1778067-3359250.jpg",
   photoUrl: "/mohit.jpg",
@@ -58,9 +58,9 @@ export const profile = {
   linkedIn: "linkedin.com/in/mohitunecha",
   github: "github.com/MohitUnecha",
   summary: [
-    "I'm a Computer Science & Economics student at Rutgers (Data Science minor, 3.9 GPA) currently in Redmond as an Explore SWE/PM Intern at Microsoft, building AI-powered tooling on the Microsoft 365 Core team. My mission is simple: leverage technology, data, and empathy to build products that genuinely improve people's lives.",
-    "I live at the intersection of software, product, and finance — from shipping an AI copilot at Microsoft, to leading the technology roadmap at a global nonprofit, to winning hackathons with ML-driven fintech tools. I'm a Break Through Tech AI Fellow at Cornell Tech and an alum of selective programs at Goldman Sachs, Capital One, BCG, Bain, Oracle, PayPal, and Vanguard.",
-    "Beyond work, you'll find me watching F1, exploring new cuisines, mountain biking, and chasing bucket-list adventures — Kilimanjaro, Everest Base Camp, and the Camino de Santiago are all on the list.",
+    "I'm a Computer Science & Economics student at Rutgers (Data Science minor, 3.9 GPA) who builds products end to end: from the problem and the spec to the code and the launch. This summer I was an Explore SWE/PM Intern at Microsoft on the Microsoft 365 Core team, leading a team building an AI copilot. My mission is simple: use technology, data, and empathy to build products that improve people's lives.",
+    "I live at the intersection of software, product, and finance, from building an AI copilot at Microsoft, to leading the technology roadmap at a global nonprofit, to winning hackathons with ML-driven fintech tools. I'm a Break Through Tech AI Fellow at Cornell Tech and an alum of selective programs at Goldman Sachs, Capital One, BCG, Bain, Oracle, PayPal, and Vanguard.",
+    "Beyond work, you'll find me watching F1, exploring new cuisines, mountain biking, and chasing bucket-list adventures: Kilimanjaro, Everest Base Camp, and the Camino de Santiago are all on the list.",
   ],
   strengths: [
     "Product discovery and user-centered design",
@@ -74,22 +74,22 @@ export const profile = {
   ],
   stats: [
     { value: 1050, suffix: "+", label: "Volunteer Hours", sub: "Lead Volunteer at Hands of Hope Food Pantry" },
-    { value: 250, suffix: "+", label: "Students Mentored", sub: "Coding & chess — Alpha Minds Academy & varsity chess" },
+    { value: 250, suffix: "+", label: "Students Mentored", sub: "Coding & chess: Alpha Minds Academy & varsity chess" },
     { value: 2, suffix: "×", label: "Hackathon Wins", sub: "Barclays Data Hackathon & SignalForge Datathon" },
     { value: 400, suffix: "+", label: "Hours Automated", sub: "Workflow automation at Kumon & Samaya Global" },
-    { value: 10, suffix: "+", label: "Selective Programs", sub: "Microsoft, Goldman Sachs, Capital One, BCG & more" },
-    { value: 3.9, decimals: 1, label: "GPA at Rutgers", sub: "Dean's List × 3 — CS & Economics" },
+    { value: 10, suffix: "+", label: "Selective Programs", sub: "Goldman Sachs, Capital One, BCG, Vanguard & more" },
+    { value: 3.9, decimals: 1, label: "GPA at Rutgers", sub: "Dean's List × 3: CS & Economics" },
   ] as StatItem[],
   experience: [
   {
-    role: "Explore Intern — SWE & Product Management",
+    role: "Explore Intern, SWE & Product Management",
     company: "Microsoft",
     location: "Redmond, WA",
-    timeline: "May 2026 – Present",
+    timeline: "May 2026 – Aug 2026",
     highlights: [
-      "Working on Microsoft Secure Score within Microsoft 365 Core, splitting the internship across product management and software development",
-      "Leading a team to define and ship Headroom Copilot — an AI-powered product enabling natural-language querying over telemetry data",
-      "Aiming to cut time to headroom insights by 30–50% and roughly double analysis efficiency",
+      "Worked on Microsoft Secure Score within Microsoft 365 Core, splitting the internship across product management and software development",
+      "Led a team to define and build Headroom Copilot, an AI-powered product enabling natural-language querying over telemetry data",
+      "Targeted a 30–50% cut in time to headroom insights and roughly double the analysis efficiency",
       "Further details under NDA 🤐"
     ]
   },
@@ -101,6 +101,7 @@ export const profile = {
     highlights: [
       "Selected from 5,000+ applicants for the Break Through Tech AI Program at Cornell Tech",
       "Completing a 12-month program of technical AI/ML coursework, hands-on experiential learning, and industry mentorship",
+      "AI Studio challenge project with Mastercard: detecting online payment fraud across ~590K high-dimensional transactions; I own the XGBoost baseline and the project roadmap",
       "Building applied machine learning skills through real-world projects and career development with industry partners"
     ]
   },
@@ -110,7 +111,7 @@ export const profile = {
     location: "Remote",
     timeline: "Feb 2026 – Present",
     highlights: [
-      "Selected for PayPal's Career Academy Program — a year-long fintech immersion built around mentorship, workshops, and hands-on learning",
+      "Selected for PayPal's Career Academy Program, a year-long fintech immersion built around mentorship, workshops, and hands-on learning",
       "Developing product thinking, business-focused communication, and cross-functional collaboration alongside PayPal professionals"
     ]
   },
@@ -122,7 +123,7 @@ export const profile = {
     highlights: [
       "Leading end-to-end development of an internal ticketing system for a nonprofit uplifting women and children through education, care, and community empowerment",
       "Managing a small team of developers, setting the technical roadmap, and partnering with operations to turn program needs into scalable tools across sites in the US, India, and beyond",
-      "Designed and launched samayaglobal.org — the organization's public home for events, ticketing, donations, and volunteer sign-ups",
+      "Designed and launched samayaglobal.org, the organization's public home for events, ticketing, donations, and volunteer sign-ups",
       "Saved 100+ hours of manual operational work, improving response times, reducing errors, and freeing staff for direct community impact"
     ]
   },
@@ -132,7 +133,7 @@ export const profile = {
     location: "New Brunswick, NJ",
     timeline: "Sep 2025 – Present",
     highlights: [
-      "Developed the full business plan for a client product launch — detailed financial modeling, competitive ecosystem mapping, and go-to-market strategy",
+      "Developed the full business plan for a client product launch: detailed financial modeling, competitive ecosystem mapping, and go-to-market strategy",
       "Supported a launch that generated nearly $100K in revenue within its first week",
       "Built dashboards and analytical models evaluating 3+ business scenarios to quantify revenue potential, risk, and scalability",
       "Partnered with a 4-person consulting team to define problem statements, test hypotheses, and deliver client-ready recommendations"
@@ -211,13 +212,13 @@ export const profile = {
       name: "Career Academy Program",
       org: "PayPal",
       year: "2026",
-      detail: "Year-long fintech immersion — mentorship, workshops, and hands-on product learning.",
+      detail: "Year-long fintech immersion: mentorship, workshops, and hands-on product learning.",
     },
     {
       name: "Engineering Possibilities Summit",
       org: "Goldman Sachs",
       year: "2025",
-      detail: "Year-long engineering program — selected from 10,000+ applicants; training across Operations, Risk, and Controllers.",
+      detail: "Year-long engineering program: selected from 10,000+ applicants; training across Operations, Risk, and Controllers.",
     },
     {
       name: "Launchpad: Legacy & Leadership",
@@ -261,7 +262,7 @@ export const profile = {
       role: "Lead Volunteer",
       org: "Hands of Hope Food Pantry",
       timeline: "Jun 2020 – Present",
-      detail: "1,050+ hours serving the people of Middlesex County — leading volunteer teams, food distribution, and community health fairs.",
+      detail: "1,050+ hours serving the people of Middlesex County, leading volunteer teams, food distribution, and community health fairs.",
     },
     {
       role: "Explorer",
@@ -273,12 +274,12 @@ export const profile = {
       role: "Technology Lead (Pro Bono)",
       org: "Samaya Global",
       timeline: "Jan 2025 – Present",
-      detail: "Donating engineering leadership to a nonprofit uplifting women and children — building the tools that power its operations.",
+      detail: "Donating engineering leadership to a nonprofit uplifting women and children, building the tools that power its operations.",
     },
   ] as VolunteeringItem[],
   projects: [
     {
-      name: "Every Lap — F1 Analytics",
+      name: "Every Lap: F1 Analytics",
       summary:
         "A Formula 1 analytics platform that predicts race outcomes, replays races on an interactive track map, and lets you explore 25 years of telemetry data.",
       technicalDetails: [
@@ -318,7 +319,7 @@ export const profile = {
     {
       name: "Basement at 6:17",
       summary:
-        "A web app for hosting in-person murder mystery game nights. The host gets a control panel to reveal clues, manage votes, and call players — while 13+ players join from their phones.",
+        "A web app for hosting in-person murder mystery game nights. The host gets a control panel to reveal clues, manage votes, and call players, while 13+ players join from their phones.",
       technicalDetails: [
         "Token-based authentication with separate host and player PINs supporting 13+ concurrent sessions",
         "Host-only admin APIs for clue reveals, vote management, tally computation, and round reset",
@@ -337,7 +338,7 @@ export const profile = {
     {
       name: "SignalForge",
       summary:
-        "A datathon-winning app that checks if a company actually failed, compares it to survivors, simulates what-if scenarios, and writes a polished analyst report — all powered by AI.",
+        "A datathon-winning app that checks if a company actually failed, compares it to survivors, simulates what-if scenarios, and writes a polished analyst report, all powered by AI.",
       technicalDetails: [
         "End-to-end pipeline: failure verification gate → survivor cohort benchmarking → digital twin risk simulation → NLP forensics",
         "Negation-aware distress parsing with theme-level severity scoring and evidence extraction",
@@ -348,7 +349,7 @@ export const profile = {
       stack: ["Python", "Streamlit", "Groq", "IBM watsonx.ai", "Tavily", "NLP", "Scikit-learn", "SHAP"],
       link: "https://github.com/Hitayu12/Datathon_S26",
       impact: [
-        "Datathon winner — built in 48 hours",
+        "Datathon winner: built in 48 hours",
         "Digital twin counterfactual simulation for failure analysis",
         "Interactive Scenario Lab and Ask Report Q&A for judges",
       ],
@@ -356,7 +357,7 @@ export const profile = {
     {
       name: "Scarlet Agent",
       summary:
-        "An AI assistant for college students that pulls assignments from Canvas, finds files in Google Drive, and talks to you via text or voice — all in one dashboard.",
+        "An AI assistant for college students that pulls assignments from Canvas, finds files in Google Drive, and talks to you via text or voice, all in one dashboard.",
       technicalDetails: [
         "Multi-agent AI ecosystem orchestrating Canvas LMS scraping, Google Drive search, and conversational AI",
         "ElevenLabs voice synthesis for natural text-to-speech interaction",
@@ -436,13 +437,13 @@ export const profile = {
       details: [
         "Dean's List × 3 for academic excellence",
         "Active in ColorStack, Rutgers Consulting Group, and Men of Character",
-        "1st place — Barclays Data Hackathon; datathon winner with SignalForge",
+        "1st place: Barclays Data Hackathon; datathon winner with SignalForge",
         "Interdisciplinary focus positioning for roles at the intersection of tech, product, and business strategy",
       ],
     },
     {
       school: "John P Stevens High School",
-      degree: "High School Diploma — Computer Science & Business Management",
+      degree: "High School Diploma: Computer Science & Business Management",
       timeline: "2020 – 2024",
       details: [
         "Strong foundation in STEM with honors in Computer Science and Mathematics",
@@ -457,18 +458,18 @@ export const profile = {
     tools: ["Power BI", "Snowflake", "Streamlit", "Gemini API", "Groq", "ElevenLabs", "Git", "Jupyter", "Excel", "Canvas LMS"],
   },
   certifications: [
-    "Harvard CS50P — Programming with Python",
-    "Google Cloud — Generative AI, Intro to Large Language Models, Responsible AI",
-    "BCG Launch Intern — Boston Consulting Group (Jun 2025)",
-    "Oracle Reach Intern — Oracle (May 2025)",
-    "Capital One Launchpad: Legacy & Leadership — 1 of 100 from 1,200+ applicants",
-    "Goldman Sachs Engineering Possibilities Summit — Selected from 10,000+ applicants",
+    "Harvard CS50P: Programming with Python",
+    "Google Cloud: Generative AI, Intro to Large Language Models, Responsible AI",
+    "BCG Launch Intern: Boston Consulting Group (Jun 2025)",
+    "Oracle Reach Intern: Oracle (May 2025)",
+    "Capital One Launchpad: Legacy & Leadership: 1 of 100 from 1,200+ applicants",
+    "Goldman Sachs Engineering Possibilities Summit: Selected from 10,000+ applicants",
     "Bain & Company Consulting Kickstart Program",
     "BNY Mellon Freshman Jumpstart Program",
-    "Power BI Essential Training — Data Modeling & Visualization",
+    "Power BI Essential Training: Data Modeling & Visualization",
   ],
   pmSpecSheet: {
-    vision: "I build products at the intersection of engineering and strategy — translating user pain into shipped solutions that move metrics. My approach combines hands-on technical execution with rigorous discovery, data-driven prioritization, and cross-functional alignment.",
+    vision: "I build products at the intersection of engineering and strategy, translating user pain into shipped solutions that move metrics. My approach combines hands-on technical execution with rigorous discovery, data-driven prioritization, and cross-functional alignment.",
     pillars: [
       {
         title: "Discovery & Research",
@@ -509,21 +510,21 @@ export const profile = {
     ],
     caseStudies: [
       {
-        product: "Headroom Copilot — Microsoft 365 Core",
+        product: "Headroom Copilot: Microsoft 365 Core",
         role: "SWE/PM Intern",
         problem: "Engineers needed faster access to headroom insights buried in telemetry data.",
-        approach: "Led a team from problem identification through validation and iteration to ship an AI-powered natural-language querying product. Further details under NDA.",
-        outcome: "Aiming to cut time to headroom insights by 30–50% and roughly double analysis efficiency.",
+        approach: "Led a team from problem identification through validation and iteration to build an AI-powered natural-language querying product. Further details under NDA.",
+        outcome: "Targeted a 30–50% cut in time to headroom insights and roughly double the analysis efficiency.",
       },
       {
-        product: "Every Lap — F1 Analytics",
+        product: "Every Lap: F1 Analytics",
         role: "Solo Builder & PM",
         problem: "F1 fans lacked a unified platform to explore historical race data, predictions, and telemetry in one place.",
         approach: "Defined user personas (casual fans vs. data analysts), scoped MVP features via impact/effort matrix, built ML pipeline and interactive replay system.",
         outcome: "85% podium prediction accuracy, 40+ engineered features, full-stack platform with real-time race replay at 60 FPS.",
       },
       {
-        product: "SignalForge — Failure Intelligence",
+        product: "SignalForge: Failure Intelligence",
         role: "Co-builder & Technical PM",
         problem: "Datathon judges needed a tool to verify company failures and understand root causes through data, not just narratives.",
         approach: "Rapid prototyping with Streamlit, multi-LLM reasoning for robustness, designed judge-facing UX with export capabilities.",
